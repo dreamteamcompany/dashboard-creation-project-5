@@ -48,10 +48,9 @@ export default function DashboardFilters({
         }}
       >
         <div
-          className="flex items-start"
+          className="flex flex-col"
           style={{
-            flexDirection: stuck ? "row" : "column",
-            gap: stuck ? "12px" : "12px",
+            gap: stuck ? "6px" : "12px",
             transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
@@ -102,13 +101,12 @@ export default function DashboardFilters({
           </div>
 
           <div
-            className="shrink-0"
             style={{
-              width: stuck ? "1px" : "100%",
-              height: stuck ? "24px" : "1px",
+              width: "100%",
+              height: "1px",
               background: "rgba(255,255,255,0.08)",
-              alignSelf: stuck ? "center" : "stretch",
-              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              transition: "opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              opacity: stuck ? 0 : 1,
             }}
           />
 
