@@ -69,7 +69,7 @@ export default function VyrabotkaAllView({
 
   return (
     <>
-      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">Динамика по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">План vs Факт · 2026</p>
@@ -121,7 +121,7 @@ export default function VyrabotkaAllView({
         </ResponsiveContainer>
       </div>}
 
-      {cityRanking.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {cityRanking.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h3 className="font-display font-bold text-white text-lg">Рейтинг городов</h3>
@@ -200,7 +200,7 @@ export default function VyrabotkaAllView({
         </div>}
 
       {(pieDataFact.length > 0 || deviationData.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {pieDataFact.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        {pieDataFact.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Доля городов в выработке</h3>
             <p className="text-white/40 text-xs mt-0.5">Фактическая выработка</p>
@@ -260,7 +260,7 @@ export default function VyrabotkaAllView({
           </div>
         </div>}
 
-        {deviationData.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        {deviationData.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Отклонение от плана</h3>
             <p className="text-white/40 text-xs mt-0.5">% выполнения по городам</p>
@@ -295,7 +295,7 @@ export default function VyrabotkaAllView({
         </div>}
       </div>}
 
-      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">% выполнения по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">Динамика процента выполнения плана</p>
@@ -322,7 +322,7 @@ export default function VyrabotkaAllView({
         </ResponsiveContainer>
       </div>}
 
-      {filteredBar.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredBar.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-display font-bold text-white text-lg">План vs Факт по городам</h3>

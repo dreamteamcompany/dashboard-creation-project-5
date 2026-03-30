@@ -118,7 +118,7 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
 
   if (table.loading) {
     return (
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="h-[200px] flex items-center justify-center text-white/20 text-sm">Загрузка графиков...</div>
       </div>
     );
@@ -131,7 +131,7 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
   if (totalAllCols <= 0) return null;
 
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in-up">
+    <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
       <div className="flex flex-wrap items-center gap-2 mb-6">
         {table.columns.map((c, i) => {
           const tabColor = CHART_COLORS[i % CHART_COLORS.length];

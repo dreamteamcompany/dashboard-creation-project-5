@@ -39,9 +39,9 @@ interface Props {
 
 export default function DashboardKpiCards({ cards, loading, kpiKey }: Props) {
   return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 ${cards.length > 4 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-4`}>
+    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${cards.length > 4 ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-2 sm:gap-4`}>
       {cards.map((card, i) => (
-        <div key={card.label} className="glass glass-hover rounded-2xl p-5 animate-fade-in-up"
+        <div key={card.label} className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up"
           style={{ animationDelay: `${i * 0.1}s` }}>
           <div className="flex items-start justify-between mb-4">
             <div className={`w-10 h-10 rounded-xl ${card.gradient} flex items-center justify-center`}

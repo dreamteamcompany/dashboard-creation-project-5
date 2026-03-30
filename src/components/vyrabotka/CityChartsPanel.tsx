@@ -36,7 +36,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
 
   return (
     <>
-      {filtered.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filtered.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-display font-bold text-white text-lg">Динамика по месяцам</h3>
@@ -102,8 +102,8 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
         </ResponsiveContainer>
       </div>}
 
-      {filtered.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filtered.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Нарастающий итог</h3>
             <p className="text-white/40 text-xs mt-0.5">Накопительный план vs факт</p>
@@ -133,7 +133,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
           </ResponsiveContainer>
         </div>
 
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">% выполнения плана</h3>
             <p className="text-white/40 text-xs mt-0.5">Динамика по месяцам</p>
@@ -176,7 +176,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
         </div>
       </div>}
 
-      {filtered.some(d => d.fact > 0) && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filtered.some(d => d.fact > 0) && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">Отклонение по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">Перевыполнение / недовыполнение</p>

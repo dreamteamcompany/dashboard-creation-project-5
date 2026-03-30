@@ -19,8 +19,8 @@ export default function CityKpiCards({
   shareOfTotal, avgMonthlyFact, yearForecast, yearPlan, bestMonthLabel, kpiKey,
 }: Props) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="glass glass-hover rounded-2xl p-5 animate-fade-in-up">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+      <div className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up">
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-xl gradient-violet flex items-center justify-center"
             style={{ boxShadow: "0 8px 24px rgba(139,92,246,0.35)" }}>
@@ -34,7 +34,7 @@ export default function CityKpiCards({
         </p>
       </div>
 
-      <div className="glass glass-hover rounded-2xl p-5 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+      <div className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-xl gradient-cyan flex items-center justify-center"
             style={{ boxShadow: "0 8px 24px rgba(0,191,255,0.35)" }}>
@@ -48,7 +48,7 @@ export default function CityKpiCards({
         </p>
       </div>
 
-      <div className="glass glass-hover rounded-2xl p-5 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+      <div className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
         <div className="flex items-start justify-between mb-4">
           <div className={`w-10 h-10 rounded-xl ${yearForecast >= yearPlan ? "gradient-green" : "gradient-pink"} flex items-center justify-center`}
             style={{ boxShadow: yearForecast >= yearPlan ? `0 8px 24px ${COLORS.goodGlow}` : `0 8px 24px ${COLORS.badGlow}` }}>
@@ -62,7 +62,7 @@ export default function CityKpiCards({
         </p>
       </div>
 
-      <div className="glass glass-hover rounded-2xl p-5 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
+      <div className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
         <div className="flex items-start justify-between mb-4">
           <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
             style={{ boxShadow: `0 8px 24px ${COLORS.goodGlow}` }}>

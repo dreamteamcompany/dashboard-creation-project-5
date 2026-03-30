@@ -18,9 +18,9 @@ interface VyrabotkaKPIProps {
 
 export default function VyrabotkaKPI({ cards, kpiKey }: VyrabotkaKPIProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
       {cards.map((card, i) => (
-        <div key={card.label + kpiKey} className="glass glass-hover rounded-2xl p-5 animate-fade-in-up"
+        <div key={card.label + kpiKey} className="glass glass-hover rounded-2xl p-3 sm:p-5 animate-fade-in-up"
           style={{ animationDelay: `${i * 0.1}s` }}>
           <div className="flex items-start justify-between mb-4">
             <div className={`w-10 h-10 rounded-xl ${card.gradient} flex items-center justify-center`}

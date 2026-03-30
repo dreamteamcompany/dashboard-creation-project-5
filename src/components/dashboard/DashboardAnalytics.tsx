@@ -49,7 +49,7 @@ interface Props {
 export function AnomaliesBlock({ anomalies, isLight, selectedCity }: { anomalies: Anomaly[]; isLight: boolean; selectedCity: string | null }) {
   if (anomalies.length === 0) return null;
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in-up">
+    <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl gradient-pink flex items-center justify-center"
           style={{ boxShadow: "0 8px 24px rgba(255,60,172,0.25)" }}>
@@ -198,7 +198,7 @@ export default function DashboardAnalytics({
   return (
     <>
       {selectedCity && cityProfileData.length > 0 && cityProfileData.some(d => d.cityRaw > 0 || d.avgRaw > 0) && (
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
               style={{ boxShadow: "0 8px 24px rgba(0,212,106,0.25)" }}>
@@ -209,7 +209,7 @@ export default function DashboardAnalytics({
               <p className="text-white/40 text-xs mt-0.5">{selectedCity} vs средние по всем городам</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
             <ResponsiveContainer width="100%" height={420}>
               <RadarChart cx="50%" cy="50%" outerRadius="75%" data={cityProfileData}>
                 <PolarGrid stroke={isLight ? "rgba(20,10,40,0.1)" : "rgba(255,255,255,0.1)"} />

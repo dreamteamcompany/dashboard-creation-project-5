@@ -117,7 +117,7 @@ export default function CityEfficiencyPanel({
 }: Props) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">
             <Icon name="Activity" size={20} className="inline mr-2 text-violet-400" />
@@ -135,7 +135,7 @@ export default function CityEfficiencyPanel({
         </div>
       </div>
 
-      <div className="glass rounded-2xl p-6 animate-fade-in-up flex flex-col" style={{ animationDelay: "0.1s" }}>
+      <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up flex flex-col" style={{ animationDelay: "0.1s" }}>
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>

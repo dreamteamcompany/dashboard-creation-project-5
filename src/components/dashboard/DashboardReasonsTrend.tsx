@@ -41,7 +41,7 @@ export default function DashboardReasonsTrend({
   };
 
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in-up">
+    <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
       <div className="mb-5">
         <h3 className="font-display font-bold text-white text-lg">Динамика причин</h3>
         <p className="text-white/40 text-xs mt-0.5">{selectedCity} · {prevMonthName} → {currentMonthName}</p>

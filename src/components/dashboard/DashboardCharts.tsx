@@ -69,7 +69,7 @@ export default function DashboardCharts({
   return (
     <>
       {selectedCity && hasMonths && !selectedMonth && !loading && aggregatedByMonthRows.some(r => Number(r.total) > 0) && (
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="font-display font-bold text-white text-lg">Динамика по месяцам</h3>
@@ -106,7 +106,7 @@ export default function DashboardCharts({
       {anomaliesSlot}
 
       {!selectedCity && !loading && cityBarData.some(d => d.total > 0) && (
-          <div className="glass rounded-2xl p-6 animate-fade-in-up">
+          <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="font-display font-bold text-white text-lg">По городам</h3>
@@ -137,7 +137,7 @@ export default function DashboardCharts({
           </div>
         )}
 
-        {!loading && grandTotal > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        {!loading && grandTotal > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-5">
             <h3 className="font-display font-bold text-white text-lg">Распределение</h3>
             <p className="text-white/40 text-xs mt-0.5">По типам причин · всего {grandTotal.toLocaleString("ru-RU")}</p>
@@ -149,7 +149,7 @@ export default function DashboardCharts({
             const innerR = 75;
             const outerR = 105;
             return (
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-8">
                 <div className="relative flex-shrink-0" style={{ width: chartSize, height: chartSize }}>
                   <ResponsiveContainer width={chartSize} height={chartSize}>
                     <PieChart>
@@ -211,7 +211,7 @@ export default function DashboardCharts({
           return e ? e.value : 0;
         };
         return (
-          <div className="glass rounded-2xl p-6 animate-fade-in-up">
+          <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
             <div className="mb-5">
               <h3 className="font-display font-bold text-white text-lg">Динамика причин</h3>
               <p className="text-white/40 text-xs mt-0.5">Все города · {prevMonthName} → {curMonthName}</p>
@@ -278,7 +278,7 @@ export default function DashboardCharts({
 
       {!hasMonths && !loading && aggregatedByCityRows.length > 0 && grandTotal > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {(
-          <div className="glass rounded-2xl p-6 animate-fade-in-up">
+          <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-display font-bold text-white text-lg">

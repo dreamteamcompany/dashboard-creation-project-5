@@ -159,7 +159,7 @@ export default function DashboardEfficiency({
     const aboveAvg = cityTotals.filter(c => c.total > avgTotal).length;
 
     return (
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      <div className="glass rounded-2xl p-3 sm:p-6 animate-fade-in-up">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
             style={{ boxShadow: "0 8px 24px rgba(16,185,129,0.25)" }}>
@@ -170,7 +170,7 @@ export default function DashboardEfficiency({
             <p className="text-white/40 text-xs mt-0.5">Меньше обращений = лучше клиника</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
           <div>
             <p className="text-xs text-emerald-400 font-semibold mb-3 flex items-center gap-1.5">
               <Icon name="ThumbsUp" size={14} /> Лучшие клиники
@@ -244,7 +244,7 @@ export default function DashboardEfficiency({
   }
 
   return (
-    <div className="glass rounded-2xl p-6 animate-fade-in-up">
+    <div className="glass rounded-2xl p-3 sm:p-6 animate-fade-in-up">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
           style={{ boxShadow: "0 8px 24px rgba(16,185,129,0.25)" }}>
@@ -255,7 +255,7 @@ export default function DashboardEfficiency({
           <p className="text-white/40 text-xs mt-0.5">{selectedCity} · чем меньше обращений — тем лучше</p>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         <div className="flex flex-col items-center">
           <SpeedometerGauge value={score} label="Оценка клиники" scoreLabel={scoreLabel} color={scoreColor} />
           <div className="flex items-center gap-4 mt-4">

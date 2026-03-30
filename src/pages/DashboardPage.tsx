@@ -49,7 +49,7 @@ export default function DashboardPage() {
           style={{ background: "radial-gradient(circle, #FF3CAC 0%, transparent 70%)", filter: "blur(80px)", opacity: "var(--blob-opacity-2)" }} />
       </div>
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 animate-fade-in-up">
           <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export default function DashboardPage() {
                 alt="Dream Team"
                 className="h-10 mb-3 object-contain"
               />
-              <h1 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">
+              <h1 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight mb-1 truncate">
                 {dashboard.title}
               </h1>
               <div className="flex flex-wrap items-center gap-2">
