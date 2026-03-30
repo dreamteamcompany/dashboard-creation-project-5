@@ -235,6 +235,24 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                   );
                 })}
 
+                <tr className="border-t-2 border-white/20">
+                  <td
+                    className="px-4 py-2.5 sticky left-0 z-10"
+                    style={{ background: "var(--sticky-cell-bg)" }}
+                  >
+                    <span className="text-white font-black text-xs uppercase tracking-wider">Итого</span>
+                  </td>
+                  {columns.map(col => {
+                    const total = allRows.reduce((sum, r) => sum + (Number(r[col.key]) || 0), 0);
+                    return (
+                      <td key={col.key} className="px-1 py-2.5 text-center">
+                        <span className="text-xs font-bold text-white/90">
+                          {total.toLocaleString("ru-RU")}
+                        </span>
+                      </td>
+                    );
+                  })}
+                </tr>
               </>
             ) : (
               allRows.map((row, ri) => (
