@@ -2,14 +2,18 @@ import { useTheme } from "@/context/ThemeContext";
 import type { ColumnDef } from "@/config/dashboards";
 import DashboardFilters from "@/components/dashboard/DashboardFilters";
 import DashboardKpiCards from "@/components/dashboard/DashboardKpiCards";
+import type { KpiCard } from "@/components/dashboard/DashboardKpiCards";
 import DashboardCharts from "@/components/dashboard/DashboardCharts";
 import DashboardAnalytics, { AnomaliesBlock, ConcentrationBlock } from "@/components/dashboard/DashboardAnalytics";
 import DashboardDataTable from "@/components/dashboard/DashboardDataTable";
 import DashboardEfficiency from "@/components/dashboard/DashboardEfficiency";
 import DashboardReasonsTrend from "@/components/dashboard/DashboardReasonsTrend";
+import ExtraDataTable from "@/components/ExtraDataTable";
 import useDashboardData, { PIE_COLORS } from "@/hooks/useDashboardData";
 import useDashboardKpi from "@/hooks/useDashboardKpi";
 import useDashboardActions from "@/hooks/useDashboardActions";
+import useExtraTableData from "@/hooks/useExtraTableData";
+import { EXTRA_TABLES_URL } from "@/config/dashboards";
 
 interface Props {
   apiUrl: string;
@@ -26,6 +30,7 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
   const gradId = `gradViolet-${apiUrl.slice(-8)}`;
 
   const data = useDashboardData(apiUrl, columns, dashboardId);
+  const { tablesWithData } = useExtraTableData(dashboardId);
 
   const { saving, saved, dirty, handleChange, handleSave } = useDashboardActions(
     data.allRows, data.setAllRows, data.fetchUrl, data.isUniversalApi,
@@ -150,6 +155,48 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
         onSave={handleSave}
         onChange={handleChange}
       />
+
+      {tablesWithData.map(et => {
+        const extraKpiCards: KpiCard[] = et.columns.map((col, i) => {
+          const gradients = [
+            { gradient: "gradient-violet", textGradient: "text-gradient-violet", glow: "rgba(124,92,255,0.35)", icon: "Users" },
+            { gradient: "gradient-pink", textGradient: "text-gradient-pink", glow: "rgba(255,60,172,0.35)", icon: "FileText" },
+            { gradient: "gradient-cyan", textGradient: "text-gradient-cyan", glow: "rgba(0,229,204,0.35)", icon: "Package" },
+            { gradient: "gradient-green", textGradient: "text-gradient-green", glow: "rgba(0,212,106,0.35)", icon: "DollarSign" },
+            { gradient: "bg-gradient-to-br from-amber-500 to-orange-600", textGradient: "text-gradient-violet", glow: "rgba(245,158,11,0.35)", icon: "Percent" },
+          ];
+          const g = gradients[i % gradients.length];
+          return {
+            label: col.label,
+            value: (et.totals[col.key] || 0).toLocaleString("ru-RU"),
+            icon: g.icon,
+            gradient: g.gradient,
+            textGradient: g.textGradient,
+            glow: g.glow,
+            sub: "итого",
+            changeType: null,
+          };
+        });
+
+        return (
+          <div key={et.id} className="space-y-4">
+            {extraKpiCards.length > 0 && (
+              <DashboardKpiCards
+                cards={extraKpiCards}
+                loading={et.loading}
+                kpiKey={`extra-${et.id}`}
+              />
+            )}
+            <ExtraDataTable
+              title={et.title}
+              apiUrl={`${EXTRA_TABLES_URL}?table_id=${et.id}&action=data`}
+              columns={et.columns}
+              editable={false}
+              hasCityMonth={et.has_city_month}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
