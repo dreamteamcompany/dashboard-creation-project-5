@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import {
   AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer,
+  Tooltip, ResponsiveContainer, ReferenceDot,
 } from "recharts";
 import type { ExtraTableWithData, ExtraRow } from "@/hooks/useExtraTableData";
 
@@ -58,6 +58,16 @@ function aggregateByCity(rows: ExtraRow[], key: string) {
     .sort((a, b) => b.value - a.value);
 }
 
+const PulseDot = ({ cx, cy, color }: { cx: number; cy: number; color: string }) => (
+  <g>
+    <circle cx={cx} cy={cy} r="10" fill={color} opacity={0.2}>
+      <animate attributeName="r" from="6" to="16" dur="1.5s" repeatCount="indefinite" />
+      <animate attributeName="opacity" from="0.3" to="0" dur="1.5s" repeatCount="indefinite" />
+    </circle>
+    <circle cx={cx} cy={cy} r="5" fill={color} stroke="white" strokeWidth={2.5} />
+  </g>
+);
+
 interface Props {
   table: ExtraTableWithData;
   isLight: boolean;
@@ -74,6 +84,14 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
   const color = CHART_COLORS[activeTab % CHART_COLORS.length];
   const gradId = `grad-tab-${table.id}-${activeTab}`;
 
+  const totals = useMemo(() => {
+    const t: Record<string, number> = {};
+    table.columns.forEach(c => {
+      t[c.key] = table.rows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
+    });
+    return t;
+  }, [table.rows, table.columns]);
+
   const monthData = useMemo(
     () => col && hasMonths ? aggregateByMonth(table.rows, col.key) : [],
     [table.rows, col, hasMonths],
@@ -82,6 +100,11 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
     () => col && hasCities ? aggregateByCity(table.rows, col.key) : [],
     [table.rows, col, hasCities],
   );
+
+  const maxMonth = useMemo(() => {
+    if (!monthData.length) return null;
+    return monthData.reduce((max, d) => d.value > max.value ? d : max, monthData[0]);
+  }, [monthData]);
 
   if (table.loading) {
     return (
@@ -100,24 +123,36 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
         {table.columns.map((c, i) => {
           const tabColor = CHART_COLORS[i % CHART_COLORS.length];
           const isActive = i === activeTab;
+          const total = totals[c.key] || 0;
           return (
             <button
               key={c.key}
               onClick={() => setActiveTab(i)}
-              className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2"
               style={{
                 background: isActive ? tabColor : isLight ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.06)",
                 color: isActive ? "#fff" : isLight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.5)",
-                boxShadow: isActive ? `0 4px 20px ${tabColor}40` : "none",
+                boxShadow: isActive ? `0 4px 24px ${tabColor}50` : "none",
+                transform: isActive ? "scale(1.05)" : "scale(1)",
               }}
             >
               {c.label}
+              <span
+                className="text-xs font-normal opacity-70 tabular-nums"
+                style={{ color: isActive ? "rgba(255,255,255,0.75)" : undefined }}
+              >
+                {total.toLocaleString("ru-RU")}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div
+        key={activeTab}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        style={{ animation: "fadeSlideIn 0.35s ease-out" }}
+      >
         {hasMonths && monthData.length > 0 && (
           <div>
             <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
@@ -127,9 +162,17 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
               <AreaChart data={monthData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
                 <defs>
                   <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                    <stop offset="0%" stopColor={color} stopOpacity={0.45} />
+                    <stop offset="50%" stopColor={color} stopOpacity={0.15} />
                     <stop offset="100%" stopColor={color} stopOpacity={0} />
                   </linearGradient>
+                  <filter id={`glow-${table.id}`}>
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                 <XAxis
@@ -155,11 +198,19 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                   dataKey="value"
                   name={col.label}
                   stroke={color}
-                  strokeWidth={2.5}
+                  strokeWidth={3}
                   fill={`url(#${gradId})`}
                   dot={{ r: 4, fill: color, stroke: "white", strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: color, stroke: "white", strokeWidth: 2 }}
+                  activeDot={{ r: 7, fill: color, stroke: "white", strokeWidth: 2.5 }}
+                  style={{ filter: `url(#glow-${table.id})` }}
                 />
+                {maxMonth && maxMonth.value > 0 && (
+                  <ReferenceDot
+                    x={maxMonth.month}
+                    y={maxMonth.value}
+                    shape={(props: Record<string, number>) => <PulseDot cx={props.cx} cy={props.cy} color={color} />}
+                  />
+                )}
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -172,6 +223,12 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
             </p>
             <ResponsiveContainer width="100%" height={360}>
               <BarChart data={cityData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
+                <defs>
+                  <linearGradient id={`bar-grad-${table.id}-${activeTab}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity={1} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0.6} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                 <XAxis
                   dataKey="city"
@@ -194,7 +251,7 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                 <Bar
                   dataKey="value"
                   name={col.label}
-                  fill={color}
+                  fill={`url(#bar-grad-${table.id}-${activeTab})`}
                   radius={[6, 6, 0, 0]}
                   maxBarSize={40}
                 />
