@@ -57,6 +57,7 @@
     --scrollbar-track: rgba(255, 255, 255, 0.02);
     --tooltip-bg: rgba(20, 18, 35, 0.95);
     --sticky-cell-bg: rgba(13, 11, 24, 0.95);
+    --filters-bg: rgba(12, 10, 22, 0.92);
   }
 
   .light {
@@ -104,6 +105,7 @@
     --scrollbar-track: rgba(0, 0, 0, 0.04);
     --tooltip-bg: rgba(255, 255, 255, 0.97);
     --sticky-cell-bg: rgba(245, 243, 255, 0.97);
+    --filters-bg: rgba(240, 238, 255, 0.92);
   }
 }
 

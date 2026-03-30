@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
 interface Props {
@@ -12,8 +13,34 @@ interface Props {
 export default function DashboardFilters({
   cities, allMonths, selectedCity, selectedMonth, onCityChange, onMonthChange,
 }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([e]) => setStuck(!e.isIntersecting),
+      { threshold: [1], rootMargin: "-5px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="glass rounded-2xl p-4 space-y-3 sticky top-4 z-30" style={{ backdropFilter: "blur(20px)" }}>
+    <>
+      <div ref={ref} className="h-0" />
+      <div
+        className={`rounded-2xl p-4 space-y-3 sticky top-0 z-30 transition-shadow duration-300 border ${
+          stuck
+            ? "shadow-[0_8px_32px_rgba(0,0,0,0.5)] border-white/10"
+            : "border-white/5"
+        }`}
+        style={{
+          background: "var(--filters-bg)",
+          backdropFilter: "blur(24px)",
+        }}
+      >
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Icon name="MapPin" size={14} className="text-violet-400" />
@@ -65,6 +92,7 @@ export default function DashboardFilters({
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
