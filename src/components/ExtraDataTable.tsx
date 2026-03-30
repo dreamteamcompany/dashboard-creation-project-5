@@ -182,7 +182,7 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
               <Icon name="Plus" size={13} /> Строка
             </button>
           )}
-          <button
+          {editable && <button
             onClick={handleSave}
             disabled={saving || !dirty}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200
@@ -200,7 +200,7 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
               <Icon name="Save" size={16} />
             )}
             {saving ? "Сохранение..." : saved ? "Сохранено" : "Сохранить"}
-          </button>
+          </button>}
         </div>
       </div>
 
