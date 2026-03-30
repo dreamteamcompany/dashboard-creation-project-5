@@ -105,8 +105,7 @@ export default function DashboardCharts({
 
       {anomaliesSlot}
 
-      <div className="space-y-4">
-        {!selectedCity && !loading && cityBarData.some(d => d.total > 0) && (
+      {!selectedCity && !loading && cityBarData.some(d => d.total > 0) && (
           <div className="glass rounded-2xl p-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -198,8 +197,6 @@ export default function DashboardCharts({
             );
           })()}
         </div>}
-
-      </div>
 
       {!selectedCity && hasMonths && !loading && reasonsByMonth.length > 1 && grandTotal > 0 && (() => {
         const globalMax = Math.max(
