@@ -36,22 +36,26 @@ const ChartTooltip = ({ active, payload, label }: TTooltip) => {
   );
 };
 
-interface ChartGroup {
-  title: string;
-  subtitle: string;
-  colKeys: string[];
-  colLabels: string[];
-  colors: string[];
+interface ColInfo {
+  key: string;
+  label: string;
+  color: string;
+  yAxisId: "left" | "right";
 }
 
-function buildGroups(columns: { key: string; label: string }[]): ChartGroup[] {
-  return columns.map((col, i) => ({
-    title: col.label,
-    subtitle: "",
-    colKeys: [col.key],
-    colLabels: [col.label],
-    colors: [CHART_COLORS[i % CHART_COLORS.length]],
-  }));
+function classifyColumns(columns: { key: string; label: string }[]): { cols: ColInfo[]; hasRight: boolean } {
+  const cols: ColInfo[] = columns.map((col, i) => {
+    const l = col.label.toLowerCase();
+    const isRight = l.includes("цена") || l.includes("стоимость") || l.includes("сумм") || l.includes("процент") || l.includes("%");
+    return {
+      key: col.key,
+      label: col.label,
+      color: CHART_COLORS[i % CHART_COLORS.length],
+      yAxisId: isRight ? "right" as const : "left" as const,
+    };
+  });
+  const hasRight = cols.some(c => c.yAxisId === "right");
+  return { cols, hasRight };
 }
 
 function aggregateByMonth(rows: ExtraRow[], colKeys: string[]) {
@@ -93,10 +97,20 @@ interface Props {
 }
 
 export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
-  const groups = useMemo(() => buildGroups(table.columns), [table.columns]);
+  const { cols, hasRight } = useMemo(() => classifyColumns(table.columns), [table.columns]);
+  const allKeys = useMemo(() => cols.map(c => c.key), [cols]);
   const hasMonths = table.rows.some(r => r.month);
   const hasCities = table.rows.some(r => r.city);
   const gridStroke = isLight ? "rgba(20,10,40,0.07)" : "rgba(255,255,255,0.05)";
+
+  const monthData = useMemo(
+    () => hasMonths ? aggregateByMonth(table.rows, allKeys) : [],
+    [table.rows, allKeys, hasMonths],
+  );
+  const cityData = useMemo(
+    () => hasCities ? aggregateByCity(table.rows, allKeys) : [],
+    [table.rows, allKeys, hasCities],
+  );
 
   if (table.loading) {
     return (
@@ -109,124 +123,147 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
   if (!hasMonths && !hasCities) return null;
   if (table.rows.length === 0) return null;
 
+  const leftCols = cols.filter(c => c.yAxisId === "left");
+  const rightCols = cols.filter(c => c.yAxisId === "right");
+  const leftLabel = leftCols.map(c => c.label).join(", ");
+  const rightLabel = rightCols.map(c => c.label).join(", ");
+
   return (
-    <div className="space-y-4">
-      {groups.map((group, gi) => {
-        const monthData = hasMonths ? aggregateByMonth(table.rows, group.colKeys) : [];
-        const cityData = hasCities ? aggregateByCity(table.rows, group.colKeys) : [];
-        const gradIds = group.colKeys.map((_, i) => `grad-extra-${table.id}-${gi}-${i}`);
+    <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      <div className="mb-5">
+        <h3 className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>
+          {table.title} — аналитика
+        </h3>
+        {hasRight && (
+          <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+            Левая ось: {leftLabel} · Правая ось: {rightLabel}
+          </p>
+        )}
+      </div>
 
-        return (
-          <div key={gi} className="glass rounded-2xl p-6 animate-fade-in-up">
-            <div className="mb-5">
-              <h3 className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>
-                {group.title}
-              </h3>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                {group.subtitle}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {hasMonths && monthData.length > 0 && (
-                <div>
-                  <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
-                    В разрезе месяцев
-                  </p>
-                  <ResponsiveContainer width="100%" height={360}>
-                    <AreaChart data={monthData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
-                      <defs>
-                        {group.colKeys.map((_, i) => (
-                          <linearGradient key={i} id={gradIds[i]} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={group.colors[i]} stopOpacity={0.3} />
-                            <stop offset="100%" stopColor={group.colors[i]} stopOpacity={0} />
-                          </linearGradient>
-                        ))}
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fill: axisColor, fontSize: 13 }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                        angle={-35}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis
-                        tick={{ fill: axisColor, fontSize: 13 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
-                        width={70}
-                      />
-                      <Tooltip content={<ChartTooltip />} />
-                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 14 }} />}
-                      {group.colKeys.map((key, i) => (
-                        <Area
-                          key={key}
-                          type="monotone"
-                          dataKey={key}
-                          name={group.colLabels[i]}
-                          stroke={group.colors[i]}
-                          strokeWidth={2.5}
-                          fill={`url(#${gradIds[i]})`}
-                          fillOpacity={0.15}
-                          dot={{ r: 4, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
-                          activeDot={{ r: 6, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
-                        />
-                      ))}
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-
-              {hasCities && cityData.length > 0 && (
-                <div>
-                  <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
-                    По городам (итого)
-                  </p>
-                  <ResponsiveContainer width="100%" height={360}>
-                    <BarChart data={cityData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
-                      <XAxis
-                        dataKey="city"
-                        tick={{ fill: axisColor, fontSize: 13 }}
-                        axisLine={false}
-                        tickLine={false}
-                        angle={-35}
-                        textAnchor="end"
-                        interval={0}
-                        height={80}
-                      />
-                      <YAxis
-                        tick={{ fill: axisColor, fontSize: 13 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
-                        width={70}
-                      />
-                      <Tooltip content={<ChartTooltip />} />
-                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 14 }} />}
-                      {group.colKeys.map((key, i) => (
-                        <Bar
-                          key={key}
-                          dataKey={key}
-                          name={group.colLabels[i]}
-                          fill={group.colors[i]}
-                          radius={[4, 4, 0, 0]}
-                          maxBarSize={40}
-                        />
-                      ))}
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {hasMonths && monthData.length > 0 && (
+          <div>
+            <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
+              В разрезе месяцев
+            </p>
+            <ResponsiveContainer width="100%" height={360}>
+              <AreaChart data={monthData} margin={{ top: 10, right: hasRight ? 15 : 20, left: 15, bottom: 5 }}>
+                <defs>
+                  {cols.map((col, i) => (
+                    <linearGradient key={i} id={`grad-month-${table.id}-${i}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={col.color} stopOpacity={0.25} />
+                      <stop offset="100%" stopColor={col.color} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  interval={0}
+                  angle={-35}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
+                  width={60}
+                />
+                {hasRight && (
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fill: axisColor, fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
+                    width={70}
+                  />
+                )}
+                <Tooltip content={<ChartTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 13 }} />
+                {cols.map((col, i) => (
+                  <Area
+                    key={col.key}
+                    yAxisId={hasRight ? col.yAxisId : "left"}
+                    type="monotone"
+                    dataKey={col.key}
+                    name={col.label}
+                    stroke={col.color}
+                    strokeWidth={2.5}
+                    fill={`url(#grad-month-${table.id}-${i})`}
+                    fillOpacity={1}
+                    dot={{ r: 4, fill: col.color, stroke: "white", strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: col.color, stroke: "white", strokeWidth: 2 }}
+                  />
+                ))}
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-        );
-      })}
+        )}
+
+        {hasCities && cityData.length > 0 && (
+          <div>
+            <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
+              По городам (итого)
+            </p>
+            <ResponsiveContainer width="100%" height={360}>
+              <BarChart data={cityData} margin={{ top: 10, right: hasRight ? 15 : 20, left: 15, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+                <XAxis
+                  dataKey="city"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  angle={-35}
+                  textAnchor="end"
+                  interval={0}
+                  height={80}
+                />
+                <YAxis
+                  yAxisId="left"
+                  tick={{ fill: axisColor, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
+                  width={60}
+                />
+                {hasRight && (
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fill: axisColor, fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
+                    width={70}
+                  />
+                )}
+                <Tooltip content={<ChartTooltip />} />
+                <Legend wrapperStyle={{ fontSize: 13 }} />
+                {cols.map((col) => (
+                  <Bar
+                    key={col.key}
+                    yAxisId={hasRight ? col.yAxisId : "left"}
+                    dataKey={col.key}
+                    name={col.label}
+                    fill={col.color}
+                    radius={[4, 4, 0, 0]}
+                    maxBarSize={36}
+                  />
+                ))}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
