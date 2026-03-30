@@ -37,7 +37,7 @@ export default function VyrabotkaView() {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [dataLoading]);
 
   useEffect(() => {
     const url = `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`;
