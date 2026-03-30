@@ -32,6 +32,7 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [editingColIdx, setEditingColIdx] = useState<number | null>(null);
+  const [expandedCities, setExpandedCities] = useState<Set<string>>(new Set());
   const colInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -73,6 +74,12 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     return map;
   }, [allRows, cities]);
 
+  const cityColTotal = (city: string, key: string) =>
+    (rowsByCity[city] || []).reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+
+  const cityTotal = (city: string) =>
+    columns.reduce((sum, col) => sum + cityColTotal(city, col.key), 0);
+
   const rowTotal = (row: Row) =>
     columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
 
@@ -80,6 +87,15 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     allRows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
 
   const grandTotal = columns.reduce((sum, col) => sum + colTotal(col.key), 0);
+
+  const toggleCity = (city: string) => {
+    setExpandedCities(prev => {
+      const next = new Set(prev);
+      if (next.has(city)) next.delete(city);
+      else next.add(city);
+      return next;
+    });
+  };
 
   const handleChange = (rowId: number, col: string, val: string) => {
     setAllRows(prev => prev.map(r => r.id === rowId ? { ...r, [col]: val } : r));
@@ -198,11 +214,6 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                   Город
                 </th>
               )}
-              {hasMonths && (
-                <th className="text-left px-3 py-3 text-white/50 font-medium text-xs whitespace-nowrap">
-                  Месяц
-                </th>
-              )}
               {columns.map((col, ci) => (
                 <th
                   key={col.key}
@@ -235,19 +246,20 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
           <tbody>
             {hasMonths ? (
               <>
-                {cities.map(city => {
-                  const cityRows = rowsByCity[city] || [];
-                  return (
-                    <CityGroup
-                      key={city}
-                      city={city}
-                      rows={cityRows}
-                      columns={columns}
-                      editable={editable}
-                      onChange={handleChange}
-                    />
-                  );
-                })}
+                {cities.map(city => (
+                  <CityAccordion
+                    key={city}
+                    city={city}
+                    rows={rowsByCity[city] || []}
+                    columns={columns}
+                    editable={editable}
+                    expanded={expandedCities.has(city)}
+                    onToggle={() => toggleCity(city)}
+                    onChange={handleChange}
+                    cityColTotal={cityColTotal}
+                    cityTotal={cityTotal}
+                  />
+                ))}
               </>
             ) : (
               allRows.map((row, ri) => (
@@ -296,7 +308,6 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                 style={{ background: "var(--sticky-cell-bg)" }}>
                 ИТОГО
               </td>
-              {hasMonths && <td></td>}
               {columns.map(col => (
                 <td key={col.key} className="px-1 py-3 text-center">
                   <span className={`text-xs font-bold ${colTotal(col.key) > 0 ? "text-gradient-cyan" : "text-white/30"}`}>
@@ -316,37 +327,74 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
   );
 }
 
-function CityGroup({
+function CityAccordion({
   city,
   rows,
   columns,
   editable,
+  expanded,
+  onToggle,
   onChange,
+  cityColTotal,
+  cityTotal,
 }: {
   city: string;
   rows: Row[];
   columns: ColumnDef[];
   editable: boolean;
+  expanded: boolean;
+  onToggle: () => void;
   onChange: (rowId: number, col: string, val: string) => void;
+  cityColTotal: (city: string, key: string) => number;
+  cityTotal: (city: string) => number;
 }) {
   const rowTotal = (row: Row) =>
     columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
 
+  const total = cityTotal(city);
+
   return (
     <>
-      {rows.map((row, ri) => (
-        <tr key={row.id} className="border-b border-white/5 transition-colors hover:bg-white/3">
-          {ri === 0 ? (
-            <td
-              className="px-4 py-2.5 text-white/80 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
-              style={{ background: "var(--sticky-cell-bg)" }}
-              rowSpan={rows.length}
-            >
-              {city}
+      <tr
+        className="border-b border-white/8 cursor-pointer transition-colors hover:bg-white/5 group"
+        onClick={onToggle}
+      >
+        <td
+          className="px-3 py-3 sticky left-0 z-10"
+          style={{ background: "var(--sticky-cell-bg)" }}
+        >
+          <div className="flex items-center gap-2">
+            <Icon
+              name="ChevronRight"
+              size={14}
+              className={`text-white/40 transition-transform duration-200 ${expanded ? "rotate-90" : ""}`}
+            />
+            <span className="text-white font-bold text-xs uppercase tracking-wider">{city}</span>
+          </div>
+        </td>
+        {columns.map(col => {
+          const val = cityColTotal(city, col.key);
+          return (
+            <td key={col.key} className="px-1 py-3 text-center">
+              <span className={`text-xs font-semibold ${val > 0 ? "text-white/70" : "text-white/20"}`}>
+                {val.toLocaleString("ru-RU")}
+              </span>
             </td>
-          ) : null}
-          <td className="px-3 py-2.5 text-white/40 text-xs whitespace-nowrap">
-            {row.month || "—"}
+          );
+        })}
+        <td className="px-2 py-3 text-center">
+          <span className={`text-xs font-bold px-2 py-1 rounded-lg ${total > 0 ? "text-gradient-violet" : "text-white/30"}`}>
+            {total.toLocaleString("ru-RU")}
+          </span>
+        </td>
+      </tr>
+      {expanded && rows.map(row => (
+        <tr key={row.id} className="border-b border-white/[0.03] bg-white/[0.02] transition-colors hover:bg-white/[0.04]">
+          <td
+            className="px-3 py-2 sticky left-0 z-10"
+            style={{ background: "var(--sticky-cell-bg)" }}
+          >
+            <span className="text-white/35 text-xs pl-5">{row.month || "—"}</span>
           </td>
           {columns.map(col => (
             <td key={col.key} className="px-1 py-1.5 text-center">
@@ -363,14 +411,14 @@ function CityGroup({
                   style={{ minWidth: 60 }}
                 />
               ) : (
-                <span className={`text-xs ${Number(row[col.key]) > 0 ? "text-white/80" : "text-white/25"}`}>
+                <span className={`text-xs ${Number(row[col.key]) > 0 ? "text-white/60" : "text-white/15"}`}>
                   {(Number(row[col.key]) || 0).toLocaleString("ru-RU")}
                 </span>
               )}
             </td>
           ))}
-          <td className="px-2 py-2.5 text-center">
-            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
+          <td className="px-2 py-2 text-center">
+            <span className={`text-xs ${rowTotal(row) > 0 ? "text-white/40" : "text-white/15"}`}>
               {rowTotal(row).toLocaleString("ru-RU")}
             </span>
           </td>
