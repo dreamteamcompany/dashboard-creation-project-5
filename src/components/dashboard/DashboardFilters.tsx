@@ -31,15 +31,15 @@ export default function DashboardFilters({
     <>
       <div ref={ref} className="h-0" />
       <div
-        className={`rounded-2xl p-4 space-y-3 sticky top-0 z-30 transition-shadow duration-300 border ${
+        className={`p-4 space-y-3 sticky top-0 z-30 border transition-all duration-300 ${
           stuck
-            ? "shadow-[0_8px_32px_rgba(0,0,0,0.5)] border-white/10"
-            : "border-white/5"
+            ? "rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border-white/10"
+            : "glass rounded-2xl border-white/5"
         }`}
-        style={{
+        style={stuck ? {
           background: "var(--filters-bg)",
           backdropFilter: "blur(24px)",
-        }}
+        } : undefined}
       >
       <div>
         <div className="flex items-center gap-2 mb-2">
