@@ -72,13 +72,23 @@ interface Props {
   table: ExtraTableWithData;
   isLight: boolean;
   axisColor: string;
+  selectedCity?: string | null;
+  selectedMonth?: string | null;
 }
 
-export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
+export default function ExtraTableCharts({ table, isLight, axisColor, selectedCity, selectedMonth }: Props) {
   const [activeTab, setActiveTab] = useState(0);
-  const hasMonths = table.rows.some(r => r.month);
-  const hasCities = table.rows.some(r => r.city);
   const gridStroke = isLight ? "rgba(20,10,40,0.07)" : "rgba(255,255,255,0.05)";
+
+  const filteredRows = useMemo(() => {
+    let rows = table.rows;
+    if (selectedCity) rows = rows.filter(r => r.city === selectedCity);
+    if (selectedMonth) rows = rows.filter(r => r.month === selectedMonth);
+    return rows;
+  }, [table.rows, selectedCity, selectedMonth]);
+
+  const hasMonths = filteredRows.some(r => r.month);
+  const hasCities = filteredRows.some(r => r.city);
 
   const col = table.columns[activeTab];
   const color = CHART_COLORS[activeTab % CHART_COLORS.length];
@@ -87,18 +97,18 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
   const totals = useMemo(() => {
     const t: Record<string, number> = {};
     table.columns.forEach(c => {
-      t[c.key] = table.rows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
+      t[c.key] = filteredRows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
     });
     return t;
-  }, [table.rows, table.columns]);
+  }, [filteredRows, table.columns]);
 
   const monthData = useMemo(
-    () => col && hasMonths ? aggregateByMonth(table.rows, col.key) : [],
-    [table.rows, col, hasMonths],
+    () => col && hasMonths ? aggregateByMonth(filteredRows, col.key) : [],
+    [filteredRows, col, hasMonths],
   );
   const cityData = useMemo(
-    () => col && hasCities ? aggregateByCity(table.rows, col.key) : [],
-    [table.rows, col, hasCities],
+    () => col && hasCities ? aggregateByCity(filteredRows, col.key) : [],
+    [filteredRows, col, hasCities],
   );
 
   const maxMonth = useMemo(() => {

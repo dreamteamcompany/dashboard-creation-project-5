@@ -195,6 +195,8 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
           table={et}
           isLight={isLight}
           axisColor={axisColor}
+          selectedCity={data.selectedCity}
+          selectedMonth={data.selectedMonth}
         />
       ))}
 

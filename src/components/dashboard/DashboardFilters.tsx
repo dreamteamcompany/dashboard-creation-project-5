@@ -13,7 +13,7 @@ export default function DashboardFilters({
   cities, allMonths, selectedCity, selectedMonth, onCityChange, onMonthChange,
 }: Props) {
   return (
-    <div className="glass rounded-2xl p-4 space-y-3">
+    <div className="glass rounded-2xl p-4 space-y-3 sticky top-4 z-30" style={{ backdropFilter: "blur(20px)" }}>
       <div>
         <div className="flex items-center gap-2 mb-2">
           <Icon name="MapPin" size={14} className="text-violet-400" />
