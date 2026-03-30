@@ -1,0 +1,1 @@
+UPDATE t_p56096254_dashboard_creation_p.dashboard_rows SET data = '{"fact": 0, "plan": 0, "col1774353880103": 0}' WHERE id = 76 AND dashboard_id = 6;
