@@ -127,6 +127,9 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
   if (!hasMonths && !hasCities) return null;
   if (table.rows.length === 0 || !col) return null;
 
+  const totalAllCols = Object.values(totals).reduce((s, v) => s + v, 0);
+  if (totalAllCols <= 0) return null;
+
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in-up">
       <div className="flex flex-wrap items-center gap-2 mb-6">

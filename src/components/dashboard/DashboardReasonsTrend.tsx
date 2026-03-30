@@ -23,6 +23,9 @@ export default function DashboardReasonsTrend({
 }: Props) {
   if (!selectedCity || selectedMonth || !hasMonths || reasonsByMonth.length <= 1) return null;
 
+  const hasAnyData = columns.some(col => reasonsByMonth.some(r => Number(r[col.key]) > 0));
+  if (!hasAnyData) return null;
+
   const globalMax = Math.max(
     ...columns.map(col => Math.max(...reasonsByMonth.map(r => Number(r[col.key]) || 0))),
     1

@@ -68,7 +68,7 @@ export default function DashboardCharts({
 }: Props) {
   return (
     <>
-      {selectedCity && hasMonths && !selectedMonth && (
+      {selectedCity && hasMonths && !selectedMonth && !loading && aggregatedByMonthRows.some(r => Number(r.total) > 0) && (
         <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -76,9 +76,7 @@ export default function DashboardCharts({
               <p className="text-white/40 text-xs mt-0.5">{selectedCity} · суммарное количество обращений</p>
             </div>
           </div>
-          {loading ? (
-            <div className="h-[240px] flex items-center justify-center text-white/20 text-sm">Загрузка...</div>
-          ) : aggregatedByMonthRows.length > 0 ? (
+          {aggregatedByMonthRows.length > 0 ? (
             <ResponsiveContainer width="100%" height={420}>
               <AreaChart data={aggregatedByMonthRows} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
                 <defs>
@@ -108,7 +106,7 @@ export default function DashboardCharts({
       {anomaliesSlot}
 
       <div className="space-y-4">
-        {!selectedCity && (
+        {!selectedCity && !loading && cityBarData.some(d => d.total > 0) && (
           <div className="glass rounded-2xl p-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -116,9 +114,7 @@ export default function DashboardCharts({
                 <p className="text-white/40 text-xs mt-0.5">Суммарное количество по каждому городу</p>
               </div>
             </div>
-            {loading ? (
-              <div className="h-[240px] flex items-center justify-center text-white/20 text-sm">Загрузка...</div>
-            ) : (
+            {(
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={cityBarData} margin={{ top: 5, right: 5, left: 10, bottom: 0 }}>
                   <defs>
@@ -142,14 +138,12 @@ export default function DashboardCharts({
           </div>
         )}
 
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        {!loading && grandTotal > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-5">
             <h3 className="font-display font-bold text-white text-lg">Распределение</h3>
-            <p className="text-white/40 text-xs mt-0.5">По типам причин{grandTotal > 0 ? ` · всего ${grandTotal.toLocaleString("ru-RU")}` : ""}</p>
+            <p className="text-white/40 text-xs mt-0.5">По типам причин · всего {grandTotal.toLocaleString("ru-RU")}</p>
           </div>
-          {loading ? (
-            <div className="h-[180px] flex items-center justify-center text-white/20 text-sm">Загрузка...</div>
-          ) : (() => {
+          {(() => {
             const topItem = sorted.find(c => c.total > 0);
             const topPct = topItem && grandTotal > 0 ? ((topItem.total / grandTotal) * 100).toFixed(1) : "0";
             const chartSize = 220;
@@ -203,11 +197,11 @@ export default function DashboardCharts({
               </div>
             );
           })()}
-        </div>
+        </div>}
 
       </div>
 
-      {!selectedCity && hasMonths && reasonsByMonth.length > 1 && (() => {
+      {!selectedCity && hasMonths && !loading && reasonsByMonth.length > 1 && grandTotal > 0 && (() => {
         const globalMax = Math.max(
           ...columns.map(col => Math.max(...reasonsByMonth.map(r => Number(r[col.key]) || 0))),
           1
@@ -285,8 +279,8 @@ export default function DashboardCharts({
         );
       })()}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {!hasMonths && (
+      {!hasMonths && !loading && aggregatedByCityRows.length > 0 && grandTotal > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {(
           <div className="glass rounded-2xl p-6 animate-fade-in-up">
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -360,7 +354,7 @@ export default function DashboardCharts({
             })()}
           </div>
         )}
-      </div>
+      </div>}
     </>
   );
 }

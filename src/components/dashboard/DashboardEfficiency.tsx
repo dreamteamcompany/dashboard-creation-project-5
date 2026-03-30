@@ -114,7 +114,7 @@ interface Props {
 export default function DashboardEfficiency({
   selectedCity, loading, columns, aggregatedByCityRows, rowTotal, grandTotal, isLight,
 }: Props) {
-  if (loading || aggregatedByCityRows.length === 0) return null;
+  if (loading || aggregatedByCityRows.length === 0 || grandTotal <= 0) return null;
 
   const cityTotals = aggregatedByCityRows
     .map(r => ({ city: r.city as string, total: rowTotal(r) }))

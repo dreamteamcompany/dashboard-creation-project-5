@@ -197,7 +197,7 @@ export default function DashboardAnalytics({
 }: Props) {
   return (
     <>
-      {selectedCity && cityProfileData.length > 0 && (
+      {selectedCity && cityProfileData.length > 0 && cityProfileData.some(d => d.cityRaw > 0 || d.avgRaw > 0) && (
         <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
