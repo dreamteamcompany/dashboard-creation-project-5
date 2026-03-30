@@ -27,125 +27,137 @@ export default function DashboardFilters({
     return () => observer.disconnect();
   }, []);
 
+  const btnCity = (active: boolean) =>
+    `rounded-full transition-all duration-300 ${active ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"}`;
+  const btnMonth = (active: boolean) =>
+    `rounded-full transition-all duration-300 ${active ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"}`;
+
   return (
     <>
       <div ref={ref} className="h-0" />
       <div
-        className={`sticky top-0 z-30 border transition-all duration-300 ${
-          stuck
-            ? "rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border-white/10 px-4 py-2.5"
-            : "glass rounded-2xl border-white/5 p-4"
-        }`}
-        style={stuck ? {
-          background: "var(--filters-bg)",
+        className="sticky top-0 z-30 border overflow-hidden"
+        style={{
+          padding: stuck ? "8px 16px" : "16px",
+          borderRadius: stuck ? "12px" : "16px",
+          background: stuck ? "var(--filters-bg)" : "var(--glass-bg)",
+          borderColor: stuck ? "rgba(255,255,255,0.1)" : "var(--glass-border)",
+          boxShadow: stuck ? "0 8px 32px rgba(0,0,0,0.5)" : "none",
           backdropFilter: "blur(24px)",
-        } : undefined}
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
       >
-        {stuck ? (
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Icon name="MapPin" size={12} className="text-violet-400" />
-              <span className="text-[10px] font-semibold text-white/40 uppercase">Город</span>
+        <div
+          className="flex items-start"
+          style={{
+            flexDirection: stuck ? "row" : "column",
+            gap: stuck ? "12px" : "12px",
+            transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <div
+            className="flex items-center shrink-0"
+            style={{
+              flexWrap: "wrap",
+              gap: stuck ? "4px" : "6px",
+              transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            <div className="flex items-center gap-1.5 shrink-0 mr-1">
+              <Icon name="MapPin" size={stuck ? 11 : 14} className="text-violet-400" />
+              <span
+                className="font-semibold text-white/40 uppercase tracking-wider"
+                style={{
+                  fontSize: stuck ? "9px" : "11px",
+                  transition: "font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Город
+              </span>
             </div>
-            <div className="flex flex-wrap items-center gap-1">
-              <button
-                onClick={() => onCityChange(null)}
-                className={`text-[11px] px-2.5 py-1 rounded-full transition-all duration-200 ${
-                  !selectedCity ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-                }`}>
-                Все
+            <button
+              onClick={() => onCityChange(null)}
+              className={btnCity(!selectedCity)}
+              style={{
+                fontSize: stuck ? "10px" : "12px",
+                padding: stuck ? "3px 8px" : "6px 12px",
+                transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {stuck ? "Все" : "Все города"}
+            </button>
+            {cities.map(city => (
+              <button key={city}
+                onClick={() => onCityChange(selectedCity === city ? null : city)}
+                className={btnCity(selectedCity === city)}
+                style={{
+                  fontSize: stuck ? "10px" : "12px",
+                  padding: stuck ? "3px 8px" : "6px 12px",
+                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                {city}
               </button>
-              {cities.map(city => (
-                <button key={city}
-                  onClick={() => onCityChange(selectedCity === city ? null : city)}
-                  className={`text-[11px] px-2.5 py-1 rounded-full transition-all duration-200 ${
-                    selectedCity === city ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-                  }`}>
-                  {city}
-                </button>
-              ))}
-            </div>
+            ))}
+          </div>
 
-            <div className="w-px h-5 bg-white/10 shrink-0" />
+          <div
+            className="shrink-0"
+            style={{
+              width: stuck ? "1px" : "100%",
+              height: stuck ? "24px" : "1px",
+              background: "rgba(255,255,255,0.08)",
+              alignSelf: stuck ? "center" : "stretch",
+              transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          />
 
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Icon name="Calendar" size={12} className="text-cyan-400" />
-              <span className="text-[10px] font-semibold text-white/40 uppercase">Месяц</span>
+          <div
+            className="flex items-center shrink-0"
+            style={{
+              flexWrap: "wrap",
+              gap: stuck ? "4px" : "6px",
+              transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            <div className="flex items-center gap-1.5 shrink-0 mr-1">
+              <Icon name="Calendar" size={stuck ? 11 : 14} className="text-cyan-400" />
+              <span
+                className="font-semibold text-white/40 uppercase tracking-wider"
+                style={{
+                  fontSize: stuck ? "9px" : "11px",
+                  transition: "font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Месяц
+              </span>
             </div>
-            <div className="flex flex-wrap items-center gap-1">
-              <button
-                onClick={() => onMonthChange(null)}
-                className={`text-[11px] px-2.5 py-1 rounded-full transition-all duration-200 ${
-                  !selectedMonth ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-                }`}>
-                Все
+            <button
+              onClick={() => onMonthChange(null)}
+              className={btnMonth(!selectedMonth)}
+              style={{
+                fontSize: stuck ? "10px" : "12px",
+                padding: stuck ? "3px 8px" : "6px 12px",
+                transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {stuck ? "Все" : "Все месяцы"}
+            </button>
+            {allMonths.map(m => (
+              <button key={m}
+                onClick={() => onMonthChange(selectedMonth === m ? null : m)}
+                className={btnMonth(selectedMonth === m)}
+                style={{
+                  fontSize: stuck ? "10px" : "12px",
+                  padding: stuck ? "3px 8px" : "6px 12px",
+                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                {m}
               </button>
-              {allMonths.map(m => (
-                <button key={m}
-                  onClick={() => onMonthChange(selectedMonth === m ? null : m)}
-                  className={`text-[11px] px-2.5 py-1 rounded-full transition-all duration-200 ${
-                    selectedMonth === m ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-                  }`}>
-                  {m}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
-        ) : (
-          <div className="space-y-3">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Icon name="MapPin" size={14} className="text-violet-400" />
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Город</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => onCityChange(null)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                    !selectedCity ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-                  }`}>
-                  Все города
-                </button>
-                {cities.map(city => (
-                  <button key={city}
-                    onClick={() => onCityChange(selectedCity === city ? null : city)}
-                    className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                      selectedCity === city ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-                    }`}>
-                    {city}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-t border-white/8" />
-
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Icon name="Calendar" size={14} className="text-cyan-400" />
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Месяц</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => onMonthChange(null)}
-                  className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                    !selectedMonth ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-                  }`}>
-                  Все месяцы
-                </button>
-                {allMonths.map(m => (
-                  <button key={m}
-                    onClick={() => onMonthChange(selectedMonth === m ? null : m)}
-                    className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                      selectedMonth === m ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-                    }`}>
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </>
   );
