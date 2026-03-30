@@ -193,13 +193,13 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {hasMonths && monthData.length > 0 && (
                 <div>
                   <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
                     В разрезе месяцев
                   </p>
-                  <ResponsiveContainer width="100%" height={420}>
+                  <ResponsiveContainer width="100%" height={360}>
                     <AreaChart data={monthData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
                       <defs>
                         {group.colKeys.map((_, i) => (
@@ -252,7 +252,7 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                   <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
                     По городам (итого)
                   </p>
-                  <ResponsiveContainer width="100%" height={420}>
+                  <ResponsiveContainer width="100%" height={360}>
                     <BarChart data={cityData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                       <XAxis
