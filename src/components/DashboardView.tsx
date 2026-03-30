@@ -169,6 +169,17 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
         PIE_COLORS={PIE_COLORS}
       />
 
+      {tablesWithData.map(et => (
+        <ExtraTableCharts
+          key={`charts-${et.id}`}
+          table={et}
+          isLight={isLight}
+          axisColor={axisColor}
+          selectedCity={data.selectedCity}
+          selectedMonth={data.selectedMonth}
+        />
+      ))}
+
       <DashboardDataTable
         title={title}
         selectedCity={data.selectedCity}
@@ -188,17 +199,6 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
         onSave={handleSave}
         onChange={handleChange}
       />
-
-      {tablesWithData.map(et => (
-        <ExtraTableCharts
-          key={`charts-${et.id}`}
-          table={et}
-          isLight={isLight}
-          axisColor={axisColor}
-          selectedCity={data.selectedCity}
-          selectedMonth={data.selectedMonth}
-        />
-      ))}
 
       {tablesWithData.map(et => (
         <ExtraDataTable
