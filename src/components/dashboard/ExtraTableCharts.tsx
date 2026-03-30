@@ -238,6 +238,7 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                           stroke={group.colors[i]}
                           strokeWidth={2.5}
                           fill={`url(#${gradIds[i]})`}
+                          fillOpacity={0.15}
                           dot={{ r: 4, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
                           activeDot={{ r: 6, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
                         />
