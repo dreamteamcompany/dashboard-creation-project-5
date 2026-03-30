@@ -193,14 +193,14 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
               {hasMonths && monthData.length > 0 && (
                 <div>
-                  <p className="text-xs mb-3 font-medium" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
                     В разрезе месяцев
                   </p>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <AreaChart data={monthData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={420}>
+                    <AreaChart data={monthData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
                       <defs>
                         {group.colKeys.map((_, i) => (
                           <linearGradient key={i} id={gradIds[i]} x1="0" y1="0" x2="0" y2="1">
@@ -212,23 +212,23 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                       <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                       <XAxis
                         dataKey="month"
-                        tick={{ fill: axisColor, fontSize: 10 }}
+                        tick={{ fill: axisColor, fontSize: 13 }}
                         axisLine={false}
                         tickLine={false}
                         interval={0}
                         angle={-35}
                         textAnchor="end"
-                        height={50}
+                        height={60}
                       />
                       <YAxis
-                        tick={{ fill: axisColor, fontSize: 11 }}
+                        tick={{ fill: axisColor, fontSize: 13 }}
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
-                        width={60}
+                        width={70}
                       />
                       <Tooltip content={<ChartTooltip />} />
-                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
+                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 14 }} />}
                       {group.colKeys.map((key, i) => (
                         <Area
                           key={key}
@@ -238,8 +238,8 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
                           stroke={group.colors[i]}
                           strokeWidth={2.5}
                           fill={`url(#${gradIds[i]})`}
-                          dot={{ r: 3, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
-                          activeDot={{ r: 5, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
+                          dot={{ r: 4, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
+                          activeDot={{ r: 6, fill: group.colors[i], stroke: "white", strokeWidth: 2 }}
                         />
                       ))}
                     </AreaChart>
@@ -249,31 +249,31 @@ export default function ExtraTableCharts({ table, isLight, axisColor }: Props) {
 
               {hasCities && cityData.length > 0 && (
                 <div>
-                  <p className="text-xs mb-3 font-medium" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm mb-4 font-medium" style={{ color: "var(--text-secondary)" }}>
                     По городам (итого)
                   </p>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={cityData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                  <ResponsiveContainer width="100%" height={420}>
+                    <BarChart data={cityData} margin={{ top: 10, right: 20, left: 15, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                       <XAxis
                         dataKey="city"
-                        tick={{ fill: axisColor, fontSize: 10 }}
+                        tick={{ fill: axisColor, fontSize: 13 }}
                         axisLine={false}
                         tickLine={false}
                         angle={-35}
                         textAnchor="end"
                         interval={0}
-                        height={60}
+                        height={80}
                       />
                       <YAxis
-                        tick={{ fill: axisColor, fontSize: 11 }}
+                        tick={{ fill: axisColor, fontSize: 13 }}
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={(v) => Number(v).toLocaleString("ru-RU")}
-                        width={60}
+                        width={70}
                       />
                       <Tooltip content={<ChartTooltip />} />
-                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
+                      {group.colKeys.length > 1 && <Legend wrapperStyle={{ fontSize: 14 }} />}
                       {group.colKeys.map((key, i) => (
                         <Bar
                           key={key}
