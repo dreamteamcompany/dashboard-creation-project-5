@@ -9,6 +9,7 @@ import DashboardDataTable from "@/components/dashboard/DashboardDataTable";
 import DashboardEfficiency from "@/components/dashboard/DashboardEfficiency";
 import DashboardReasonsTrend from "@/components/dashboard/DashboardReasonsTrend";
 import ExtraDataTable from "@/components/ExtraDataTable";
+import ExtraTableCharts from "@/components/dashboard/ExtraTableCharts";
 import useDashboardData, { PIE_COLORS } from "@/hooks/useDashboardData";
 import useDashboardKpi from "@/hooks/useDashboardKpi";
 import useDashboardActions from "@/hooks/useDashboardActions";
@@ -187,6 +188,15 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
         onSave={handleSave}
         onChange={handleChange}
       />
+
+      {tablesWithData.map(et => (
+        <ExtraTableCharts
+          key={`charts-${et.id}`}
+          table={et}
+          isLight={isLight}
+          axisColor={axisColor}
+        />
+      ))}
 
       {tablesWithData.map(et => (
         <ExtraDataTable
