@@ -210,6 +210,8 @@ export default function RussiaMap({ cityRanking, onCityClick }: Props) {
       pct: c.pct,
     }));
 
+  if (cities.length === 0) return null;
+
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in-up">
       {/* Header */}

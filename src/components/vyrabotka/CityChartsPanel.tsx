@@ -36,7 +36,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
 
   return (
     <>
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filtered.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-display font-bold text-white text-lg">Динамика по месяцам</h3>
@@ -100,9 +100,9 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {filtered.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Нарастающий итог</h3>
@@ -174,9 +174,9 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </div>}
 
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filtered.some(d => d.fact > 0) && <div className="glass rounded-2xl p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">Отклонение по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">Перевыполнение / недовыполнение</p>
@@ -246,7 +246,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </div>}
     </>
   );
 }

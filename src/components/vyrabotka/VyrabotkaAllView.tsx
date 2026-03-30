@@ -64,15 +64,18 @@ export default function VyrabotkaAllView({
   DATA, activeMonths, selectedMonth, monthlyData, barData, pieDataFact,
   deviationData, cityRanking, isLight, axisColor, setSelectedCity,
 }: Props) {
+  const filteredMonthly = monthlyData.filter(d => d.plan > 0 || d.fact > 0);
+  const filteredBar = barData.filter(d => d.plan > 0 || d.fact > 0);
+
   return (
     <>
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">Динамика по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">План vs Факт · 2026</p>
         </div>
         <ResponsiveContainer width="100%" height={420}>
-          <BarChart data={monthlyData.filter(d => d.plan > 0 || d.fact > 0)} margin={{ top: 20, right: 20, left: 10, bottom: 0 }} barCategoryGap="8%" barGap={2}>
+          <BarChart data={filteredMonthly} margin={{ top: 20, right: 20, left: 10, bottom: 0 }} barCategoryGap="8%" barGap={2}>
             <defs>
               <linearGradient id="gradAllPlan" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={COLORS.plan} stopOpacity={1} />
@@ -97,7 +100,7 @@ export default function VyrabotkaAllView({
                 ) : null
               }
             >
-              {monthlyData.filter(d => d.plan > 0 || d.fact > 0).map((d) => (
+              {filteredMonthly.map((d) => (
                 <Cell key={d.shortName} fill="url(#gradAllPlan)" opacity={!selectedMonth || d.shortName === selectedMonth ? 1 : 0.15} />
               ))}
             </Bar>
@@ -110,15 +113,15 @@ export default function VyrabotkaAllView({
                 ) : null
               }
             >
-              {monthlyData.filter(d => d.plan > 0 || d.fact > 0).map((d) => (
+              {filteredMonthly.map((d) => (
                 <Cell key={d.shortName} fill="url(#gradAllFact)" opacity={!selectedMonth || d.shortName === selectedMonth ? 1 : 0.15} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {cityRanking.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-5 flex items-center justify-between">
             <div>
@@ -196,10 +199,10 @@ export default function VyrabotkaAllView({
             })}
           </div>
         </div>
-      </div>
+      </div>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {(pieDataFact.length > 0 || deviationData.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {pieDataFact.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Доля городов в выработке</h3>
             <p className="text-white/40 text-xs mt-0.5">Фактическая выработка</p>
@@ -257,9 +260,9 @@ export default function VyrabotkaAllView({
               })}
             </div>
           </div>
-        </div>
+        </div>}
 
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+        {deviationData.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Отклонение от плана</h3>
             <p className="text-white/40 text-xs mt-0.5">% выполнения по городам</p>
@@ -291,16 +294,16 @@ export default function VyrabotkaAllView({
               );
             })}
           </div>
-        </div>
-      </div>
+        </div>}
+      </div>}
 
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
         <div className="mb-6">
           <h3 className="font-display font-bold text-white text-lg">% выполнения по месяцам</h3>
           <p className="text-white/40 text-xs mt-0.5">Динамика процента выполнения плана</p>
         </div>
         <ResponsiveContainer width="100%" height={250}>
-          <AreaChart data={monthlyData.filter(d => d.plan > 0 || d.fact > 0)} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
+          <AreaChart data={filteredMonthly} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
             <defs>
               <linearGradient id="gradPct" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={COLORS.plan} stopOpacity={0.4} />
@@ -319,9 +322,9 @@ export default function VyrabotkaAllView({
               fill="url(#gradPct)" dot={{ fill: COLORS.plan, r: 5 }} activeDot={{ r: 7 }} />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+      </div>}
 
-      <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {filteredBar.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-display font-bold text-white text-lg">План vs Факт по городам</h3>
@@ -382,7 +385,7 @@ export default function VyrabotkaAllView({
             );
           })}
         </div>
-      </div>
+      </div>}
     </>
   );
 }
