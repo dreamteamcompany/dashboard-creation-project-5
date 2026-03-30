@@ -45,79 +45,13 @@ interface ChartGroup {
 }
 
 function buildGroups(columns: { key: string; label: string }[]): ChartGroup[] {
-  const countCols: string[] = [];
-  const countLabels: string[] = [];
-  const moneyCols: string[] = [];
-  const moneyLabels: string[] = [];
-  const pctCols: string[] = [];
-  const pctLabels: string[] = [];
-  const otherCols: string[] = [];
-  const otherLabels: string[] = [];
-
-  columns.forEach(col => {
-    const l = col.label.toLowerCase();
-    if (l.includes("процент") || l.includes("%")) {
-      pctCols.push(col.key);
-      pctLabels.push(col.label);
-    } else if (l.includes("цена") || l.includes("стоимость") || l.includes("сумм")) {
-      moneyCols.push(col.key);
-      moneyLabels.push(col.label);
-    } else if (l.includes("пациент") || l.includes("план") || l.includes("номенклатур")) {
-      countCols.push(col.key);
-      countLabels.push(col.label);
-    } else {
-      otherCols.push(col.key);
-      otherLabels.push(col.label);
-    }
-  });
-
-  const groups: ChartGroup[] = [];
-  let colorIdx = 0;
-
-  if (countCols.length > 0) {
-    groups.push({
-      title: "Количественные показатели",
-      subtitle: countLabels.join(", "),
-      colKeys: countCols,
-      colLabels: countLabels,
-      colors: countCols.map((_, i) => CHART_COLORS[(colorIdx + i) % CHART_COLORS.length]),
-    });
-    colorIdx += countCols.length;
-  }
-
-  if (moneyCols.length > 0) {
-    groups.push({
-      title: "Стоимость",
-      subtitle: moneyLabels.join(", "),
-      colKeys: moneyCols,
-      colLabels: moneyLabels,
-      colors: moneyCols.map((_, i) => CHART_COLORS[(colorIdx + i) % CHART_COLORS.length]),
-    });
-    colorIdx += moneyCols.length;
-  }
-
-  if (pctCols.length > 0) {
-    groups.push({
-      title: "Процент снижения",
-      subtitle: pctLabels.join(", "),
-      colKeys: pctCols,
-      colLabels: pctLabels,
-      colors: pctCols.map((_, i) => CHART_COLORS[(colorIdx + i) % CHART_COLORS.length]),
-    });
-    colorIdx += pctCols.length;
-  }
-
-  if (otherCols.length > 0) {
-    groups.push({
-      title: "Прочие показатели",
-      subtitle: otherLabels.join(", "),
-      colKeys: otherCols,
-      colLabels: otherLabels,
-      colors: otherCols.map((_, i) => CHART_COLORS[(colorIdx + i) % CHART_COLORS.length]),
-    });
-  }
-
-  return groups;
+  return columns.map((col, i) => ({
+    title: col.label,
+    subtitle: "",
+    colKeys: [col.key],
+    colLabels: [col.label],
+    colors: [CHART_COLORS[i % CHART_COLORS.length]],
+  }));
 }
 
 function aggregateByMonth(rows: ExtraRow[], colKeys: string[]) {
