@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 import { useTheme } from "@/context/ThemeContext";
 import funcUrls from "../../backend/func2url.json";
@@ -25,6 +25,19 @@ export default function VyrabotkaView() {
   const [dataLoading, setDataLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+
+  useEffect(() => {
+    const el = filtersRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([e]) => setStuck(!e.isIntersecting),
+      { threshold: [1], rootMargin: "-5px 0px 0px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const url = `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`;
@@ -194,53 +207,123 @@ export default function VyrabotkaView() {
 
   return (
     <div className="space-y-4">
-      <div className="glass rounded-2xl p-4 space-y-3">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Icon name="MapPin" size={14} className="text-violet-400" />
-            <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Город</span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
+      <div ref={filtersRef} className="h-0" />
+      <div
+        className="sticky top-0 z-30 border overflow-hidden"
+        style={{
+          padding: stuck ? "8px 16px" : "16px",
+          borderRadius: stuck ? "12px" : "16px",
+          background: stuck ? "var(--filters-bg)" : "var(--glass-bg)",
+          borderColor: stuck ? "rgba(255,255,255,0.1)" : "var(--glass-border)",
+          boxShadow: stuck ? "0 8px 32px rgba(0,0,0,0.5)" : "none",
+          backdropFilter: "blur(24px)",
+          transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <div
+          className="flex flex-col"
+          style={{
+            gap: stuck ? "6px" : "12px",
+            transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <div
+            className="flex items-center shrink-0"
+            style={{
+              flexWrap: "wrap",
+              gap: stuck ? "4px" : "6px",
+              transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            <div className="flex items-center gap-1.5 shrink-0 mr-1">
+              <Icon name="MapPin" size={stuck ? 11 : 14} className="text-violet-400" />
+              <span
+                className="font-semibold text-white/40 uppercase tracking-wider"
+                style={{
+                  fontSize: stuck ? "9px" : "11px",
+                  transition: "font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Город
+              </span>
+            </div>
             <button
               onClick={() => setSelectedCity(null)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                !selectedCity ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-              }`}>
-              Все города
+              className={`rounded-full transition-all duration-300 ${!selectedCity ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"}`}
+              style={{
+                fontSize: stuck ? "10px" : "12px",
+                padding: stuck ? "3px 8px" : "6px 12px",
+                transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {stuck ? "Все" : "Все города"}
             </button>
             {DATA.map(d => (
               <button key={d.city}
                 onClick={() => setSelectedCity(selectedCity === d.city ? null : d.city)}
-                className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                  selectedCity === d.city ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"
-                }`}>
+                className={`rounded-full transition-all duration-300 ${selectedCity === d.city ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"}`}
+                style={{
+                  fontSize: stuck ? "10px" : "12px",
+                  padding: stuck ? "3px 8px" : "6px 12px",
+                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
                 {d.city}
               </button>
             ))}
           </div>
-        </div>
 
-        <div className="border-t border-white/8" />
+          <div
+            style={{
+              width: "100%",
+              height: "1px",
+              background: "rgba(255,255,255,0.08)",
+              transition: "opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              opacity: stuck ? 0 : 1,
+            }}
+          />
 
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Icon name="Calendar" size={14} className="text-cyan-400" />
-            <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider">Месяц</span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div
+            className="flex items-center shrink-0"
+            style={{
+              flexWrap: "wrap",
+              gap: stuck ? "4px" : "6px",
+              transition: "gap 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
+          >
+            <div className="flex items-center gap-1.5 shrink-0 mr-1">
+              <Icon name="Calendar" size={stuck ? 11 : 14} className="text-cyan-400" />
+              <span
+                className="font-semibold text-white/40 uppercase tracking-wider"
+                style={{
+                  fontSize: stuck ? "9px" : "11px",
+                  transition: "font-size 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                Месяц
+              </span>
+            </div>
             <button
               onClick={() => setSelectedMonth(null)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                !selectedMonth ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-              }`}>
-              Все месяцы
+              className={`rounded-full transition-all duration-300 ${!selectedMonth ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"}`}
+              style={{
+                fontSize: stuck ? "10px" : "12px",
+                padding: stuck ? "3px 8px" : "6px 12px",
+                transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {stuck ? "Все" : "Все месяцы"}
             </button>
             {activeMonths.map(m => (
               <button key={m}
                 onClick={() => setSelectedMonth(selectedMonth === m ? null : m)}
-                className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
-                  selectedMonth === m ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"
-                }`}>
+                className={`rounded-full transition-all duration-300 ${selectedMonth === m ? "gradient-cyan text-white font-semibold" : "glass glass-hover text-white/50"}`}
+                style={{
+                  fontSize: stuck ? "10px" : "12px",
+                  padding: stuck ? "3px 8px" : "6px 12px",
+                  transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
                 {MONTH_LABELS[m]}
               </button>
             ))}
