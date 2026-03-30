@@ -72,6 +72,38 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
 
       <DashboardKpiCards cards={kpiCards} loading={data.loading} kpiKey={kpiKey} />
 
+      {tablesWithData.map(et => {
+        const extraKpiCards: KpiCard[] = et.columns.map((col, i) => {
+          const gradients = [
+            { gradient: "gradient-violet", textGradient: "text-gradient-violet", glow: "rgba(124,92,255,0.35)", icon: "Users" },
+            { gradient: "gradient-pink", textGradient: "text-gradient-pink", glow: "rgba(255,60,172,0.35)", icon: "FileText" },
+            { gradient: "gradient-cyan", textGradient: "text-gradient-cyan", glow: "rgba(0,229,204,0.35)", icon: "Package" },
+            { gradient: "gradient-green", textGradient: "text-gradient-green", glow: "rgba(0,212,106,0.35)", icon: "DollarSign" },
+            { gradient: "bg-gradient-to-br from-amber-500 to-orange-600", textGradient: "text-gradient-violet", glow: "rgba(245,158,11,0.35)", icon: "Percent" },
+          ];
+          const g = gradients[i % gradients.length];
+          return {
+            label: col.label,
+            value: (et.totals[col.key] || 0).toLocaleString("ru-RU"),
+            icon: g.icon,
+            gradient: g.gradient,
+            textGradient: g.textGradient,
+            glow: g.glow,
+            sub: "итого",
+            changeType: null,
+          };
+        });
+        if (extraKpiCards.length === 0) return null;
+        return (
+          <DashboardKpiCards
+            key={`extra-kpi-${et.id}`}
+            cards={extraKpiCards}
+            loading={et.loading}
+            kpiKey={`extra-${et.id}`}
+          />
+        );
+      })}
+
       <DashboardEfficiency
         selectedCity={data.selectedCity}
         loading={data.loading}
@@ -156,47 +188,16 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
         onChange={handleChange}
       />
 
-      {tablesWithData.map(et => {
-        const extraKpiCards: KpiCard[] = et.columns.map((col, i) => {
-          const gradients = [
-            { gradient: "gradient-violet", textGradient: "text-gradient-violet", glow: "rgba(124,92,255,0.35)", icon: "Users" },
-            { gradient: "gradient-pink", textGradient: "text-gradient-pink", glow: "rgba(255,60,172,0.35)", icon: "FileText" },
-            { gradient: "gradient-cyan", textGradient: "text-gradient-cyan", glow: "rgba(0,229,204,0.35)", icon: "Package" },
-            { gradient: "gradient-green", textGradient: "text-gradient-green", glow: "rgba(0,212,106,0.35)", icon: "DollarSign" },
-            { gradient: "bg-gradient-to-br from-amber-500 to-orange-600", textGradient: "text-gradient-violet", glow: "rgba(245,158,11,0.35)", icon: "Percent" },
-          ];
-          const g = gradients[i % gradients.length];
-          return {
-            label: col.label,
-            value: (et.totals[col.key] || 0).toLocaleString("ru-RU"),
-            icon: g.icon,
-            gradient: g.gradient,
-            textGradient: g.textGradient,
-            glow: g.glow,
-            sub: "итого",
-            changeType: null,
-          };
-        });
-
-        return (
-          <div key={et.id} className="space-y-4">
-            {extraKpiCards.length > 0 && (
-              <DashboardKpiCards
-                cards={extraKpiCards}
-                loading={et.loading}
-                kpiKey={`extra-${et.id}`}
-              />
-            )}
-            <ExtraDataTable
-              title={et.title}
-              apiUrl={`${EXTRA_TABLES_URL}?table_id=${et.id}&action=data`}
-              columns={et.columns}
-              editable={false}
-              hasCityMonth={et.has_city_month}
-            />
-          </div>
-        );
-      })}
+      {tablesWithData.map(et => (
+        <ExtraDataTable
+          key={et.id}
+          title={et.title}
+          apiUrl={`${EXTRA_TABLES_URL}?table_id=${et.id}&action=data`}
+          columns={et.columns}
+          editable={false}
+          hasCityMonth={et.has_city_month}
+        />
+      ))}
     </div>
   );
 }
