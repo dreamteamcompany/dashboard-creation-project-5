@@ -73,6 +73,14 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     return map;
   }, [allRows, cities]);
 
+  const rowTotal = (row: Row) =>
+    columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
+
+  const colTotal = (key: string) =>
+    allRows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+
+  const grandTotal = columns.reduce((sum, col) => sum + colTotal(col.key), 0);
+
   const handleChange = (rowId: number, col: string, val: string) => {
     setAllRows(prev => prev.map(r => r.id === rowId ? { ...r, [col]: val } : r));
     setDirty(true);
@@ -136,7 +144,7 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     );
   }
 
-  const totalColSpan = (hasMonths ? 1 : 0) + columns.length + (hasMonths ? 1 : 0) + (editable && !hasMonths ? 1 : 0);
+  const totalColSpan = (hasMonths ? 1 : 0) + columns.length + 1 + (editable && !hasMonths ? 1 : 0);
 
   return (
     <div className="glass rounded-2xl overflow-hidden animate-fade-in-up" style={{ "--sticky-cell-bg": "rgba(30,20,50,0.97)" } as React.CSSProperties}>
@@ -180,20 +188,26 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
         </div>
       </div>
 
-      <div className="overflow-auto max-h-[70vh]" style={{ scrollbarGutter: "stable" }}>
+      <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="sticky top-0 z-20">
-            <tr className="border-b border-white/8" style={{ background: "var(--sticky-cell-bg)" }}>
+          <thead>
+            <tr className="border-b border-white/8">
               {hasMonths && (
-                <th className="text-left px-4 py-3 text-white/50 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
-                  style={{ background: "var(--sticky-cell-bg)", minWidth: 120 }}>
+                <th className="text-left px-3 py-3 text-white/50 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
+                  style={{ background: "var(--sticky-cell-bg)", minWidth: 110 }}>
+                  Город
+                </th>
+              )}
+              {hasMonths && (
+                <th className="text-left px-3 py-3 text-white/50 font-medium text-xs whitespace-nowrap">
+                  Месяц
                 </th>
               )}
               {columns.map((col, ci) => (
                 <th
                   key={col.key}
-                  className="px-3 py-3 text-white/50 font-medium text-xs text-center leading-tight"
-                  style={{ minWidth: 80, background: "var(--sticky-cell-bg)" }}
+                  className="px-1.5 py-3 text-white/50 font-medium text-[10px] text-center leading-tight"
+                  style={{ minWidth: 60 }}
                 >
                   {editable && editingColIdx === ci ? (
                     <input
@@ -214,8 +228,8 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                   )}
                 </th>
               ))}
-
-              {editable && !hasMonths && <th className="px-2 py-3 w-8" style={{ background: "var(--sticky-cell-bg)" }}></th>}
+              <th className="px-4 py-3 text-white/70 font-bold text-xs text-center whitespace-nowrap">ИТОГО</th>
+              {editable && !hasMonths && <th className="px-2 py-3 w-8"></th>}
             </tr>
           </thead>
           <tbody>
@@ -234,25 +248,6 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                     />
                   );
                 })}
-
-                <tr className="border-t-2 border-white/20">
-                  <td
-                    className="px-4 py-2.5 sticky left-0 z-10"
-                    style={{ background: "var(--sticky-cell-bg)" }}
-                  >
-                    <span className="text-white font-black text-xs uppercase tracking-wider">Итого</span>
-                  </td>
-                  {columns.map(col => {
-                    const total = allRows.reduce((sum, r) => sum + (Number(r[col.key]) || 0), 0);
-                    return (
-                      <td key={col.key} className="px-1 py-2.5 text-center">
-                        <span className="text-xs font-bold text-white/90">
-                          {total.toLocaleString("ru-RU")}
-                        </span>
-                      </td>
-                    );
-                  })}
-                </tr>
               </>
             ) : (
               allRows.map((row, ri) => (
@@ -272,6 +267,11 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
                       />
                     </td>
                   ))}
+                  <td className="px-4 py-2.5 text-center">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
+                      {rowTotal(row).toLocaleString("ru-RU")}
+                    </span>
+                  </td>
                   {editable && (
                     <td className="px-2 py-1.5 text-center">
                       <button onClick={() => removeRow(row.id)} className="text-white/15 hover:text-red-400 transition-colors">
@@ -290,6 +290,26 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
               </tr>
             )}
           </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-white/10">
+              <td className="px-4 py-3 text-white/70 font-bold text-xs sticky left-0 z-10"
+                style={{ background: "var(--sticky-cell-bg)" }}>
+                ИТОГО
+              </td>
+              {hasMonths && <td></td>}
+              {columns.map(col => (
+                <td key={col.key} className="px-1 py-3 text-center">
+                  <span className={`text-xs font-bold ${colTotal(col.key) > 0 ? "text-gradient-cyan" : "text-white/30"}`}>
+                    {colTotal(col.key).toLocaleString("ru-RU")}
+                  </span>
+                </td>
+              ))}
+              <td className="px-2 py-3 text-center">
+                <span className="text-sm font-black text-gradient-pink">{grandTotal.toLocaleString("ru-RU")}</span>
+              </td>
+              {editable && !hasMonths && <td></td>}
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
@@ -309,22 +329,24 @@ function CityGroup({
   editable: boolean;
   onChange: (rowId: number, col: string, val: string) => void;
 }) {
+  const rowTotal = (row: Row) =>
+    columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
+
   return (
     <>
-      <tr className="border-t border-white/10">
-        <td
-          colSpan={1 + columns.length}
-          className="px-4 py-2.5 sticky left-0"
-          style={{ background: "var(--sticky-cell-bg)" }}
-        >
-          <span className="text-white font-black text-xs uppercase tracking-wider">{city}</span>
-        </td>
-      </tr>
-      {rows.map(row => (
+      {rows.map((row, ri) => (
         <tr key={row.id} className="border-b border-white/5 transition-colors hover:bg-white/3">
-          <td className="px-4 py-2 text-white/60 text-xs whitespace-nowrap sticky left-0 z-10"
-            style={{ background: "var(--sticky-cell-bg)" }}>
-            {row.month}
+          {ri === 0 ? (
+            <td
+              className="px-4 py-2.5 text-white/80 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
+              style={{ background: "var(--sticky-cell-bg)" }}
+              rowSpan={rows.length}
+            >
+              {city}
+            </td>
+          ) : null}
+          <td className="px-3 py-2.5 text-white/40 text-xs whitespace-nowrap">
+            {row.month || "—"}
           </td>
           {columns.map(col => (
             <td key={col.key} className="px-1 py-1.5 text-center">
@@ -342,11 +364,16 @@ function CityGroup({
                 />
               ) : (
                 <span className={`text-xs ${Number(row[col.key]) > 0 ? "text-white/80" : "text-white/25"}`}>
-                  {Number(row[col.key]) || 0}
+                  {(Number(row[col.key]) || 0).toLocaleString("ru-RU")}
                 </span>
               )}
             </td>
           ))}
+          <td className="px-2 py-2.5 text-center">
+            <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
+              {rowTotal(row).toLocaleString("ru-RU")}
+            </span>
+          </td>
         </tr>
       ))}
     </>
