@@ -121,8 +121,7 @@ export default function VyrabotkaAllView({
         </ResponsiveContainer>
       </div>}
 
-      {cityRanking.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="glass rounded-2xl p-6 animate-fade-in-up">
+      {cityRanking.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h3 className="font-display font-bold text-white text-lg">Рейтинг городов</h3>
@@ -198,8 +197,7 @@ export default function VyrabotkaAllView({
               );
             })}
           </div>
-        </div>
-      </div>}
+        </div>}
 
       {(pieDataFact.length > 0 || deviationData.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {pieDataFact.length > 0 && <div className="glass rounded-2xl p-6 animate-fade-in-up">
