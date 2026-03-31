@@ -66,7 +66,7 @@ export function AnimatedNumber({ value, key2 }: { value: string | number; key2?:
 }
 
 export function fmtMoney(v: number): string {
-  return Math.round(v).toLocaleString("ru-RU") + " ₽";
+  return Math.round(v).toLocaleString("ru-RU") + "\u00A0₽";
 }
 
 export function fmtShort(v: number): string {
@@ -77,7 +77,7 @@ export function fmtShort(v: number): string {
 }
 
 export function fmtFull(v: number): string {
-  return v.toLocaleString("ru-RU", { maximumFractionDigits: 0 }) + " ₽";
+  return v.toLocaleString("ru-RU", { maximumFractionDigits: 0 }) + "\u00A0₽";
 }
 
 export function pctColor(pct: number): string {
