@@ -31,7 +31,7 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
   const gradId = `gradViolet-${apiUrl.slice(-8)}`;
 
   const data = useDashboardData(apiUrl, columns, dashboardId);
-  const { tablesWithData } = useExtraTableData(dashboardId);
+  const { tablesWithData } = useExtraTableData(dashboardId, data.selectedCity, data.selectedMonth);
 
   const { saving, saved, dirty, handleChange, handleSave } = useDashboardActions(
     data.allRows, data.setAllRows, data.fetchUrl, data.isUniversalApi,
@@ -100,7 +100,7 @@ export default function DashboardView({ apiUrl, columns, title, dashboardId, rea
             key={`extra-kpi-${et.id}`}
             cards={extraKpiCards}
             loading={et.loading}
-            kpiKey={`extra-${et.id}`}
+            kpiKey={`extra-${et.id}-${kpiKey}`}
           />
         );
       })}

@@ -15,7 +15,11 @@ interface ExtraTableWithData extends ExtraTableConfig {
   totals: Record<string, number>;
 }
 
-export default function useExtraTableData(dashboardId?: number) {
+export default function useExtraTableData(
+  dashboardId?: number,
+  selectedCity?: string | null,
+  selectedMonth?: string | null,
+) {
   const [tables, setTables] = useState<ExtraTableConfig[]>([]);
   const [tableData, setTableData] = useState<Record<number, ExtraRow[]>>({});
   const [loadingTables, setLoadingTables] = useState(false);
@@ -48,14 +52,20 @@ export default function useExtraTableData(dashboardId?: number) {
 
   const tablesWithData: ExtraTableWithData[] = useMemo(() => {
     return tables.map(t => {
-      const rows = tableData[t.id] || [];
+      let rows = tableData[t.id] || [];
+      if (selectedCity) {
+        rows = rows.filter(r => r.city === selectedCity);
+      }
+      if (selectedMonth) {
+        rows = rows.filter(r => r.month === selectedMonth);
+      }
       const totals: Record<string, number> = {};
       t.columns.forEach(col => {
         totals[col.key] = rows.reduce((sum, r) => sum + (Number(r[col.key]) || 0), 0);
       });
       return { ...t, rows, loading: loadingData[t.id] ?? true, totals };
     });
-  }, [tables, tableData, loadingData]);
+  }, [tables, tableData, loadingData, selectedCity, selectedMonth]);
 
   return { tablesWithData, loadingTables };
 }
