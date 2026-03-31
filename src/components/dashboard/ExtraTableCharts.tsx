@@ -190,11 +190,11 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
                 <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                 <XAxis
                   dataKey="month"
-                  tick={{ fill: axisColor, fontSize: 12 }}
+                  tick={{ fill: axisColor, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
                   interval={0}
-                  angle={-35}
+                  angle={-45}
                   textAnchor="end"
                   height={60}
                 />
@@ -245,13 +245,13 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
                 <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
                 <XAxis
                   dataKey="city"
-                  tick={{ fill: axisColor, fontSize: 12 }}
+                  tick={{ fill: axisColor, fontSize: 10 }}
                   axisLine={false}
                   tickLine={false}
-                  angle={-35}
+                  angle={-55}
                   textAnchor="end"
                   interval={0}
-                  height={80}
+                  height={100}
                 />
                 <YAxis
                   tick={{ fill: axisColor, fontSize: 12 }}

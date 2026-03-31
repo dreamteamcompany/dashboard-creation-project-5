@@ -123,8 +123,8 @@ export default function DashboardCharts({
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(20,10,40,0.07)" : "rgba(255,255,255,0.05)"} />
-                  <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 10 }}
-                    axisLine={false} tickLine={false} angle={-35} textAnchor="end" interval={0} height={50} />
+                  <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 9 }}
+                    axisLine={false} tickLine={false} angle={-55} textAnchor="end" interval={0} height={90} />
                   <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
                     tickFormatter={(v) => Number(v).toLocaleString("ru-RU")} width={50} />
                   <Tooltip content={<CustomTooltip />} />
