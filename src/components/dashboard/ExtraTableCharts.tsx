@@ -36,25 +36,37 @@ const ChartTooltip = ({ active, payload, label }: TTooltip) => {
   );
 };
 
-function aggregateByMonth(rows: ExtraRow[], key: string) {
+function aggregateByMonth(rows: ExtraRow[], key: string, agg?: "sum" | "avg") {
   const map: Record<string, number> = {};
+  const counts: Record<string, number> = {};
   rows.forEach(r => {
     const m = r.month || "—";
-    map[m] = (map[m] || 0) + (Number(r[key]) || 0);
+    const v = Number(r[key]) || 0;
+    map[m] = (map[m] || 0) + v;
+    if (v) counts[m] = (counts[m] || 0) + 1;
   });
   return MONTHS_ORDER
     .filter(m => map[m] !== undefined)
-    .map(m => ({ month: m, value: map[m] || 0 }));
+    .map(m => ({
+      month: m,
+      value: agg === "avg" && counts[m] ? Math.round(map[m] / counts[m]) : (map[m] || 0),
+    }));
 }
 
-function aggregateByCity(rows: ExtraRow[], key: string) {
+function aggregateByCity(rows: ExtraRow[], key: string, agg?: "sum" | "avg") {
   const map: Record<string, number> = {};
+  const counts: Record<string, number> = {};
   rows.forEach(r => {
     const c = r.city || "—";
-    map[c] = (map[c] || 0) + (Number(r[key]) || 0);
+    const v = Number(r[key]) || 0;
+    map[c] = (map[c] || 0) + v;
+    if (v) counts[c] = (counts[c] || 0) + 1;
   });
   return Object.entries(map)
-    .map(([city, value]) => ({ city, value }))
+    .map(([city, value]) => ({
+      city,
+      value: agg === "avg" && counts[city] ? Math.round(value / counts[city]) : value,
+    }))
     .sort((a, b) => b.value - a.value);
 }
 
@@ -97,17 +109,23 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
   const totals = useMemo(() => {
     const t: Record<string, number> = {};
     table.columns.forEach(c => {
-      t[c.key] = filteredRows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
+      const sum = filteredRows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
+      if (c.agg === "avg") {
+        const count = filteredRows.filter(r => Number(r[c.key]) || 0).length;
+        t[c.key] = count > 0 ? Math.round(sum / count) : 0;
+      } else {
+        t[c.key] = sum;
+      }
     });
     return t;
   }, [filteredRows, table.columns]);
 
   const monthData = useMemo(
-    () => col && hasMonths ? aggregateByMonth(filteredRows, col.key) : [],
+    () => col && hasMonths ? aggregateByMonth(filteredRows, col.key, col.agg) : [],
     [filteredRows, col, hasMonths],
   );
   const cityData = useMemo(
-    () => col && hasCities ? aggregateByCity(filteredRows, col.key) : [],
+    () => col && hasCities ? aggregateByCity(filteredRows, col.key, col.agg) : [],
     [filteredRows, col, hasCities],
   );
 

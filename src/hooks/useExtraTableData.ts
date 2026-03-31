@@ -61,7 +61,13 @@ export default function useExtraTableData(
       }
       const totals: Record<string, number> = {};
       t.columns.forEach(col => {
-        totals[col.key] = rows.reduce((sum, r) => sum + (Number(r[col.key]) || 0), 0);
+        const sum = rows.reduce((s, r) => s + (Number(r[col.key]) || 0), 0);
+        if (col.agg === "avg") {
+          const count = rows.filter(r => Number(r[col.key]) || 0).length;
+          totals[col.key] = count > 0 ? Math.round(sum / count) : 0;
+        } else {
+          totals[col.key] = sum;
+        }
       });
       return { ...t, rows, loading: loadingData[t.id] ?? true, totals };
     });

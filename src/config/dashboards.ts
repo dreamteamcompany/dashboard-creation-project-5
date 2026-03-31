@@ -1,6 +1,7 @@
 export interface ColumnDef {
   key: string;
   label: string;
+  agg?: "sum" | "avg";
 }
 
 export interface DashboardConfig {

@@ -74,19 +74,34 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     return map;
   }, [allRows, cities]);
 
-  const cityColTotal = (city: string, key: string) =>
-    (rowsByCity[city] || []).reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+  const colAgg = (key: string) => columns.find(c => c.key === key)?.agg || "sum";
+
+  const cityColTotal = (city: string, key: string) => {
+    const rows = rowsByCity[city] || [];
+    const sum = rows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
+    if (colAgg(key) === "avg") {
+      const count = rows.filter(r => Number(r[key]) || 0).length;
+      return count > 0 ? Math.round(sum / count) : 0;
+    }
+    return sum;
+  };
 
   const cityTotal = (city: string) =>
-    columns.reduce((sum, col) => sum + cityColTotal(city, col.key), 0);
+    columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + cityColTotal(city, col.key), 0);
 
   const rowTotal = (row: Row) =>
-    columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
+    columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
 
-  const colTotal = (key: string) =>
-    allRows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
+  const colTotal = (key: string) => {
+    const sum = allRows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
+    if (colAgg(key) === "avg") {
+      const count = allRows.filter(r => Number(r[key]) || 0).length;
+      return count > 0 ? Math.round(sum / count) : 0;
+    }
+    return sum;
+  };
 
-  const grandTotal = columns.reduce((sum, col) => sum + colTotal(col.key), 0);
+  const grandTotal = columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + colTotal(col.key), 0);
 
   const toggleCity = (city: string) => {
     setExpandedCities(prev => {
