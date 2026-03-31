@@ -169,7 +169,7 @@ export default function CityEfficiencyPanel({
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={growthRateData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} vertical={false} />
-                  <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
                   <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
                     tickFormatter={(v: number) => `${v}%`} />
                   <Tooltip

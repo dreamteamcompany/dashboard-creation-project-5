@@ -86,8 +86,8 @@ export default function DashboardCharts({
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(20,10,40,0.07)" : "rgba(255,255,255,0.05)"} />
-                <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 12 }}
-                  axisLine={false} tickLine={false} interval={0} height={40} />
+                <XAxis dataKey="month" tick={{ fill: axisColor, fontSize: 11 }}
+                  axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
                 <YAxis tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false}
                   tickFormatter={(v) => Number(v).toLocaleString("ru-RU")} width={70} />
                 <Tooltip content={<CustomTooltip />} />

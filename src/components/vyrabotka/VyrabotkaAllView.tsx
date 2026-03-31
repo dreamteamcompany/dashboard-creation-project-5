@@ -87,7 +87,7 @@ export default function VyrabotkaAllView({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} vertical={false} />
-            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
             <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
               tickFormatter={(v: number) => fmtShort(v)} width={70} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)", radius: 8 }} />
@@ -309,7 +309,7 @@ export default function VyrabotkaAllView({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"} />
-            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
             <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
               tickFormatter={(v: number) => `${v}%`} domain={[0, 'auto']} />
             <Tooltip formatter={(value: number) => [`${value.toFixed(1)}%`, "Выполнение"]}
