@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import Icon from "@/components/ui/icon";
 import type { ColumnDef } from "@/config/dashboards";
 
+const parseNum = (v: unknown): number => {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v) return Number(v.replace(",", ".")) || 0;
+  return 0;
+};
+
 const MONTHS_ORDER = [
   "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
   "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
@@ -78,10 +84,10 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
 
   const cityColTotal = (city: string, key: string) => {
     const rows = rowsByCity[city] || [];
-    const sum = rows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
+    const sum = rows.reduce((s, r) => s + parseNum(r[key]), 0);
     if (colAgg(key) === "avg") {
-      const count = rows.filter(r => Number(r[key]) || 0).length;
-      return count > 0 ? Math.round(sum / count) : 0;
+      const count = rows.filter(r => parseNum(r[key]) > 0).length;
+      return count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
     }
     return sum;
   };
@@ -90,13 +96,13 @@ export default function ExtraDataTable({ title, subtitle, apiUrl, columns: initi
     columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + cityColTotal(city, col.key), 0);
 
   const rowTotal = (row: Row) =>
-    columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
+    columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + parseNum(row[col.key]), 0);
 
   const colTotal = (key: string) => {
-    const sum = allRows.reduce((s, r) => s + (Number(r[key]) || 0), 0);
+    const sum = allRows.reduce((s, r) => s + parseNum(r[key]), 0);
     if (colAgg(key) === "avg") {
-      const count = allRows.filter(r => Number(r[key]) || 0).length;
-      return count > 0 ? Math.round(sum / count) : 0;
+      const count = allRows.filter(r => parseNum(r[key]) > 0).length;
+      return count > 0 ? Math.round((sum / count) * 100) / 100 : 0;
     }
     return sum;
   };
@@ -364,7 +370,7 @@ function CityAccordion({
   cityTotal: (city: string) => number;
 }) {
   const rowTotal = (row: Row) =>
-    columns.reduce((sum, col) => sum + (Number(row[col.key]) || 0), 0);
+    columns.filter(c => c.agg !== "avg").reduce((sum, col) => sum + parseNum(row[col.key]), 0);
 
   const total = cityTotal(city);
 
@@ -426,8 +432,8 @@ function CityAccordion({
                   style={{ minWidth: 60 }}
                 />
               ) : (
-                <span className={`text-xs ${Number(row[col.key]) > 0 ? "text-white/60" : "text-white/15"}`}>
-                  {(Number(row[col.key]) || 0).toLocaleString("ru-RU")}
+                <span className={`text-xs ${parseNum(row[col.key]) > 0 ? "text-white/60" : "text-white/15"}`}>
+                  {parseNum(row[col.key]).toLocaleString("ru-RU")}
                 </span>
               )}
             </td>

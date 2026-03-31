@@ -1,6 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { EXTRA_TABLES_URL } from "@/config/dashboards";
 import type { ExtraTableConfig, ColumnDef } from "@/config/dashboards";
+
+const parseNum = (v: unknown): number => {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v) return Number(v.replace(",", ".")) || 0;
+  return 0;
+};
 
 interface ExtraRow {
   id: number;
@@ -61,9 +67,9 @@ export default function useExtraTableData(
       }
       const totals: Record<string, number> = {};
       t.columns.forEach(col => {
-        const sum = rows.reduce((s, r) => s + (Number(r[col.key]) || 0), 0);
+        const sum = rows.reduce((s, r) => s + parseNum(r[col.key]), 0);
         if (col.agg === "avg") {
-          const count = rows.filter(r => Number(r[col.key]) || 0).length;
+          const count = rows.filter(r => parseNum(r[col.key]) > 0).length;
           totals[col.key] = count > 0 ? Math.round(sum / count) : 0;
         } else {
           totals[col.key] = sum;

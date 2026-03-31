@@ -36,12 +36,18 @@ const ChartTooltip = ({ active, payload, label }: TTooltip) => {
   );
 };
 
+const parseNum = (v: unknown): number => {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v) return Number(v.replace(",", ".")) || 0;
+  return 0;
+};
+
 function aggregateByMonth(rows: ExtraRow[], key: string, agg?: "sum" | "avg") {
   const map: Record<string, number> = {};
   const counts: Record<string, number> = {};
   rows.forEach(r => {
     const m = r.month || "—";
-    const v = Number(r[key]) || 0;
+    const v = parseNum(r[key]);
     map[m] = (map[m] || 0) + v;
     if (v) counts[m] = (counts[m] || 0) + 1;
   });
@@ -58,7 +64,7 @@ function aggregateByCity(rows: ExtraRow[], key: string, agg?: "sum" | "avg") {
   const counts: Record<string, number> = {};
   rows.forEach(r => {
     const c = r.city || "—";
-    const v = Number(r[key]) || 0;
+    const v = parseNum(r[key]);
     map[c] = (map[c] || 0) + v;
     if (v) counts[c] = (counts[c] || 0) + 1;
   });
@@ -109,9 +115,9 @@ export default function ExtraTableCharts({ table, isLight, axisColor, selectedCi
   const totals = useMemo(() => {
     const t: Record<string, number> = {};
     table.columns.forEach(c => {
-      const sum = filteredRows.reduce((s, r) => s + (Number(r[c.key]) || 0), 0);
+      const sum = filteredRows.reduce((s, r) => s + parseNum(r[c.key]), 0);
       if (c.agg === "avg") {
-        const count = filteredRows.filter(r => Number(r[c.key]) || 0).length;
+        const count = filteredRows.filter(r => parseNum(r[c.key]) > 0).length;
         t[c.key] = count > 0 ? Math.round(sum / count) : 0;
       } else {
         t[c.key] = sum;
