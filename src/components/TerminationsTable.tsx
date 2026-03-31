@@ -82,9 +82,9 @@ export default function TerminationsTable() {
   return (
     <div className="glass rounded-2xl overflow-hidden animate-fade-in-up delay-700">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-        <div>
-          <h3 className="font-display font-bold text-white text-lg">Причины расторжений</h3>
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/8 gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-white text-base sm:text-lg">Причины расторжений</h3>
           <p className="text-white/40 text-xs mt-0.5">Кликните на ячейку для редактирования</p>
         </div>
         <button
@@ -119,8 +119,8 @@ export default function TerminationsTable() {
               </th>
               {COLUMNS.map(col => (
                 <th key={col.key}
-                  className="px-3 py-3 text-white/50 font-medium text-xs text-center leading-tight"
-                  style={{ minWidth: 90, maxWidth: 110 }}>
+                  className="px-2 py-3 text-white/50 font-medium text-[10px] sm:text-xs text-center leading-tight"
+                  style={{ minWidth: 80, maxWidth: 110 }}>
                   <span className="block" style={{ writingMode: "horizontal-tb" }}>{col.label}</span>
                 </th>
               ))}

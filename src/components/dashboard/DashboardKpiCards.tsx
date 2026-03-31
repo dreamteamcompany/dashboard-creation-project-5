@@ -59,7 +59,7 @@ export default function DashboardKpiCards({ cards, loading, kpiKey }: Props) {
               {card.sub}
             </span>
           </div>
-          <p className="text-white/50 text-xs mb-1">{card.label}</p>
+          <p className="text-white/50 text-xs mb-1 truncate">{card.label}</p>
           {loading ? (
             <div className="h-8 w-24 rounded-lg bg-white/5 animate-pulse" />
           ) : (

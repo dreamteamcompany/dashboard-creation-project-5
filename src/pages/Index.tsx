@@ -40,11 +40,11 @@ export default function Dashboard() {
               className="h-10 mb-3 object-contain"
             />
             {user && (
-              <p className="text-white/50 text-sm mb-2">
+              <p className="text-white/50 text-xs sm:text-sm mb-2 truncate">
                 {user.name}, добро пожаловать в систему аналитики Команды Мечты!
               </p>
             )}
-            <h1 className="font-display text-3xl sm:text-4xl font-black text-white tracking-tight mb-1">
+            <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight mb-1 truncate">
               {first?.title ?? "Дашборды"}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">

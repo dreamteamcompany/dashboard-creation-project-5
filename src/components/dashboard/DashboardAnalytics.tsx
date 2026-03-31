@@ -128,16 +128,16 @@ export function AnomaliesBlock({ anomalies, isLight, selectedCity }: { anomalies
                 </div>
               </div>
 
-              <div className="relative flex items-end justify-between">
-                <div>
-                  <span className="text-2xl font-bold font-mono leading-none" style={{ color: isLight ? "#1a1a2e" : "#fff" }}>
+              <div className="relative flex flex-wrap items-end justify-between gap-1">
+                <div className="min-w-0">
+                  <span className="text-2xl font-bold font-mono leading-none whitespace-nowrap" style={{ color: isLight ? "#1a1a2e" : "#fff" }}>
                     {a.cur.toLocaleString("ru-RU")}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-xs pb-0.5" style={{ color: isLight ? "rgba(20,10,40,0.3)" : "rgba(255,255,255,0.25)" }}>
-                  <span className="font-mono">{a.prev.toLocaleString("ru-RU")}</span>
+                <div className="flex items-center gap-1.5 text-xs pb-0.5 shrink-0" style={{ color: isLight ? "rgba(20,10,40,0.3)" : "rgba(255,255,255,0.25)" }}>
+                  <span className="font-mono whitespace-nowrap">{a.prev.toLocaleString("ru-RU")}</span>
                   <Icon name="ArrowRight" size={10} />
-                  <span className="font-mono font-semibold" style={{ color: accentColor }}>{a.cur.toLocaleString("ru-RU")}</span>
+                  <span className="font-mono font-semibold whitespace-nowrap" style={{ color: accentColor }}>{a.cur.toLocaleString("ru-RU")}</span>
                 </div>
               </div>
             </div>

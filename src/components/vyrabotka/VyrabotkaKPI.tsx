@@ -29,7 +29,7 @@ export default function VyrabotkaKPI({ cards, kpiKey }: VyrabotkaKPIProps) {
             </div>
             <span className="text-xs font-semibold px-2 py-1 rounded-full bg-white/8 text-white/40">{card.sub}</span>
           </div>
-          <p className="text-white/50 text-xs mb-1">{card.label}</p>
+          <p className="text-white/50 text-xs mb-1 truncate">{card.label}</p>
           <p className={`font-display text-2xl font-bold ${card.textGradient}`}>
             <AnimatedNumber value={card.value} key2={kpiKey} />
           </p>

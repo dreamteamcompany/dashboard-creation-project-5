@@ -177,15 +177,15 @@ export default function UserManager({ onClose }: { onClose: () => void }) {
             </div>
           ) : (
             users.map(u => (
-              <div key={u.id} className="glass glass-hover rounded-2xl p-4 flex items-center justify-between group">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-500/30 flex items-center justify-center border border-white/10">
+              <div key={u.id} className="glass glass-hover rounded-2xl p-4 flex items-center justify-between gap-3 group">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-500/30 flex items-center justify-center border border-white/10 shrink-0">
                     <span className="text-white font-bold text-sm">
                       {u.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
                     </span>
                   </div>
-                  <div>
-                    <p className="text-white font-medium text-sm">{u.name}</p>
+                  <div className="min-w-0">
+                    <p className="text-white font-medium text-sm truncate">{u.name}</p>
                     <p className="text-white/30 text-xs">Bitrix ID: {u.bitrix_id}</p>
                   </div>
                 </div>

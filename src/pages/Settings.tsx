@@ -45,7 +45,7 @@ export default function Settings() {
               <h1 className="font-display text-2xl sm:text-3xl font-black text-white tracking-tight mb-0.5">
                 Настройки
               </h1>
-              <p className="text-white/40 text-sm">
+              <p className="text-white/40 text-sm truncate max-w-[250px] sm:max-w-none">
                 {dashboard ? `Редактирование таблицы: ${dashboard.title}` : "Настройки таблиц"}
               </p>
             </div>

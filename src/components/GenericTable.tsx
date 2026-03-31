@@ -185,12 +185,12 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
 
   return (
     <div className="glass rounded-2xl overflow-hidden animate-fade-in-up">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-        <div>
-          <h3 className="font-display font-bold text-white text-lg">{title}</h3>
-          {subtitle && <p className="text-white/40 text-xs mt-0.5">{subtitle}</p>}
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/8 gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-white text-base sm:text-lg truncate">{title}</h3>
+          {subtitle && <p className="text-white/40 text-xs mt-0.5 truncate">{subtitle}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {editable && (
             <>
               <button onClick={addColumn}

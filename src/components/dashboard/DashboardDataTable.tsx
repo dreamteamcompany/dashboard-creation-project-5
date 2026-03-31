@@ -35,9 +35,9 @@ export default function DashboardDataTable({
 }: Props) {
   return (
     <div className="glass rounded-2xl overflow-hidden animate-fade-in-up">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/8">
-        <div>
-          <h3 className="font-display font-bold text-white text-lg">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/8 gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-white text-base sm:text-lg truncate">
             {title}
             {selectedCity ? ` · ${selectedCity}` : ""}
             {selectedMonth ? ` · ${selectedMonth}` : ""}

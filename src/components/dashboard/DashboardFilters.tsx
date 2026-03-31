@@ -88,12 +88,13 @@ export default function DashboardFilters({
             {cities.map(city => (
               <button key={city}
                 onClick={() => onCityChange(selectedCity === city ? null : city)}
-                className={btnCity(selectedCity === city)}
+                className={`${btnCity(selectedCity === city)} truncate max-w-[140px] sm:max-w-none`}
                 style={{
                   fontSize: stuck ? "10px" : "12px",
                   padding: stuck ? "3px 8px" : "6px 12px",
                   transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
+                title={city}
               >
                 {city}
               </button>
@@ -144,7 +145,7 @@ export default function DashboardFilters({
             {allMonths.map(m => (
               <button key={m}
                 onClick={() => onMonthChange(selectedMonth === m ? null : m)}
-                className={btnMonth(selectedMonth === m)}
+                className={`${btnMonth(selectedMonth === m)} whitespace-nowrap`}
                 style={{
                   fontSize: stuck ? "10px" : "12px",
                   padding: stuck ? "3px 8px" : "6px 12px",
