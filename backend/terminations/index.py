@@ -48,13 +48,11 @@ def handler(event: dict, context) -> dict:
         conn = psycopg2.connect(os.environ["DATABASE_URL"])
         cur = conn.cursor()
         for row in rows:
-            cols_set = ", ".join(f"{col} = %s" for col in COLUMNS)
-            vals = [int(row.get(col, 0)) for col in COLUMNS]
-            vals.append(int(row["id"]))
+            cols_set = ", ".join(f"{col} = {int(row.get(col, 0))}" for col in COLUMNS)
+            row_id = int(row["id"])
             cur.execute(
                 f"UPDATE t_p56096254_dashboard_creation_p.terminations "
-                f"SET {cols_set}, updated_at = NOW() WHERE id = %s",
-                vals
+                f"SET {cols_set}, updated_at = NOW() WHERE id = {row_id}"
             )
         conn.commit()
         cur.close()
