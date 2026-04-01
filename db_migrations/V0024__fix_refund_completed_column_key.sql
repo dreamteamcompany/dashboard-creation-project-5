@@ -1,0 +1,3 @@
+UPDATE t_p56096254_dashboard_creation_p.dashboards 
+SET columns = '[{"key":"deadline_violations","label":"Нарушены сроки выполнения работы"},{"key":"poor_quality_service","label":"Некачественно оказанные услуги"},{"key":"patient_no_contact","label":"Пациент не выходит на связь"},{"key":"patient_died","label":"Пациент умер"},{"key":"reregistration","label":"Переоформление"},{"key":"complaint","label":"Претензия"},{"key":"procedures_not_needed","label":"Процедуры не понадобились"},{"key":"financial_difficulties","label":"Финансовые трудности"},{"key":"refund_completed","label":"Возврат за пройденные"}]'::jsonb
+WHERE id = 1;
