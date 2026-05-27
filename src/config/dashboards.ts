@@ -1,7 +1,10 @@
+export type ClinicErrorType = "Бухгалтерия" | "Фин" | "Сервис";
+
 export interface ColumnDef {
   key: string;
   label: string;
   agg?: "sum" | "avg";
+  type?: ClinicErrorType;
 }
 
 export interface DashboardConfig {

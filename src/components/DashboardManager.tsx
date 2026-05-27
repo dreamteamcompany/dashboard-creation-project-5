@@ -5,6 +5,7 @@ import { useDashboards } from "@/hooks/useDashboards";
 import { DASHBOARD_DATA_URL, EXTRA_TABLES_URL } from "@/config/dashboards";
 import type { DashboardConfig, ColumnDef, ExtraTableConfig } from "@/config/dashboards";
 import GenericTable from "@/components/GenericTable";
+import ClinicErrorsTable from "@/components/ClinicErrorsTable";
 import ExtraDataTable from "@/components/ExtraDataTable";
 
 interface Props {
@@ -357,16 +358,29 @@ export default function DashboardManager({ onClose }: Props) {
               </div>
 
               {mode === "edit" && editing && (
-                <GenericTable
-                  title={editing.title}
-                  subtitle="Кликните на ячейку для редактирования"
-                  apiUrl={`${editing.api_url}?dashboard_id=${editing.id}`}
-                  columns={editing.columns}
-                  editable
-                  onColumnsChange={async (cols) => {
-                    await update(editing.id, { columns: cols });
-                  }}
-                />
+                editing.title.trim().toLowerCase() === "ошибки клиники" ? (
+                  <ClinicErrorsTable
+                    title={editing.title}
+                    subtitle="Кликните на ячейку для редактирования"
+                    apiUrl={`${editing.api_url}?dashboard_id=${editing.id}`}
+                    columns={editing.columns}
+                    editable
+                    onColumnsChange={async (cols) => {
+                      await update(editing.id, { columns: cols });
+                    }}
+                  />
+                ) : (
+                  <GenericTable
+                    title={editing.title}
+                    subtitle="Кликните на ячейку для редактирования"
+                    apiUrl={`${editing.api_url}?dashboard_id=${editing.id}`}
+                    columns={editing.columns}
+                    editable
+                    onColumnsChange={async (cols) => {
+                      await update(editing.id, { columns: cols });
+                    }}
+                  />
+                )
               )}
 
               {mode === "edit" && editing && (
