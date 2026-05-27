@@ -4,6 +4,7 @@ import Icon from "@/components/ui/icon";
 import { useTheme } from "@/context/ThemeContext";
 import DashboardView from "@/components/DashboardView";
 import VyrabotkaView from "@/components/VyrabotkaView";
+import ClinicErrorsView from "@/components/ClinicErrorsView";
 import DashboardManager from "@/components/DashboardManager";
 import { useDashboards } from "@/hooks/useDashboards";
 
@@ -97,6 +98,14 @@ export default function DashboardPage() {
 
         {dashboard.slug === "vyrabotka" ? (
           <VyrabotkaView />
+        ) : dashboard.title.trim().toLowerCase() === "ошибки клиники" ? (
+          <ClinicErrorsView
+            key={dashboard.slug}
+            title={dashboard.title}
+            apiUrl={dashboard.api_url}
+            columns={dashboard.columns}
+            dashboardId={dashboard.id}
+          />
         ) : (
           <DashboardView
             key={dashboard.slug}
