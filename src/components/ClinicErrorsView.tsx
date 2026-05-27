@@ -114,9 +114,23 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
         }
       }
       total += rowTotal;
-      if (city) byCity[city] = (byCity[city] || 0) + rowTotal;
+      if (city) {
+        byCity[city] = (byCity[city] || 0) + rowTotal;
+      }
       if (month) byMonth[month] = (byMonth[month] || 0) + rowTotal;
     }
+
+    const cityTotals = Object.entries(byCity)
+      .map(([city, total]) => ({ city, total }))
+      .sort((a, b) => a.total - b.total);
+    const totalCities = cityTotals.length;
+    const minCityVal = cityTotals[0]?.total ?? 0;
+    const maxCityVal = cityTotals[totalCities - 1]?.total ?? 0;
+    const avgCity = totalCities > 0 ? total / totalCities : 0;
+    const best3 = cityTotals.slice(0, 3);
+    const worst3 = cityTotals.slice(-3).reverse();
+    const belowAvg = cityTotals.filter(c => c.total <= avgCity).length;
+    const aboveAvg = cityTotals.filter(c => c.total > avgCity).length;
 
     const topType = (Object.entries(byType) as [ClinicErrorType, number][])
       .sort((a, b) => b[1] - a[1])[0];
@@ -149,6 +163,15 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
         : null,
       typesData,
       monthsData,
+      cityTotals,
+      totalCities,
+      minCityVal,
+      maxCityVal,
+      avgCity,
+      best3,
+      worst3,
+      belowAvg,
+      aboveAvg,
     };
   }, [rows, columns]);
 
@@ -246,6 +269,95 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
           </div>
         </div>
       </div>
+
+      {/* Эффективность клиник */}
+      {stats.totalCities > 0 && stats.maxCityVal > 0 && (
+        <div className="glass rounded-2xl p-3 sm:p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-xl gradient-green flex items-center justify-center"
+              style={{ boxShadow: "0 8px 24px rgba(16,185,129,0.25)" }}>
+              <Icon name="Activity" size={18} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-display font-bold text-white text-lg">Эффективность клиник</h3>
+              <p className="text-white/40 text-xs mt-0.5">Меньше ошибок = лучше клиника</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+            <div>
+              <p className="text-xs text-emerald-400 font-semibold mb-3 flex items-center gap-1.5">
+                <Icon name="ThumbsUp" size={14} /> Лучшие клиники
+              </p>
+              <div className="space-y-3">
+                {stats.best3.map((c, i) => {
+                  const pct = stats.maxCityVal > 0 ? (c.total / stats.maxCityVal) * 100 : 0;
+                  const medals = ["🥇", "🥈", "🥉"];
+                  return (
+                    <div key={c.city}>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-base flex-shrink-0">{medals[i]}</span>
+                        <span className="text-sm text-white/80 flex-1 truncate">{c.city}</span>
+                        <span className="text-sm font-mono font-semibold text-emerald-400">{c.total.toLocaleString("ru-RU")}</span>
+                      </div>
+                      <div className="ml-9 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${pct}%`, background: "linear-gradient(90deg, rgba(16,185,129,0.4), #10B981)" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-red-400 font-semibold mb-3 flex items-center gap-1.5">
+                <Icon name="AlertTriangle" size={14} /> Требуют внимания
+              </p>
+              <div className="space-y-3">
+                {stats.worst3.map((c, i) => {
+                  const pct = stats.maxCityVal > 0 ? (c.total / stats.maxCityVal) * 100 : 0;
+                  return (
+                    <div key={c.city}>
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-red-400"
+                          style={{ background: "rgba(239,68,68,0.15)" }}>{stats.totalCities - i}</span>
+                        <span className="text-sm text-white/80 flex-1 truncate">{c.city}</span>
+                        <span className="text-sm font-mono font-semibold text-red-400">{c.total.toLocaleString("ru-RU")}</span>
+                      </div>
+                      <div className="ml-9 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                        <div className="h-full rounded-full transition-all duration-1000 ease-out"
+                          style={{ width: `${pct}%`, background: "linear-gradient(90deg, rgba(239,68,68,0.4), #EF4444)" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between text-xs text-white/40 mb-3">
+              <span>Среднее: <span className="font-semibold text-white/60">{Math.round(stats.avgCity).toLocaleString("ru-RU")}</span> ошибок</span>
+              <span>Разброс: <span className="font-semibold text-white/60">{stats.minCityVal.toLocaleString("ru-RU")} — {stats.maxCityVal.toLocaleString("ru-RU")}</span></span>
+            </div>
+            <div className="relative h-3 rounded-full overflow-hidden" style={{ background: "linear-gradient(90deg, rgba(16,185,129,0.25), rgba(239,68,68,0.25))" }}>
+              <div className="absolute top-0 h-full w-0.5 bg-white/60 z-10"
+                style={{
+                  left: `${Math.min(Math.max(((stats.avgCity - stats.minCityVal) / (Math.max(stats.maxCityVal - stats.minCityVal, 1))) * 100, 2), 98)}%`,
+                  transition: "left 1s ease",
+                }}>
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-white/70 whitespace-nowrap">
+                  avg
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between mt-2 text-[11px]">
+              <span className="text-emerald-400/70"><span className="font-bold text-emerald-400">{stats.belowAvg}</span> ниже среднего</span>
+              <span className="text-red-400/70"><span className="font-bold text-red-400">{stats.aboveAvg}</span> выше среднего</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
