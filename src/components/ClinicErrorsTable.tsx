@@ -19,6 +19,11 @@ interface Props {
 
 const TYPE_OPTIONS: ClinicErrorType[] = ["Бухгалтерия", "Фин", "Сервис"];
 
+const MONTHS = [
+  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+];
+
 const TYPE_STYLES: Record<ClinicErrorType, string> = {
   "Бухгалтерия": "bg-amber-500/15 text-amber-300 border-amber-500/30",
   "Фин": "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
@@ -44,6 +49,7 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
 
   const [editingRowIdx, setEditingRowIdx] = useState<number | null>(null);
   const [editingColIdx, setEditingColIdx] = useState<number | null>(null);
+  const [expandedCities, setExpandedCities] = useState<Record<string, boolean>>({});
   const rowInputRef = useRef<HTMLInputElement>(null);
   const colInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +87,12 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
           });
         }
         setRows(arr);
+        const expanded: Record<string, boolean> = {};
+        arr.forEach(r => {
+          const cs = String(r.city);
+          if (cs.includes(" — ")) expanded[cs.split(" — ")[0]] = true;
+        });
+        setExpandedCities(expanded);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -143,6 +155,42 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
     setRows(prev => prev.map((r, i) => i === idx ? { ...r, city: val } : r));
     setEditingRowIdx(null);
     setDirty(true);
+  };
+
+  const toggleCity = (cityName: string) => {
+    setExpandedCities(prev => {
+      const isOpen = !!prev[cityName];
+      const next = { ...prev, [cityName]: !isOpen };
+
+      if (!isOpen) {
+        setRows(curr => {
+          const existingMonths = new Set(
+            curr
+              .map(r => String(r.city))
+              .filter(c => c.startsWith(cityName + " — "))
+              .map(c => c.split(" — ")[1])
+          );
+          const missing = MONTHS.filter(m => !existingMonths.has(m));
+          if (missing.length === 0) return curr;
+
+          const baseRowIdx = curr.findIndex(r => String(r.city) === cityName);
+          let insertIdx = baseRowIdx === -1 ? curr.length : baseRowIdx + 1;
+          for (let i = insertIdx; i < curr.length; i++) {
+            if (String(curr[i].city).startsWith(cityName + " — ")) insertIdx = i + 1;
+            else break;
+          }
+          const newRows: Row[] = missing.map(m => {
+            const r: Row = { id: 0, city: `${cityName} — ${m}` };
+            columns.forEach(c => { r[c.key] = 0; });
+            return r;
+          });
+          setDirty(true);
+          setSaved(false);
+          return [...curr.slice(0, insertIdx), ...newRows, ...curr.slice(insertIdx)];
+        });
+      }
+      return next;
+    });
   };
 
   const addColumn = () => {
@@ -308,79 +356,71 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
             {rows.map((row, ri) => {
               const cityStr = String(row.city);
               const hasGroup = cityStr.includes(" — ");
-              const groupName = hasGroup ? cityStr.split(" — ")[0] : null;
-              const prevCity = ri > 0 ? String(rows[ri - 1].city) : "";
-              const prevGroup = prevCity.includes(" — ") ? prevCity.split(" — ")[0] : null;
-              const showGroupHeader = hasGroup && groupName !== prevGroup;
+              const groupName = hasGroup ? cityStr.split(" — ")[0] : cityStr;
+              const isCityRow = !hasGroup;
+              const isOpen = !!expandedCities[groupName];
+
+              if (hasGroup && !isOpen) return null;
 
               return (
-                <>
-                  {showGroupHeader && (
-                    <tr key={`group-${groupName}`} className="border-b border-white/8 bg-white/5">
-                      <td
-                        colSpan={columns.length + 2}
-                        className="px-4 py-2 text-white/70 font-bold text-xs uppercase tracking-wide"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>{groupName}</span>
-                          {editable && (
-                            <button
-                              onClick={() => addCity(groupName!)}
-                              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20 text-white/50 hover:text-white text-[10px] font-medium transition-colors normal-case tracking-normal"
-                            >
-                              <Icon name="Plus" size={10} /> строка
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  <tr key={row.id || ri} className="border-b border-white/5 transition-colors hover:bg-white/3">
-                    <td
-                      className="px-4 py-2.5 text-white/80 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
-                      style={{ background: "var(--sticky-cell-bg)", paddingLeft: hasGroup ? 28 : undefined }}
-                    >
-                      {editable && editingRowIdx === ri ? (
-                        <input
-                          ref={rowInputRef}
-                          defaultValue={row.city}
-                          placeholder="Название..."
-                          onBlur={e => commitCity(ri, e.target.value)}
-                          onKeyDown={e => { if (e.key === "Enter") commitCity(ri, e.currentTarget.value); }}
-                          className="w-full bg-white text-gray-800 text-xs rounded-lg py-1 px-2 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-violet-500"
-                        />
-                      ) : (
+                <tr key={(row.id || 0) + "-" + ri} className="border-b border-white/5 transition-colors hover:bg-white/3">
+                  <td
+                    className="px-4 py-2.5 text-white/80 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
+                    style={{ background: "var(--sticky-cell-bg)", paddingLeft: hasGroup ? 36 : undefined }}
+                  >
+                    {editable && editingRowIdx === ri ? (
+                      <input
+                        ref={rowInputRef}
+                        defaultValue={row.city}
+                        placeholder="Название..."
+                        onBlur={e => commitCity(ri, e.target.value)}
+                        onKeyDown={e => { if (e.key === "Enter") commitCity(ri, e.currentTarget.value); }}
+                        className="w-full bg-white text-gray-800 text-xs rounded-lg py-1 px-2 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-violet-500"
+                      />
+                    ) : isCityRow ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleCity(groupName)}
+                          className="flex items-center justify-center w-5 h-5 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+                          title={isOpen ? "Свернуть месяцы" : "Развернуть месяцы"}
+                        >
+                          <Icon name={isOpen ? "ChevronDown" : "ChevronRight"} size={14} />
+                        </button>
                         <span
                           onClick={editable ? () => { setEditingRowIdx(ri); setTimeout(() => rowInputRef.current?.focus(), 30); } : undefined}
                           className={editable ? "cursor-pointer hover:text-white transition-colors" : ""}
                         >
-                          {hasGroup ? cityStr.split(" — ")[1] : (row.city || <span className="text-white/20 italic">пусто</span>)}
+                          {row.city || <span className="text-white/20 italic">пусто</span>}
                         </span>
-                      )}
-                    </td>
-                    {columns.map(col => (
-                      <td key={col.key} className="px-2 py-1.5 text-center">
-                        <input
-                          type="number"
-                          min={0}
-                          value={row[col.key] === 0 ? "" : String(row[col.key])}
-                          placeholder="0"
-                          onChange={e => handleChange(row.id || ri, col.key, e.target.value)}
-                          className="w-full text-center text-white/80 text-xs rounded-lg py-1.5 px-1 outline-none transition-all duration-150
-                            bg-transparent border border-transparent
-                            hover:border-white/15 focus:border-violet-500/60 focus:bg-violet-500/8
-                            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          style={{ minWidth: 52 }}
-                        />
-                      </td>
-                    ))}
-                    <td className="px-4 py-2.5 text-center">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
-                        {rowTotal(row).toLocaleString("ru-RU")}
+                      </div>
+                    ) : (
+                      <span className="text-white/60">
+                        {cityStr.split(" — ")[1]}
                       </span>
+                    )}
+                  </td>
+                  {columns.map(col => (
+                    <td key={col.key} className="px-2 py-1.5 text-center">
+                      <input
+                        type="number"
+                        min={0}
+                        value={row[col.key] === 0 ? "" : String(row[col.key])}
+                        placeholder="0"
+                        onChange={e => handleChange(row.id || ri, col.key, e.target.value)}
+                        className="w-full text-center text-white/80 text-xs rounded-lg py-1.5 px-1 outline-none transition-all duration-150
+                          bg-transparent border border-transparent
+                          hover:border-white/15 focus:border-violet-500/60 focus:bg-violet-500/8
+                          [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        style={{ minWidth: 52 }}
+                      />
                     </td>
-                  </tr>
-                </>
+                  ))}
+                  <td className="px-4 py-2.5 text-center">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
+                      {rowTotal(row).toLocaleString("ru-RU")}
+                    </span>
+                  </td>
+                </tr>
               );
             })}
           </tbody>
