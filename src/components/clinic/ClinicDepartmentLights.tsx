@@ -46,7 +46,7 @@ export default function ClinicDepartmentLights({ typeChange, total }: Props) {
               </div>
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <p className="text-3xl font-black text-white">{data.value.toLocaleString("ru-RU")}</p>
+                  <p className="font-display text-3xl font-bold text-white">{data.value.toLocaleString("ru-RU")}</p>
                   <p className="text-white/40 text-xs mt-0.5">{pct.toFixed(1)}% от всех</p>
                 </div>
                 {data.prev > 0 && (

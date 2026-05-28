@@ -36,7 +36,7 @@ export default function ClinicForecast({ forecast, forecastDirection, lastValue,
           {forecast != null ? (
             <div className="flex items-end gap-4">
               <div>
-                <p className="text-5xl font-black text-gradient-cyan">{forecast.toLocaleString("ru-RU")}</p>
+                <p className="font-display text-5xl font-bold text-gradient-cyan">{forecast.toLocaleString("ru-RU")}</p>
                 <p className="text-white/40 text-xs mt-1">ожидаемых ошибок</p>
               </div>
               <div className={`flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 ${dirColor}`}>
@@ -79,7 +79,7 @@ export default function ClinicForecast({ forecast, forecastDirection, lastValue,
           {worstPair ? (
             <div>
               <div className="flex items-baseline gap-3 mb-3">
-                <p className="text-5xl font-black text-gradient-pink">{worstPair.value.toLocaleString("ru-RU")}</p>
+                <p className="font-display text-5xl font-bold text-gradient-pink">{worstPair.value.toLocaleString("ru-RU")}</p>
                 <p className="text-white/40 text-xs">ошибок</p>
               </div>
               <div className="space-y-2">

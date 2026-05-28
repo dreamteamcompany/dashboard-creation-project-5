@@ -22,7 +22,7 @@ export default function ClinicCityProfile({ profile, avgCity, onClose }: Props) 
             <Icon name="MapPin" size={20} />
           </div>
           <div>
-            <h3 className="font-display font-black text-white text-xl">{profile.city}</h3>
+            <h3 className="font-display font-bold text-white text-xl">{profile.city}</h3>
             <p className="text-white/40 text-xs">Детальный профиль клиники</p>
           </div>
         </div>
@@ -37,18 +37,18 @@ export default function ClinicCityProfile({ profile, avgCity, onClose }: Props) 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         <div className="rounded-xl bg-white/5 p-3 text-center">
           <p className="text-[10px] text-white/40 uppercase tracking-wide">Всего</p>
-          <p className="text-2xl font-black text-white">{profile.total.toLocaleString("ru-RU")}</p>
+          <p className="font-display text-2xl font-bold text-white">{profile.total.toLocaleString("ru-RU")}</p>
         </div>
         <div className="rounded-xl bg-white/5 p-3 text-center">
           <p className="text-[10px] text-white/40 uppercase tracking-wide">vs Среднее</p>
-          <p className={`text-2xl font-black ${vsAvg > 0 ? "text-red-400" : "text-emerald-400"}`}>
+          <p className={`font-display text-2xl font-bold ${vsAvg > 0 ? "text-red-400" : "text-emerald-400"}`}>
             {vsAvg > 0 ? "+" : ""}{vsAvg.toFixed(0)}%
           </p>
         </div>
         {ALL_TYPES.slice(0, 2).map(t => (
           <div key={t} className="rounded-xl p-3 text-center" style={{ background: `${TYPE_COLORS[t]}15` }}>
             <p className="text-[10px] uppercase tracking-wide" style={{ color: TYPE_COLORS[t] }}>{t}</p>
-            <p className="text-2xl font-black text-white">{(profile.byType[t] || 0).toLocaleString("ru-RU")}</p>
+            <p className="font-display text-2xl font-bold text-white">{(profile.byType[t] || 0).toLocaleString("ru-RU")}</p>
           </div>
         ))}
       </div>

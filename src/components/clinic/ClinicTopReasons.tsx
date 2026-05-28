@@ -30,7 +30,7 @@ export default function ClinicTopReasons({ reasons }: Props) {
           return (
             <div key={r.label} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors">
               <div className="flex items-center gap-3 mb-2">
-                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white/80"
+                <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-display font-bold text-white/80"
                   style={{ background: `${color}25`, color }}>
                   {i + 1}
                 </span>

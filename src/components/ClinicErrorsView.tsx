@@ -85,7 +85,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
                 <Icon name="AlertTriangle" size={18} />
               </div>
             </div>
-            <p className="text-3xl sm:text-4xl font-black text-gradient-pink">{stats.total.toLocaleString("ru-RU")}</p>
+            <p className="font-display text-3xl sm:text-4xl font-bold text-gradient-pink">{stats.total.toLocaleString("ru-RU")}</p>
             <div className="flex items-center gap-2 mt-1">
               <p className="text-white/40 text-xs">за период</p>
               {stats.totalPrev > 0 && (
@@ -109,7 +109,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
             </div>
             {stats.topType ? (
               <>
-                <p className={`text-2xl sm:text-3xl font-black ${TYPE_TEXT[stats.topType.name as ClinicErrorType]}`}>
+                <p className={`font-display text-2xl sm:text-3xl font-bold ${TYPE_TEXT[stats.topType.name as ClinicErrorType]}`}>
                   {stats.topType.name}
                 </p>
                 <p className="text-white/40 text-xs mt-1">{stats.topType.value.toLocaleString("ru-RU")} ошибок</p>
@@ -133,7 +133,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
               <>
                 <button
                   onClick={() => setSelectedCity(stats.topCity!.city)}
-                  className="text-2xl sm:text-3xl font-black text-gradient-cyan truncate hover:underline text-left w-full"
+                  className="font-display text-2xl sm:text-3xl font-bold text-gradient-cyan truncate hover:underline text-left w-full"
                 >
                   {stats.topCity.city}
                 </button>
@@ -156,7 +156,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
             </div>
             {stats.topReason ? (
               <>
-                <p className="text-xl sm:text-2xl font-black text-amber-300 truncate" title={stats.topReason.label}>
+                <p className="font-display text-xl sm:text-2xl font-bold text-amber-300 truncate" title={stats.topReason.label}>
                   {stats.topReason.label}
                 </p>
                 <p className="text-white/40 text-xs mt-1">

@@ -35,7 +35,7 @@ export default function ClinicAnomalies({ anomalies, concentrationPct, topCities
                   <p className="text-white/40 text-xs">{a.prev} → {a.total} ошибок</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-black text-red-400">+{a.growthPct.toFixed(0)}%</p>
+                  <p className="font-display text-2xl font-bold text-red-400">+{a.growthPct.toFixed(0)}%</p>
                   <p className="text-[10px] text-white/40">рост</p>
                 </div>
               </div>
@@ -62,7 +62,7 @@ export default function ClinicAnomalies({ anomalies, concentrationPct, topCities
         </div>
 
         <div className="text-center mb-5">
-          <p className="text-5xl font-black text-gradient-violet">{concentrationPct.toFixed(0)}%</p>
+          <p className="font-display text-5xl font-bold text-gradient-violet">{concentrationPct.toFixed(0)}%</p>
           <p className="text-white/50 text-sm mt-1">даёт топ-3 города</p>
         </div>
 
