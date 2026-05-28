@@ -66,9 +66,9 @@ export default function ClinicDepartmentsBreakdown({ byType, typeChange, total }
                 <RadialBarChart
                   cx="50%"
                   cy="50%"
-                  innerRadius="40%"
+                  innerRadius="65%"
                   outerRadius="100%"
-                  barSize={12}
+                  barSize={10}
                   data={radialData}
                   startAngle={90}
                   endAngle={-270}
@@ -82,12 +82,12 @@ export default function ClinicDepartmentsBreakdown({ byType, typeChange, total }
                 </RadialBarChart>
               </ResponsiveContainer>
 
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <p className="text-[10px] text-white/40 uppercase tracking-wide">Всего</p>
-                <p className="font-display text-2xl font-bold text-white leading-none">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center">
+                <p className="text-[9px] text-white/40 uppercase tracking-wider leading-none">Всего</p>
+                <p className="font-display text-base sm:text-lg font-bold text-white leading-tight mt-1 whitespace-nowrap">
                   {total.toLocaleString("ru-RU")}
                 </p>
-                <p className="text-[10px] text-white/40 mt-1">ошибок</p>
+                <p className="text-[9px] text-white/40 leading-none mt-1">ошибок</p>
               </div>
             </div>
 
