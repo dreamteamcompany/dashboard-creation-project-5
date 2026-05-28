@@ -26,6 +26,7 @@ import ClinicCityProfile from "@/components/clinic/ClinicCityProfile";
 import ClinicAnomalies from "@/components/clinic/ClinicAnomalies";
 import ClinicForecast from "@/components/clinic/ClinicForecast";
 import ClinicDepartmentsBreakdown from "@/components/clinic/ClinicDepartmentsBreakdown";
+import ClinicCityBenchmark from "@/components/clinic/ClinicCityBenchmark";
 
 interface Props {
   title: string;
@@ -275,6 +276,15 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
           total={stats.total}
         />
       </div>
+
+      {/* Бенчмарк городов */}
+      <ClinicCityBenchmark
+        cityTotals={sortedDesc}
+        cityProfiles={stats.cityProfiles}
+        total={stats.total}
+        avgCity={stats.avgCity}
+        onCityClick={setSelectedCity}
+      />
 
       {/* Тепловая карта */}
       <ClinicHeatmap
