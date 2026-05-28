@@ -35,6 +35,7 @@ export interface CityMonthCell {
   city: string;
   month: string;
   value: number;
+  types: Record<ClinicErrorType, number>;
 }
 
 export interface CityProfile {
@@ -186,9 +187,6 @@ export function useClinicStats({ rows, columns, filters }: Params) {
       if (inCurrent) {
         total += rowTotal;
         if (city) cityMap[city].total += rowTotal;
-        if (city && month && rowTotal > 0) {
-          cityMonthCells.push({ city, month, value: rowTotal });
-        }
       }
       if (inPrev) {
         totalPrev += rowTotal;
@@ -199,6 +197,23 @@ export function useClinicStats({ rows, columns, filters }: Params) {
     const cityTotals: CityTotal[] = Object.entries(cityMap)
       .map(([city, c]) => ({ city, total: c.total, prev: c.prev }))
       .sort((a, b) => a.total - b.total);
+
+    for (const [city, c] of Object.entries(cityMap)) {
+      for (const [month, mb] of Object.entries(c.byMonth)) {
+        if (mb.total > 0) {
+          cityMonthCells.push({
+            city,
+            month,
+            value: mb.total,
+            types: {
+              "Бухгалтерия": mb.types["Бухгалтерия"] || 0,
+              "Фин": mb.types["Фин"] || 0,
+              "Сервис": mb.types["Сервис"] || 0,
+            },
+          });
+        }
+      }
+    }
 
     const reasons = Object.values(reasonMap).sort((a, b) => b.total - a.total);
 

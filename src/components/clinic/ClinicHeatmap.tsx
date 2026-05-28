@@ -1,5 +1,7 @@
 import Icon from "@/components/ui/icon";
 import type { CityMonthCell } from "./useClinicStats";
+import type { ClinicErrorType } from "./types";
+import { ALL_TYPES, TYPE_COLORS } from "./types";
 
 interface Props {
   cities: string[];
@@ -19,12 +21,18 @@ function colorFor(value: number, max: number): string {
   return "rgba(239,68,68,0.85)";
 }
 
+const TYPE_SHORT: Record<ClinicErrorType, string> = {
+  "Бухгалтерия": "БУХ",
+  "Фин": "ФИН",
+  "Сервис": "СРВ",
+};
+
 export default function ClinicHeatmap({ cities, months, cells, max, onCityClick }: Props) {
   if (cities.length === 0 || months.length === 0) return null;
-  const map: Record<string, Record<string, number>> = {};
+  const map: Record<string, Record<string, CityMonthCell>> = {};
   cells.forEach(c => {
     map[c.city] = map[c.city] || {};
-    map[c.city][c.month] = c.value;
+    map[c.city][c.month] = c;
   });
 
   return (
@@ -32,7 +40,7 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display font-bold text-white text-base sm:text-lg">Тепловая карта Город × Месяц</h3>
-          <p className="text-white/40 text-xs">Чем краснее — тем больше ошибок</p>
+          <p className="text-white/40 text-xs">Цвет ячейки — объём, ярлык и нижняя полоска — структура по отделам</p>
         </div>
         <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
           <Icon name="Grid3x3" size={18} />
@@ -44,7 +52,7 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
             <tr>
               <th className="text-left text-white/40 font-medium px-2 sticky left-0 z-10" style={{ background: "var(--page-bg, #0a0812)" }}>Город</th>
               {months.map(m => (
-                <th key={m} className="text-white/40 font-medium px-1 text-center min-w-[44px]">{m.slice(0, 3)}</th>
+                <th key={m} className="text-white/40 font-medium px-1 text-center min-w-[52px]">{m.slice(0, 3)}</th>
               ))}
               <th className="text-white/40 font-medium px-2 text-right">Итого</th>
             </tr>
@@ -52,7 +60,7 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
           <tbody>
             {cities.map(city => {
               const row = map[city] || {};
-              const rowTotal = months.reduce((s, m) => s + (row[m] || 0), 0);
+              const rowTotal = months.reduce((s, m) => s + (row[m]?.value || 0), 0);
               return (
                 <tr key={city}>
                   <td
@@ -63,13 +71,52 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
                     {city}
                   </td>
                   {months.map(m => {
-                    const v = row[m] || 0;
+                    const cell = row[m];
+                    const v = cell?.value || 0;
+                    const types = cell?.types;
+                    const dominant = types
+                      ? (Object.entries(types) as [ClinicErrorType, number][])
+                          .sort((a, b) => b[1] - a[1])[0]
+                      : undefined;
+                    const tooltipParts = types
+                      ? ALL_TYPES
+                          .filter(t => types[t] > 0)
+                          .map(t => `${t}: ${types[t]}`)
+                          .join(" · ")
+                      : "";
                     return (
-                      <td key={m} className="text-center rounded-md transition-all duration-200 hover:scale-110"
-                        style={{ background: colorFor(v, max), minWidth: 44, height: 32 }}
-                        title={`${city} · ${m}: ${v}`}
+                      <td key={m} className="relative text-center rounded-md transition-all duration-200 hover:scale-110 overflow-hidden"
+                        style={{ background: colorFor(v, max), minWidth: 52, height: 38 }}
+                        title={`${city} · ${m}: ${v}${tooltipParts ? "\n" + tooltipParts : ""}`}
                       >
-                        <span className="text-[11px] font-semibold text-white/90">{v || ""}</span>
+                        {v > 0 && (
+                          <>
+                            <span className="text-[11px] font-semibold text-white/95 leading-none block mt-1">{v}</span>
+                            {dominant && dominant[1] > 0 && (
+                              <span
+                                className="text-[8px] font-bold tracking-wider leading-none block mt-0.5"
+                                style={{ color: TYPE_COLORS[dominant[0]] }}
+                              >
+                                {TYPE_SHORT[dominant[0]]}
+                              </span>
+                            )}
+                            {types && (
+                              <div className="absolute bottom-0 left-0 right-0 h-1 flex">
+                                {ALL_TYPES.map(t => {
+                                  const tv = types[t] || 0;
+                                  if (tv === 0) return null;
+                                  const pct = v > 0 ? (tv / v) * 100 : 0;
+                                  return (
+                                    <div
+                                      key={t}
+                                      style={{ width: `${pct}%`, background: TYPE_COLORS[t] }}
+                                    />
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </>
+                        )}
                       </td>
                     );
                   })}
@@ -80,14 +127,24 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-end gap-2 mt-3 text-[10px] text-white/40">
-        <span>0</span>
-        <div className="flex gap-0.5">
-          {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => (
-            <div key={r} className="w-5 h-2.5 rounded" style={{ background: colorFor(max * r, max) }} />
+      <div className="flex flex-wrap items-center justify-between gap-3 mt-3 text-[10px] text-white/40">
+        <div className="flex items-center gap-3">
+          {ALL_TYPES.map(t => (
+            <div key={t} className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: TYPE_COLORS[t] }} />
+              <span className="text-white/60">{t}</span>
+            </div>
           ))}
         </div>
-        <span>{max}</span>
+        <div className="flex items-center gap-2">
+          <span>0</span>
+          <div className="flex gap-0.5">
+            {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => (
+              <div key={r} className="w-5 h-2.5 rounded" style={{ background: colorFor(max * r, max) }} />
+            ))}
+          </div>
+          <span>{max}</span>
+        </div>
       </div>
     </div>
   );
