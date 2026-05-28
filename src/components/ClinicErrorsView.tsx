@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 import {
   ResponsiveContainer,
@@ -16,13 +16,18 @@ import {
   Legend,
 } from "recharts";
 import type { ColumnDef, ClinicErrorType } from "@/config/dashboards";
-
-interface Row {
-  id: number;
-  city: string;
-  month?: string;
-  [key: string]: number | string | undefined;
-}
+import type { Row, Filters } from "@/components/clinic/types";
+import { ALL_TYPES, TYPE_COLORS, TYPE_TEXT } from "@/components/clinic/types";
+import { useClinicStats } from "@/components/clinic/useClinicStats";
+import CustomTooltip from "@/components/clinic/CustomTooltip";
+import ClinicFilters from "@/components/clinic/ClinicFilters";
+import ClinicDepartmentLights from "@/components/clinic/ClinicDepartmentLights";
+import ClinicTopReasons from "@/components/clinic/ClinicTopReasons";
+import ClinicHeatmap from "@/components/clinic/ClinicHeatmap";
+import ClinicDepartmentsTrend from "@/components/clinic/ClinicDepartmentsTrend";
+import ClinicCityProfile from "@/components/clinic/ClinicCityProfile";
+import ClinicAnomalies from "@/components/clinic/ClinicAnomalies";
+import ClinicForecast from "@/components/clinic/ClinicForecast";
 
 interface Props {
   title: string;
@@ -31,40 +36,11 @@ interface Props {
   columns: ColumnDef[];
 }
 
-const MONTHS = [
-  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
-];
-
-const TYPE_COLORS: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "#f59e0b",
-  "Фин": "#10b981",
-  "Сервис": "#8b5cf6",
-};
-
-const TYPE_TEXT: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "text-amber-400",
-  "Фин": "text-emerald-400",
-  "Сервис": "text-violet-400",
-};
-
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) => {
-  if (!active || !payload || !payload.length) return null;
-  return (
-    <div className="rounded-xl border border-white/10 bg-black/80 backdrop-blur-md px-3 py-2 shadow-xl">
-      {label && <p className="text-white/60 text-xs mb-1">{label}</p>}
-      {payload.map((p, i) => (
-        <p key={i} className="text-xs font-medium" style={{ color: p.color }}>
-          {p.name}: {p.value.toLocaleString("ru-RU")}
-        </p>
-      ))}
-    </div>
-  );
-};
-
-export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }: Props) {
+export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState<Filters>({ period: "all", types: [...ALL_TYPES] });
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -79,101 +55,7 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
       .catch(() => setLoading(false));
   }, [apiUrl, dashboardId]);
 
-  const stats = useMemo(() => {
-    const byType: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
-    const byCity: Record<string, number> = {};
-    const byReason: Record<string, { total: number; type?: ClinicErrorType }> = {};
-    const byMonth: Record<string, number> = {};
-    const byMonthType: Record<string, Record<ClinicErrorType, number>> = {};
-    let total = 0;
-
-    for (const row of rows) {
-      const cityStr = String(row.city || "");
-      const sep = cityStr.lastIndexOf(" — ");
-      let city = cityStr;
-      let month: string | undefined = (row.month as string) || undefined;
-      if (sep !== -1) {
-        city = cityStr.substring(0, sep);
-        if (!month) month = cityStr.substring(sep + 3);
-      }
-
-      let rowTotal = 0;
-      for (const col of columns) {
-        const v = Number(row[col.key] || 0);
-        if (!v) continue;
-        rowTotal += v;
-        if (col.type) byType[col.type] += v;
-
-        const label = col.label || col.key;
-        if (!byReason[label]) byReason[label] = { total: 0, type: col.type };
-        byReason[label].total += v;
-
-        if (month) {
-          if (!byMonthType[month]) byMonthType[month] = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
-          if (col.type) byMonthType[month][col.type] += v;
-        }
-      }
-      total += rowTotal;
-      if (city) {
-        byCity[city] = (byCity[city] || 0) + rowTotal;
-      }
-      if (month) byMonth[month] = (byMonth[month] || 0) + rowTotal;
-    }
-
-    const cityTotals = Object.entries(byCity)
-      .map(([city, total]) => ({ city, total }))
-      .sort((a, b) => a.total - b.total);
-    const totalCities = cityTotals.length;
-    const minCityVal = cityTotals[0]?.total ?? 0;
-    const maxCityVal = cityTotals[totalCities - 1]?.total ?? 0;
-    const avgCity = totalCities > 0 ? total / totalCities : 0;
-    const best3 = cityTotals.slice(0, 3);
-    const worst3 = cityTotals.slice(-3).reverse();
-    const belowAvg = cityTotals.filter(c => c.total <= avgCity).length;
-    const aboveAvg = cityTotals.filter(c => c.total > avgCity).length;
-
-    const topType = (Object.entries(byType) as [ClinicErrorType, number][])
-      .sort((a, b) => b[1] - a[1])[0];
-
-    const topCity = Object.entries(byCity).sort((a, b) => b[1] - a[1])[0];
-
-    const topReason = Object.entries(byReason).sort((a, b) => b[1].total - a[1].total)[0];
-
-    const typesData = (Object.entries(byType) as [ClinicErrorType, number][])
-      .map(([name, value]) => ({ name, value }))
-      .filter(d => d.value > 0);
-
-    const monthsData = MONTHS
-      .filter(m => byMonth[m] !== undefined)
-      .map(m => ({
-        month: m.slice(0, 3),
-        fullMonth: m,
-        total: byMonth[m] || 0,
-        "Бухгалтерия": byMonthType[m]?.["Бухгалтерия"] || 0,
-        "Фин": byMonthType[m]?.["Фин"] || 0,
-        "Сервис": byMonthType[m]?.["Сервис"] || 0,
-      }));
-
-    return {
-      total,
-      topType: topType && topType[1] > 0 ? { name: topType[0], value: topType[1] } : null,
-      topCity: topCity && topCity[1] > 0 ? { name: topCity[0], value: topCity[1] } : null,
-      topReason: topReason && topReason[1].total > 0
-        ? { name: topReason[0], value: topReason[1].total, type: topReason[1].type }
-        : null,
-      typesData,
-      monthsData,
-      cityTotals,
-      totalCities,
-      minCityVal,
-      maxCityVal,
-      avgCity,
-      best3,
-      worst3,
-      belowAvg,
-      aboveAvg,
-    };
-  }, [rows, columns]);
+  const stats = useClinicStats({ rows, columns, filters });
 
   if (loading) {
     return (
@@ -184,8 +66,14 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
     );
   }
 
+  const cityProfile = selectedCity ? stats.cityProfiles[selectedCity] : null;
+  const lastMonthValue = stats.monthsData.length > 0 ? stats.monthsData[stats.monthsData.length - 1].total : null;
+  const sortedDesc = [...stats.cityTotals].sort((a, b) => b.total - a.total);
+
   return (
     <div className="space-y-6 animate-fade-in-up">
+      <ClinicFilters filters={filters} onChange={setFilters} />
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="glass glass-hover rounded-2xl p-4 sm:p-5 relative overflow-hidden">
@@ -198,7 +86,15 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
               </div>
             </div>
             <p className="text-3xl sm:text-4xl font-black text-gradient-pink">{stats.total.toLocaleString("ru-RU")}</p>
-            <p className="text-white/40 text-xs mt-1">за весь период</p>
+            <div className="flex items-center gap-2 mt-1">
+              <p className="text-white/40 text-xs">за период</p>
+              {stats.totalPrev > 0 && (
+                <span className={`text-xs font-bold flex items-center gap-0.5 ${stats.totalDeltaPct > 0 ? "text-red-400" : "text-emerald-400"}`}>
+                  <Icon name={stats.totalDeltaPct > 0 ? "ArrowUp" : "ArrowDown"} size={11} />
+                  {Math.abs(stats.totalDeltaPct).toFixed(0)}%
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -235,8 +131,13 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
             </div>
             {stats.topCity ? (
               <>
-                <p className="text-2xl sm:text-3xl font-black text-gradient-cyan truncate">{stats.topCity.name}</p>
-                <p className="text-white/40 text-xs mt-1">{stats.topCity.value.toLocaleString("ru-RU")} ошибок</p>
+                <button
+                  onClick={() => setSelectedCity(stats.topCity!.city)}
+                  className="text-2xl sm:text-3xl font-black text-gradient-cyan truncate hover:underline text-left w-full"
+                >
+                  {stats.topCity.city}
+                </button>
+                <p className="text-white/40 text-xs mt-1">{stats.topCity.total.toLocaleString("ru-RU")} ошибок</p>
               </>
             ) : (
               <p className="text-white/30 text-sm">Нет данных</p>
@@ -255,11 +156,11 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
             </div>
             {stats.topReason ? (
               <>
-                <p className="text-xl sm:text-2xl font-black text-amber-300 truncate" title={stats.topReason.name}>
-                  {stats.topReason.name}
+                <p className="text-xl sm:text-2xl font-black text-amber-300 truncate" title={stats.topReason.label}>
+                  {stats.topReason.label}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
-                  {stats.topReason.value.toLocaleString("ru-RU")} ошибок
+                  {stats.topReason.total.toLocaleString("ru-RU")} ошибок
                   {stats.topReason.type && <span className="ml-1">· {stats.topReason.type}</span>}
                 </p>
               </>
@@ -269,6 +170,14 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
           </div>
         </div>
       </div>
+
+      {/* Светофор по отделам */}
+      <ClinicDepartmentLights typeChange={stats.typeChange} total={stats.total} />
+
+      {/* Профиль города */}
+      {cityProfile && (
+        <ClinicCityProfile profile={cityProfile} avgCity={stats.avgCity} onClose={() => setSelectedCity(null)} />
+      )}
 
       {/* Эффективность клиник */}
       {stats.totalCities > 0 && stats.maxCityVal > 0 && (
@@ -280,7 +189,7 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
             </div>
             <div>
               <h3 className="font-display font-bold text-white text-lg">Эффективность клиник</h3>
-              <p className="text-white/40 text-xs mt-0.5">Меньше ошибок = лучше клиника</p>
+              <p className="text-white/40 text-xs mt-0.5">Меньше ошибок = лучше клиника · клик по городу = профиль</p>
             </div>
           </div>
 
@@ -297,7 +206,7 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
                     <div key={c.city}>
                       <div className="flex items-center gap-3 mb-1">
                         <span className="text-base flex-shrink-0">{medals[i]}</span>
-                        <span className="text-sm text-white/80 flex-1 truncate">{c.city}</span>
+                        <button onClick={() => setSelectedCity(c.city)} className="text-sm text-white/80 flex-1 truncate text-left hover:text-white">{c.city}</button>
                         <span className="text-sm font-mono font-semibold text-emerald-400">{c.total.toLocaleString("ru-RU")}</span>
                       </div>
                       <div className="ml-9 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -321,7 +230,7 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
                       <div className="flex items-center gap-3 mb-1">
                         <span className="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold text-red-400"
                           style={{ background: "rgba(239,68,68,0.15)" }}>{stats.totalCities - i}</span>
-                        <span className="text-sm text-white/80 flex-1 truncate">{c.city}</span>
+                        <button onClick={() => setSelectedCity(c.city)} className="text-sm text-white/80 flex-1 truncate text-left hover:text-white">{c.city}</button>
                         <span className="text-sm font-mono font-semibold text-red-400">{c.total.toLocaleString("ru-RU")}</span>
                       </div>
                       <div className="ml-9 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
@@ -359,73 +268,73 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
         </div>
       )}
 
-      {/* Charts */}
+      {/* Топ-5 причин + Прогноз/Точка боли */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Разбивка по отделам */}
-        <div className="glass rounded-2xl p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-display font-bold text-white text-base sm:text-lg">Разбивка по отделам</h3>
-              <p className="text-white/40 text-xs">Доля ошибок каждого отдела</p>
+        <ClinicTopReasons reasons={stats.reasons} />
+        <div className="space-y-4 sm:space-y-6">
+          {/* Разбивка по отделам (пирог) */}
+          <div className="glass rounded-2xl p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-display font-bold text-white text-base sm:text-lg">Разбивка по отделам</h3>
+                <p className="text-white/40 text-xs">Доля каждого отдела</p>
+              </div>
+              <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+                <Icon name="PieChart" size={18} />
+              </div>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
-              <Icon name="PieChart" size={18} />
-            </div>
+            {stats.typesData.length > 0 ? (
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <div className="w-full sm:w-1/2 h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={stats.typesData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3}>
+                        {stats.typesData.map(entry => (
+                          <Cell key={entry.name} fill={TYPE_COLORS[entry.name as ClinicErrorType]} stroke="transparent" />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full sm:w-1/2 space-y-2">
+                  {stats.typesData.map(d => {
+                    const pct = stats.total ? ((d.value / stats.total) * 100).toFixed(1) : "0";
+                    return (
+                      <div key={d.name} className="flex items-center justify-between p-2 rounded-lg bg-white/3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: TYPE_COLORS[d.name as ClinicErrorType] }} />
+                          <span className="text-white/80 text-xs">{d.name}</span>
+                        </div>
+                        <span className="text-white text-xs font-bold">{pct}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="h-[180px] flex items-center justify-center text-white/30 text-sm">Нет данных</div>
+            )}
           </div>
-          {stats.typesData.length > 0 ? (
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="w-full sm:w-1/2 h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={stats.typesData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={85}
-                      paddingAngle={3}
-                    >
-                      {stats.typesData.map(entry => (
-                        <Cell key={entry.name} fill={TYPE_COLORS[entry.name as ClinicErrorType]} stroke="transparent" />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="w-full sm:w-1/2 space-y-2">
-                {stats.typesData.map(d => {
-                  const pct = stats.total ? ((d.value / stats.total) * 100).toFixed(1) : "0";
-                  return (
-                    <div key={d.name} className="flex items-center justify-between p-2.5 rounded-xl bg-white/3 border border-white/5">
-                      <div className="flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ background: TYPE_COLORS[d.name as ClinicErrorType] }} />
-                        <span className="text-white/80 text-sm font-medium">{d.name}</span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-white font-bold text-sm">{d.value.toLocaleString("ru-RU")}</p>
-                        <p className="text-white/40 text-[10px]">{pct}%</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
-            <div className="h-[220px] flex items-center justify-center text-white/30 text-sm">
-              Назначьте тип колонкам в настройках
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Динамика по месяцам */}
+      {/* Тепловая карта */}
+      <ClinicHeatmap
+        cities={stats.heatmapCities}
+        months={stats.currentMonths}
+        cells={stats.cityMonthCells}
+        max={stats.heatmapMaxValue}
+        onCityClick={setSelectedCity}
+      />
+
+      {/* Динамика по месяцам + Динамика по отделам */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <div className="glass rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-display font-bold text-white text-base sm:text-lg">Динамика по месяцам</h3>
-              <p className="text-white/40 text-xs">Изменение количества ошибок</p>
+              <p className="text-white/40 text-xs">Общее изменение</p>
             </div>
             <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
               <Icon name="TrendingUp" size={18} />
@@ -442,29 +351,22 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} />
+                  <XAxis dataKey="short" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                   <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="total"
-                    name="Всего"
-                    stroke="#8b5cf6"
-                    strokeWidth={2}
-                    fill="url(#totalGradient)"
-                  />
+                  <Area type="monotone" dataKey="total" name="Всего" stroke="#8b5cf6" strokeWidth={2} fill="url(#totalGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="h-[260px] flex items-center justify-center text-white/30 text-sm">
-              Добавьте данные по месяцам в настройках
-            </div>
+            <div className="h-[260px] flex items-center justify-center text-white/30 text-sm">Нет данных по месяцам</div>
           )}
         </div>
+
+        <ClinicDepartmentsTrend monthsData={stats.monthsData} />
       </div>
 
-      {/* Месяцы по отделам */}
+      {/* Месяцы по отделам (stacked) */}
       {stats.monthsData.length > 0 && (
         <div className="glass rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
@@ -480,18 +382,34 @@ export default function ClinicErrorsView({ title, apiUrl, dashboardId, columns }
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.monthsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                <XAxis dataKey="month" stroke="rgba(255,255,255,0.4)" fontSize={11} />
+                <XAxis dataKey="short" stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
-                <Bar dataKey="Бухгалтерия" stackId="a" fill={TYPE_COLORS["Бухгалтерия"]} radius={[0, 0, 0, 0]} />
-                <Bar dataKey="Фин" stackId="a" fill={TYPE_COLORS["Фин"]} radius={[0, 0, 0, 0]} />
+                <Bar dataKey="Бухгалтерия" stackId="a" fill={TYPE_COLORS["Бухгалтерия"]} />
+                <Bar dataKey="Фин" stackId="a" fill={TYPE_COLORS["Фин"]} />
                 <Bar dataKey="Сервис" stackId="a" fill={TYPE_COLORS["Сервис"]} radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
+
+      {/* Аномалии и Концентрация */}
+      <ClinicAnomalies
+        anomalies={stats.anomalies}
+        concentrationPct={stats.concentrationPct}
+        topCities={sortedDesc}
+        total={stats.total}
+      />
+
+      {/* Прогноз и точка боли */}
+      <ClinicForecast
+        forecast={stats.forecast}
+        forecastDirection={stats.forecastDirection}
+        lastValue={lastMonthValue}
+        worstPair={stats.worstPair}
+      />
     </div>
   );
 }
