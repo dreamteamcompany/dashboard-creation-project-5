@@ -51,6 +51,23 @@ export default function ClinicFilters({ filters, onChange }: Props) {
         <span className="text-xs text-white/40 uppercase tracking-wide font-semibold">Отделы</span>
       </div>
       <div className="flex flex-wrap items-center gap-1.5">
+        {(() => {
+          const allActive = filters.types.length === ALL_TYPES.length;
+          return (
+            <button
+              onClick={() => onChange({ ...filters, types: [...ALL_TYPES] })}
+              className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 border flex items-center gap-1.5 ${
+                allActive
+                  ? "border-transparent text-white font-semibold gradient-violet"
+                  : "border-white/10 bg-white/5 hover:bg-white/10 text-white/60"
+              }`}
+              style={allActive ? { boxShadow: "0 4px 14px rgba(139,92,246,0.35)" } : undefined}
+            >
+              <Icon name="LayoutGrid" size={11} />
+              Все
+            </button>
+          );
+        })()}
         {ALL_TYPES.map(t => {
           const active = filters.types.includes(t);
           return (
