@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import Icon from "@/components/ui/icon";
 import type { CityMonthCell } from "./useClinicStats";
 import type { ClinicErrorType } from "./types";
@@ -11,7 +12,23 @@ interface Props {
   onCityClick?: (city: string) => void;
 }
 
-function colorFor(value: number, max: number): string {
+type ViewMode = "all" | ClinicErrorType;
+
+const TYPE_SHORT: Record<ClinicErrorType, string> = {
+  "Бухгалтерия": "БУХ",
+  "Фин": "ФИН",
+  "Сервис": "СРВ",
+};
+
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function colorForAll(value: number, max: number): string {
   if (value === 0) return "rgba(255,255,255,0.04)";
   const ratio = max > 0 ? value / max : 0;
   if (ratio < 0.2) return "rgba(16,185,129,0.4)";
@@ -21,31 +38,101 @@ function colorFor(value: number, max: number): string {
   return "rgba(239,68,68,0.85)";
 }
 
-const TYPE_SHORT: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "БУХ",
-  "Фин": "ФИН",
-  "Сервис": "СРВ",
-};
+function colorForType(value: number, max: number, type: ClinicErrorType): string {
+  if (value === 0) return "rgba(255,255,255,0.04)";
+  const ratio = max > 0 ? value / max : 0;
+  const alpha = 0.2 + ratio * 0.7;
+  return hexToRgba(TYPE_COLORS[type], Math.min(alpha, 0.9));
+}
 
 export default function ClinicHeatmap({ cities, months, cells, max, onCityClick }: Props) {
+  const [view, setView] = useState<ViewMode>("all");
+
+  const map: Record<string, Record<string, CityMonthCell>> = useMemo(() => {
+    const m: Record<string, Record<string, CityMonthCell>> = {};
+    cells.forEach(c => {
+      m[c.city] = m[c.city] || {};
+      m[c.city][c.month] = c;
+    });
+    return m;
+  }, [cells]);
+
+  const effectiveMax = useMemo(() => {
+    if (view === "all") return max;
+    let mx = 0;
+    cells.forEach(c => {
+      const v = c.types[view] || 0;
+      if (v > mx) mx = v;
+    });
+    return mx;
+  }, [view, cells, max]);
+
   if (cities.length === 0 || months.length === 0) return null;
-  const map: Record<string, Record<string, CityMonthCell>> = {};
-  cells.forEach(c => {
-    map[c.city] = map[c.city] || {};
-    map[c.city][c.month] = c;
-  });
+
+  const getValue = (cell: CityMonthCell | undefined): number => {
+    if (!cell) return 0;
+    if (view === "all") return cell.value;
+    return cell.types[view] || 0;
+  };
+
+  const getCellColor = (value: number): string => {
+    if (view === "all") return colorForAll(value, effectiveMax);
+    return colorForType(value, effectiveMax, view);
+  };
+
+  const TabButton = ({ v, label, color }: { v: ViewMode; label: string; color?: string }) => {
+    const active = view === v;
+    return (
+      <button
+        onClick={() => setView(v)}
+        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+          active
+            ? "text-white border-white/30"
+            : "text-white/50 border-white/10 hover:text-white/80 hover:border-white/20"
+        }`}
+        style={
+          active && color
+            ? { background: hexToRgba(color, 0.25), borderColor: hexToRgba(color, 0.5) }
+            : active
+              ? { background: "rgba(255,255,255,0.12)" }
+              : undefined
+        }
+      >
+        {color && (
+          <span
+            className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle"
+            style={{ background: color }}
+          />
+        )}
+        {label}
+      </button>
+    );
+  };
 
   return (
     <div className="glass rounded-2xl p-4 sm:p-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
         <div>
           <h3 className="font-display font-bold text-white text-base sm:text-lg">Тепловая карта Город × Месяц</h3>
-          <p className="text-white/40 text-xs">Цвет ячейки — объём, ярлык и нижняя полоска — структура по отделам</p>
+          <p className="text-white/40 text-xs">
+            {view === "all"
+              ? "Все отделы · цвет — общий объём, ярлык и полоска — структура"
+              : `Только отдел «${view}» · цвет — объём этого отдела`}
+          </p>
         </div>
         <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
           <Icon name="Grid3x3" size={18} />
         </div>
       </div>
+
+      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+        <span className="text-[10px] text-white/40 uppercase tracking-wide mr-1">Отдел:</span>
+        <TabButton v="all" label="Все" />
+        {ALL_TYPES.map(t => (
+          <TabButton key={t} v={t} label={t} color={TYPE_COLORS[t]} />
+        ))}
+      </div>
+
       <div className="overflow-x-auto -mx-2 px-2">
         <table className="w-full text-xs border-separate" style={{ borderSpacing: "3px" }}>
           <thead>
@@ -60,7 +147,7 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
           <tbody>
             {cities.map(city => {
               const row = map[city] || {};
-              const rowTotal = months.reduce((s, m) => s + (row[m]?.value || 0), 0);
+              const rowTotal = months.reduce((s, m) => s + getValue(row[m]), 0);
               return (
                 <tr key={city}>
                   <td
@@ -72,7 +159,7 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
                   </td>
                   {months.map(m => {
                     const cell = row[m];
-                    const v = cell?.value || 0;
+                    const v = getValue(cell);
                     const types = cell?.types;
                     const dominant = types
                       ? (Object.entries(types) as [ClinicErrorType, number][])
@@ -84,15 +171,19 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
                           .map(t => `${t}: ${types[t]}`)
                           .join(" · ")
                       : "";
+                    const tooltipBase =
+                      view === "all"
+                        ? `${city} · ${m}: ${v}`
+                        : `${city} · ${m} · ${view}: ${v}`;
                     return (
                       <td key={m} className="relative text-center rounded-md transition-all duration-200 hover:scale-110 overflow-hidden"
-                        style={{ background: colorFor(v, max), minWidth: 52, height: 38 }}
-                        title={`${city} · ${m}: ${v}${tooltipParts ? "\n" + tooltipParts : ""}`}
+                        style={{ background: getCellColor(v), minWidth: 52, height: 38 }}
+                        title={`${tooltipBase}${tooltipParts ? "\n" + tooltipParts : ""}`}
                       >
                         {v > 0 && (
                           <>
                             <span className="text-[11px] font-semibold text-white/95 leading-none block mt-1">{v}</span>
-                            {dominant && dominant[1] > 0 && (
+                            {view === "all" && dominant && dominant[1] > 0 && (
                               <span
                                 className="text-[8px] font-bold tracking-wider leading-none block mt-0.5"
                                 style={{ color: TYPE_COLORS[dominant[0]] }}
@@ -100,12 +191,20 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
                                 {TYPE_SHORT[dominant[0]]}
                               </span>
                             )}
-                            {types && (
+                            {view !== "all" && (
+                              <span
+                                className="text-[8px] font-bold tracking-wider leading-none block mt-0.5"
+                                style={{ color: TYPE_COLORS[view] }}
+                              >
+                                {TYPE_SHORT[view]}
+                              </span>
+                            )}
+                            {view === "all" && types && (
                               <div className="absolute bottom-0 left-0 right-0 h-1 flex">
                                 {ALL_TYPES.map(t => {
                                   const tv = types[t] || 0;
                                   if (tv === 0) return null;
-                                  const pct = v > 0 ? (tv / v) * 100 : 0;
+                                  const pct = cell && cell.value > 0 ? (tv / cell.value) * 100 : 0;
                                   return (
                                     <div
                                       key={t}
@@ -139,11 +238,13 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
         <div className="flex items-center gap-2">
           <span>0</span>
           <div className="flex gap-0.5">
-            {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => (
-              <div key={r} className="w-5 h-2.5 rounded" style={{ background: colorFor(max * r, max) }} />
-            ))}
+            {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => {
+              const val = effectiveMax * r;
+              const bg = view === "all" ? colorForAll(val, effectiveMax) : colorForType(val, effectiveMax, view);
+              return <div key={r} className="w-5 h-2.5 rounded" style={{ background: bg }} />;
+            })}
           </div>
-          <span>{max}</span>
+          <span>{effectiveMax}</span>
         </div>
       </div>
     </div>
