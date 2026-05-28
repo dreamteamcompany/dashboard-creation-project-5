@@ -59,16 +59,16 @@ export default function ClinicDepartmentsBreakdown({ byType, typeChange, total }
         {items.length === 0 ? (
           <div className="h-[200px] flex items-center justify-center text-white/30 text-sm">Нет данных</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-5 items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-[320px_1fr] gap-6 items-center">
             {/* Радиальные бары + центральный счётчик */}
-            <div className="relative w-full aspect-square max-w-[200px] mx-auto">
+            <div className="relative w-full aspect-square max-w-[320px] mx-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart
                   cx="50%"
                   cy="50%"
-                  innerRadius="65%"
+                  innerRadius="62%"
                   outerRadius="100%"
-                  barSize={10}
+                  barSize={16}
                   data={radialData}
                   startAngle={90}
                   endAngle={-270}
@@ -77,17 +77,17 @@ export default function ClinicDepartmentsBreakdown({ byType, typeChange, total }
                   <RadialBar
                     background={{ fill: "rgba(255,255,255,0.04)" }}
                     dataKey="value"
-                    cornerRadius={8}
+                    cornerRadius={10}
                   />
                 </RadialBarChart>
               </ResponsiveContainer>
 
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-2 text-center">
-                <p className="text-[9px] text-white/40 uppercase tracking-wider leading-none">Всего</p>
-                <p className="font-display text-base sm:text-lg font-bold text-white leading-tight mt-1 whitespace-nowrap">
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4 text-center">
+                <p className="text-[11px] text-white/40 uppercase tracking-wider leading-none">Всего</p>
+                <p className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight mt-1.5 whitespace-nowrap">
                   {total.toLocaleString("ru-RU")}
                 </p>
-                <p className="text-[9px] text-white/40 leading-none mt-1">ошибок</p>
+                <p className="text-[11px] text-white/40 leading-none mt-1.5">ошибок</p>
               </div>
             </div>
 
