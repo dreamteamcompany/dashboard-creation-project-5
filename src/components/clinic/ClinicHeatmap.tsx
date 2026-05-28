@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Icon from "@/components/ui/icon";
 import type { CityMonthCell } from "./useClinicStats";
 import type { ClinicErrorType } from "./types";
@@ -12,30 +12,12 @@ interface Props {
   onCityClick?: (city: string) => void;
 }
 
-type ViewMode = "all" | ClinicErrorType;
-
-const TYPE_SHORT: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "БУХ",
-  "Фин": "ФИН",
-  "Сервис": "СРВ",
-};
-
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace("#", "");
   const r = parseInt(h.substring(0, 2), 16);
   const g = parseInt(h.substring(2, 4), 16);
   const b = parseInt(h.substring(4, 6), 16);
   return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function colorForAll(value: number, max: number): string {
-  if (value === 0) return "rgba(255,255,255,0.04)";
-  const ratio = max > 0 ? value / max : 0;
-  if (ratio < 0.2) return "rgba(16,185,129,0.4)";
-  if (ratio < 0.4) return "rgba(245,158,11,0.4)";
-  if (ratio < 0.7) return "rgba(245,158,11,0.65)";
-  if (ratio < 0.9) return "rgba(239,68,68,0.6)";
-  return "rgba(239,68,68,0.85)";
 }
 
 function colorForType(value: number, max: number, type: ClinicErrorType): string {
@@ -45,109 +27,101 @@ function colorForType(value: number, max: number, type: ClinicErrorType): string
   return hexToRgba(TYPE_COLORS[type], Math.min(alpha, 0.9));
 }
 
-export default function ClinicHeatmap({ cities, months, cells, max, onCityClick }: Props) {
-  const [view, setView] = useState<ViewMode>("all");
+interface SingleHeatmapProps {
+  type: ClinicErrorType;
+  cities: string[];
+  months: string[];
+  map: Record<string, Record<string, CityMonthCell>>;
+  onCityClick?: (city: string) => void;
+}
 
-  const map: Record<string, Record<string, CityMonthCell>> = useMemo(() => {
-    const m: Record<string, Record<string, CityMonthCell>> = {};
-    cells.forEach(c => {
-      m[c.city] = m[c.city] || {};
-      m[c.city][c.month] = c;
-    });
-    return m;
-  }, [cells]);
+function SingleTypeHeatmap({ type, cities, months, map, onCityClick }: SingleHeatmapProps) {
+  const color = TYPE_COLORS[type];
 
-  const effectiveMax = useMemo(() => {
-    if (view === "all") return max;
+  const typeMax = useMemo(() => {
     let mx = 0;
-    cells.forEach(c => {
-      const v = c.types[view] || 0;
-      if (v > mx) mx = v;
+    cities.forEach(city => {
+      months.forEach(m => {
+        const v = map[city]?.[m]?.types[type] || 0;
+        if (v > mx) mx = v;
+      });
     });
     return mx;
-  }, [view, cells, max]);
+  }, [cities, months, map, type]);
 
-  if (cities.length === 0 || months.length === 0) return null;
-
-  const getValue = (cell: CityMonthCell | undefined): number => {
-    if (!cell) return 0;
-    if (view === "all") return cell.value;
-    return cell.types[view] || 0;
-  };
-
-  const getCellColor = (value: number): string => {
-    if (view === "all") return colorForAll(value, effectiveMax);
-    return colorForType(value, effectiveMax, view);
-  };
-
-  const TabButton = ({ v, label, color }: { v: ViewMode; label: string; color?: string }) => {
-    const active = view === v;
-    return (
-      <button
-        onClick={() => setView(v)}
-        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
-          active
-            ? "text-white border-white/30"
-            : "text-white/50 border-white/10 hover:text-white/80 hover:border-white/20"
-        }`}
-        style={
-          active && color
-            ? { background: hexToRgba(color, 0.25), borderColor: hexToRgba(color, 0.5) }
-            : active
-              ? { background: "rgba(255,255,255,0.12)" }
-              : undefined
-        }
-      >
-        {color && (
-          <span
-            className="inline-block w-2 h-2 rounded-full mr-1.5 align-middle"
-            style={{ background: color }}
-          />
-        )}
-        {label}
-      </button>
-    );
-  };
+  const grandTotal = useMemo(() => {
+    let s = 0;
+    cities.forEach(city => {
+      months.forEach(m => {
+        s += map[city]?.[m]?.types[type] || 0;
+      });
+    });
+    return s;
+  }, [cities, months, map, type]);
 
   return (
-    <div className="glass rounded-2xl p-4 sm:p-6 overflow-hidden">
-      <div className="flex items-start justify-between mb-4 gap-3 flex-wrap">
-        <div>
-          <h3 className="font-display font-bold text-white text-base sm:text-lg">Тепловая карта Город × Месяц</h3>
-          <p className="text-white/40 text-xs">
-            {view === "all"
-              ? "Все отделы · цвет — общий объём, ярлык и полоска — структура"
-              : `Только отдел «${view}» · цвет — объём этого отдела`}
+    <div
+      className="rounded-2xl p-4 sm:p-5 border"
+      style={{
+        background: hexToRgba(color, 0.04),
+        borderColor: hexToRgba(color, 0.18),
+      }}
+    >
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{ background: hexToRgba(color, 0.18) }}
+          >
+            <Icon name="Building2" size={18} style={{ color }} />
+          </div>
+          <div>
+            <h4 className="font-display font-bold text-white text-base">
+              Отдел: {type}
+            </h4>
+            <p className="text-white/40 text-xs">Ошибки по городам и месяцам</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p
+            className="font-display text-xl font-bold tabular-nums"
+            style={{ color }}
+          >
+            {grandTotal.toLocaleString("ru-RU")}
+          </p>
+          <p className="text-white/40 text-[10px] uppercase tracking-wide">
+            всего по отделу
           </p>
         </div>
-        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
-          <Icon name="Grid3x3" size={18} />
-        </div>
-      </div>
-
-      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
-        <span className="text-[10px] text-white/40 uppercase tracking-wide mr-1">Отдел:</span>
-        <TabButton v="all" label="Все" />
-        {ALL_TYPES.map(t => (
-          <TabButton key={t} v={t} label={t} color={TYPE_COLORS[t]} />
-        ))}
       </div>
 
       <div className="overflow-x-auto -mx-2 px-2">
         <table className="w-full text-xs border-separate" style={{ borderSpacing: "3px" }}>
           <thead>
             <tr>
-              <th className="text-left text-white/40 font-medium px-2 sticky left-0 z-10" style={{ background: "var(--page-bg, #0a0812)" }}>Город</th>
+              <th
+                className="text-left text-white/40 font-medium px-2 sticky left-0 z-10"
+                style={{ background: "var(--page-bg, #0a0812)" }}
+              >
+                Город
+              </th>
               {months.map(m => (
-                <th key={m} className="text-white/40 font-medium px-1 text-center min-w-[52px]">{m.slice(0, 3)}</th>
+                <th
+                  key={m}
+                  className="text-white/40 font-medium px-1 text-center min-w-[48px]"
+                >
+                  {m.slice(0, 3)}
+                </th>
               ))}
               <th className="text-white/40 font-medium px-2 text-right">Итого</th>
             </tr>
           </thead>
           <tbody>
             {cities.map(city => {
-              const row = map[city] || {};
-              const rowTotal = months.reduce((s, m) => s + getValue(row[m]), 0);
+              const rowTotal = months.reduce(
+                (s, m) => s + (map[city]?.[m]?.types[type] || 0),
+                0,
+              );
               return (
                 <tr key={city}>
                   <td
@@ -158,94 +132,93 @@ export default function ClinicHeatmap({ cities, months, cells, max, onCityClick 
                     {city}
                   </td>
                   {months.map(m => {
-                    const cell = row[m];
-                    const v = getValue(cell);
-                    const types = cell?.types;
-                    const dominant = types
-                      ? (Object.entries(types) as [ClinicErrorType, number][])
-                          .sort((a, b) => b[1] - a[1])[0]
-                      : undefined;
-                    const tooltipParts = types
-                      ? ALL_TYPES
-                          .filter(t => types[t] > 0)
-                          .map(t => `${t}: ${types[t]}`)
-                          .join(" · ")
-                      : "";
-                    const tooltipBase =
-                      view === "all"
-                        ? `${city} · ${m}: ${v}`
-                        : `${city} · ${m} · ${view}: ${v}`;
+                    const v = map[city]?.[m]?.types[type] || 0;
                     return (
-                      <td key={m} className="relative text-center rounded-md transition-all duration-200 hover:scale-110 overflow-hidden"
-                        style={{ background: getCellColor(v), minWidth: 52, height: 38 }}
-                        title={`${tooltipBase}${tooltipParts ? "\n" + tooltipParts : ""}`}
+                      <td
+                        key={m}
+                        className="text-center rounded-md transition-all duration-200 hover:scale-110"
+                        style={{
+                          background: colorForType(v, typeMax, type),
+                          minWidth: 48,
+                          height: 34,
+                        }}
+                        title={`${city} · ${m} · ${type}: ${v}`}
                       >
-                        {v > 0 && (
-                          <>
-                            <span className="text-[11px] font-semibold text-white/95 leading-none block mt-1">{v}</span>
-                            {view === "all" && dominant && dominant[1] > 0 && (
-                              <span
-                                className="text-[8px] font-bold tracking-wider leading-none block mt-0.5"
-                                style={{ color: TYPE_COLORS[dominant[0]] }}
-                              >
-                                {TYPE_SHORT[dominant[0]]}
-                              </span>
-                            )}
-                            {view !== "all" && (
-                              <span
-                                className="text-[8px] font-bold tracking-wider leading-none block mt-0.5"
-                                style={{ color: TYPE_COLORS[view] }}
-                              >
-                                {TYPE_SHORT[view]}
-                              </span>
-                            )}
-                            {view === "all" && types && (
-                              <div className="absolute bottom-0 left-0 right-0 h-1 flex">
-                                {ALL_TYPES.map(t => {
-                                  const tv = types[t] || 0;
-                                  if (tv === 0) return null;
-                                  const pct = cell && cell.value > 0 ? (tv / cell.value) * 100 : 0;
-                                  return (
-                                    <div
-                                      key={t}
-                                      style={{ width: `${pct}%`, background: TYPE_COLORS[t] }}
-                                    />
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </>
-                        )}
+                        <span className="text-[11px] font-semibold text-white/95">
+                          {v || ""}
+                        </span>
                       </td>
                     );
                   })}
-                  <td className="px-2 text-right text-white/70 font-bold">{rowTotal.toLocaleString("ru-RU")}</td>
+                  <td
+                    className="px-2 text-right font-bold tabular-nums"
+                    style={{ color: rowTotal > 0 ? color : "rgba(255,255,255,0.3)" }}
+                  >
+                    {rowTotal.toLocaleString("ru-RU")}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-3 text-[10px] text-white/40">
-        <div className="flex items-center gap-3">
-          {ALL_TYPES.map(t => (
-            <div key={t} className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: TYPE_COLORS[t] }} />
-              <span className="text-white/60">{t}</span>
-            </div>
+
+      <div className="flex items-center justify-end gap-2 mt-3 text-[10px] text-white/40">
+        <span>0</span>
+        <div className="flex gap-0.5">
+          {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => (
+            <div
+              key={r}
+              className="w-5 h-2.5 rounded"
+              style={{ background: colorForType(typeMax * r, typeMax, type) }}
+            />
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <span>0</span>
-          <div className="flex gap-0.5">
-            {[0.1, 0.3, 0.5, 0.7, 0.9].map(r => {
-              const val = effectiveMax * r;
-              const bg = view === "all" ? colorForAll(val, effectiveMax) : colorForType(val, effectiveMax, view);
-              return <div key={r} className="w-5 h-2.5 rounded" style={{ background: bg }} />;
-            })}
-          </div>
-          <span>{effectiveMax}</span>
+        <span>{typeMax}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Props) {
+  const map: Record<string, Record<string, CityMonthCell>> = useMemo(() => {
+    const m: Record<string, Record<string, CityMonthCell>> = {};
+    cells.forEach(c => {
+      m[c.city] = m[c.city] || {};
+      m[c.city][c.month] = c;
+    });
+    return m;
+  }, [cells]);
+
+  if (cities.length === 0 || months.length === 0) return null;
+
+  return (
+    <div className="glass rounded-2xl p-4 sm:p-6 overflow-hidden">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h3 className="font-display font-bold text-white text-base sm:text-lg">
+            Тепловая карта Город × Месяц
+          </h3>
+          <p className="text-white/40 text-xs">
+            Отдельная карта на каждый отдел — Бухгалтерия, Фин, Сервис
+          </p>
         </div>
+        <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+          <Icon name="Grid3x3" size={18} />
+        </div>
+      </div>
+
+      <div className="space-y-5">
+        {ALL_TYPES.map(t => (
+          <SingleTypeHeatmap
+            key={t}
+            type={t}
+            cities={cities}
+            months={months}
+            map={map}
+            onCityClick={onCityClick}
+          />
+        ))}
       </div>
     </div>
   );
