@@ -6,9 +6,6 @@ import {
   Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -28,6 +25,7 @@ import ClinicDepartmentsTrend from "@/components/clinic/ClinicDepartmentsTrend";
 import ClinicCityProfile from "@/components/clinic/ClinicCityProfile";
 import ClinicAnomalies from "@/components/clinic/ClinicAnomalies";
 import ClinicForecast from "@/components/clinic/ClinicForecast";
+import ClinicDepartmentsBreakdown from "@/components/clinic/ClinicDepartmentsBreakdown";
 
 interface Props {
   title: string;
@@ -268,55 +266,14 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
         </div>
       )}
 
-      {/* Топ-5 причин + Прогноз/Точка боли */}
+      {/* Топ-5 причин + Разбивка по отделам */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <ClinicTopReasons reasons={stats.reasons} />
-        <div className="space-y-4 sm:space-y-6">
-          {/* Разбивка по отделам (пирог) */}
-          <div className="glass rounded-2xl p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-display font-bold text-white text-base sm:text-lg">Разбивка по отделам</h3>
-                <p className="text-white/40 text-xs">Доля каждого отдела</p>
-              </div>
-              <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
-                <Icon name="PieChart" size={18} />
-              </div>
-            </div>
-            {stats.typesData.length > 0 ? (
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <div className="w-full sm:w-1/2 h-[180px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={stats.typesData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3}>
-                        {stats.typesData.map(entry => (
-                          <Cell key={entry.name} fill={TYPE_COLORS[entry.name as ClinicErrorType]} stroke="transparent" />
-                        ))}
-                      </Pie>
-                      <Tooltip content={<CustomTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="w-full sm:w-1/2 space-y-2">
-                  {stats.typesData.map(d => {
-                    const pct = stats.total ? ((d.value / stats.total) * 100).toFixed(1) : "0";
-                    return (
-                      <div key={d.name} className="flex items-center justify-between p-2 rounded-lg bg-white/3">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: TYPE_COLORS[d.name as ClinicErrorType] }} />
-                          <span className="text-white/80 text-xs">{d.name}</span>
-                        </div>
-                        <span className="text-white text-xs font-bold">{pct}%</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : (
-              <div className="h-[180px] flex items-center justify-center text-white/30 text-sm">Нет данных</div>
-            )}
-          </div>
-        </div>
+        <ClinicDepartmentsBreakdown
+          byType={stats.byType}
+          typeChange={stats.typeChange}
+          total={stats.total}
+        />
       </div>
 
       {/* Тепловая карта */}
