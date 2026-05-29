@@ -73,8 +73,6 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
     );
   }
 
-  if (items.length === 0) return null;
-
   const title = mode === "city" ? "Выработка на 20-е по городам" : "Выработка на 20-е по месяцам";
   const subtitle = mode === "city" ? "Сравнение по городам" : "Сравнение по месяцам";
   const countLabel = mode === "city" ? `${items.length} городов` : `${items.length} месяцев`;
