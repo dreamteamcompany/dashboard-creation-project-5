@@ -17,8 +17,15 @@ interface GenericTableProps {
   onColumnsChange?: (cols: ColumnDef[]) => Promise<void>;
 }
 
+const TRANSLIT: Record<string, string> = {
+  а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",
+  н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"c",ч:"ch",ш:"sh",щ:"sch",
+  ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya",
+};
+
 function slugify(s: string) {
-  return s.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const translit = s.toLowerCase().split("").map(ch => TRANSLIT[ch] ?? ch).join("");
+  return translit.replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "");
 }
 
 export default function GenericTable({ title, subtitle, apiUrl, columns: initialColumns, editable = false, onColumnsChange }: GenericTableProps) {
@@ -150,8 +157,10 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
 
   const commitColumn = async (idx: number, val: string) => {
     const label = val.trim();
-    const key = slugify(label) || columns[idx]?.key || `col${idx}`;
     const oldKey = columns[idx]?.key;
+    let key = slugify(label) || (oldKey && oldKey !== "-" ? oldKey : "") || `col${idx}`;
+    const taken = columns.some((c, i) => i !== idx && c.key === key);
+    if (taken) key = `${key}_${idx}`;
     const updatedCols = columns.map((c, i) => i === idx ? { key, label } : c);
     setColumns(updatedCols);
     if (oldKey && oldKey !== key) {
