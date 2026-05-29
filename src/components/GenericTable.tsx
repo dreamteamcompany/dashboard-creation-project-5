@@ -349,13 +349,20 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
               >
                 ИТОГО
               </td>
-              {columns.map(col => (
-                <td key={col.key} className="px-2 py-3 text-center">
-                  <span className={`text-xs font-bold ${colTotal(col) > 0 ? "text-gradient-cyan" : "text-white/30"}`}>
-                    {colTotal(col).toLocaleString("ru-RU")}
-                  </span>
-                </td>
-              ))}
+              {columns.map(col => {
+                const excludeFromTotal = (col.label || "").trim().toLowerCase() === "выработка на 20-е";
+                return (
+                  <td key={col.key} className="px-2 py-3 text-center">
+                    {excludeFromTotal ? (
+                      <span className="text-xs font-bold text-white/30">—</span>
+                    ) : (
+                      <span className={`text-xs font-bold ${colTotal(col) > 0 ? "text-gradient-cyan" : "text-white/30"}`}>
+                        {colTotal(col).toLocaleString("ru-RU")}
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           </tfoot>
         </table>
