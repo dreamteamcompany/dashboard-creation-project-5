@@ -74,21 +74,13 @@ def handler(event: dict, context) -> dict:
             rows = body.get("rows", [])
             for row in rows:
                 row_id = row.get("id")
+                incoming = {k: int(row.get(k)) for k in col_keys if row.get(k) is not None}
                 if row_id:
                     cur.execute(
-                        f"SELECT data FROM {SCHEMA}.dashboard_rows WHERE id = %s AND dashboard_id = %s",
-                        (int(row_id), int(dashboard_id)),
-                    )
-                    existing = cur.fetchone()
-                    existing_data = existing[0] if existing and isinstance(existing[0], dict) else (json.loads(existing[0]) if existing else {})
-                    incoming = {k: row.get(k) for k in col_keys if row.get(k) is not None}
-                    merged = {**existing_data, **{k: int(v) for k, v in incoming.items()}}
-                    for k in col_keys:
-                        if k not in merged:
-                            merged[k] = 0
-                    cur.execute(
-                        f"UPDATE {SCHEMA}.dashboard_rows SET data = %s, city = %s, updated_at = NOW() WHERE id = %s AND dashboard_id = %s",
-                        (json.dumps(merged), row.get("city", ""), int(row_id), int(dashboard_id)),
+                        f"""UPDATE {SCHEMA}.dashboard_rows
+                            SET data = data || %s::jsonb, city = %s, updated_at = NOW()
+                            WHERE id = %s AND dashboard_id = %s""",
+                        (json.dumps(incoming), row.get("city", ""), int(row_id), int(dashboard_id)),
                     )
                 else:
                     data = {k: int(row.get(k, 0)) for k in col_keys}
