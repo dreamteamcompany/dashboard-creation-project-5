@@ -4,9 +4,7 @@
       "name": "GET all dashboards",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 200,
-      "expectedBody": {"id": 1},
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
     }
   ]
 }

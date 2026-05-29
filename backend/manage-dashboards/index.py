@@ -15,6 +15,28 @@ def get_conn():
     return psycopg2.connect(os.environ["DATABASE_URL"])
 
 
+def sanitize_columns(columns):
+    """Гарантирует уникальные непустые ключи. Запрещает '-' и дубликаты."""
+    if not isinstance(columns, list):
+        return columns
+    seen = set()
+    result = []
+    for idx, c in enumerate(columns):
+        if not isinstance(c, dict):
+            result.append(c)
+            continue
+        key = (c.get("key") or "").strip()
+        if not key or key == "-" or key in seen:
+            key = f"col{idx}"
+            n = idx
+            while key in seen:
+                n += 1
+                key = f"col{n}"
+        seen.add(key)
+        result.append({**c, "key": key})
+    return result
+
+
 def handler(event: dict, context) -> dict:
     """CRUD для дашбордов: список, создание с данными, обновление, удаление."""
 
@@ -60,7 +82,7 @@ def handler(event: dict, context) -> dict:
             title = body["title"]
             slug = body["slug"]
             api_url = body.get("api_url", "")
-            columns = body.get("columns", [])
+            columns = sanitize_columns(body.get("columns", []))
             initial_rows = body.get("rows", [])
 
             cur.execute(
@@ -92,7 +114,7 @@ def handler(event: dict, context) -> dict:
             title = body.get("title")
             slug = body.get("slug")
             api_url = body.get("api_url")
-            columns = body.get("columns")
+            columns = sanitize_columns(body.get("columns")) if body.get("columns") is not None else None
             cur.execute(
                 f"""UPDATE {SCHEMA}.dashboards
                     SET title = COALESCE(%s, title),
