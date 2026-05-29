@@ -15,6 +15,7 @@ import {
 import VyrabotkaKPI from "./vyrabotka/VyrabotkaKPI";
 import VyrabotkaCityView from "./vyrabotka/VyrabotkaCityView";
 import VyrabotkaAllView from "./vyrabotka/VyrabotkaAllView";
+import RaskhozhdenieDiffBlock from "./vyrabotka/RaskhozhdenieDiffBlock";
 
 export default function VyrabotkaView() {
   const { theme } = useTheme();
