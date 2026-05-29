@@ -3,15 +3,12 @@ import Icon from "@/components/ui/icon";
 import funcUrls from "../../../backend/func2url.json";
 import { DASHBOARD_ID, fmtMoney } from "./VyrabotkaUtils";
 
-interface DashColumn {
-  id: string;
-  name: string;
-}
-
 interface DashRow {
   id: number;
   city: string;
-  data: Record<string, string | number>;
+  raskhod_uk: number;
+  raskhod_city: number;
+  [key: string]: unknown;
 }
 
 interface CityDiff {
@@ -21,19 +18,6 @@ interface CityDiff {
   diff: number;
 }
 
-const COL_CITY = "Город";
-const COL_UK = "Расхождение УК";
-const COL_CITY_DIFF = "Расхождение города";
-
-function toNum(v: unknown): number {
-  if (typeof v === "number") return v;
-  if (typeof v === "string") {
-    const n = parseFloat(v.replace(/\s/g, "").replace(",", "."));
-    return isNaN(n) ? 0 : n;
-  }
-  return 0;
-}
-
 export default function RaskhozhdenieDiffBlock() {
   const [rows, setRows] = useState<CityDiff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,32 +25,22 @@ export default function RaskhozhdenieDiffBlock() {
   useEffect(() => {
     async function load() {
       try {
-        const colsUrl = `${funcUrls["dashboards"]}`;
-        const [rowsResp, colsResp] = await Promise.all([
-          fetch(`${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`).then(r => r.json()),
-          fetch(colsUrl).then(r => r.json()).catch(() => null),
-        ]);
+        const rawRows: DashRow[] = await fetch(
+          `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`,
+        ).then(r => r.json());
 
-        let columns: DashColumn[] = [];
-        if (Array.isArray(colsResp)) {
-          const dash = colsResp.find((d: { id: number; columns?: DashColumn[] }) => d.id === DASHBOARD_ID);
-          if (dash?.columns) columns = dash.columns;
-        }
-
-        const colId = (name: string) => columns.find(c => c.name === name)?.id;
-        const ukKey = colId(COL_UK);
-        const cityKey = colId(COL_CITY_DIFF);
-        const cityNameKey = colId(COL_CITY);
-
-        const data: DashRow[] = Array.isArray(rowsResp) ? rowsResp : [];
-        const mapped: CityDiff[] = data.map(r => {
-          const d = r.data || {};
-          const cityName =
-            (cityNameKey && d[cityNameKey] ? String(d[cityNameKey]) : "") || r.city || "—";
-          const uk = ukKey ? toNum(d[ukKey]) : 0;
-          const cityVal = cityKey ? toNum(d[cityKey]) : 0;
-          return { city: cityName, uk, cityVal, diff: uk - cityVal };
+        const cityMap: Record<string, CityDiff> = {};
+        rawRows.forEach(r => {
+          const sep = r.city.lastIndexOf(" — ");
+          const cityName = sep !== -1 ? r.city.substring(0, sep) : r.city;
+          if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
+          cityMap[cityName].uk += Number(r.raskhod_uk) || 0;
+          cityMap[cityName].cityVal += Number(r.raskhod_city) || 0;
         });
+        const mapped = Object.values(cityMap).map(c => ({
+          ...c,
+          diff: c.uk - c.cityVal,
+        }));
         setRows(mapped);
       } catch (e) {
         console.error("Failed to load raskhozhdenie diff", e);

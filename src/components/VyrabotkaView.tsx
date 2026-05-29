@@ -359,6 +359,8 @@ export default function VyrabotkaView() {
           setSelectedCity={setSelectedCity}
         />
       )}
+
+      <RaskhozhdenieDiffBlock />
     </div>
   );
 }
