@@ -56,10 +56,13 @@ export default function RaskhozhdenieDiffBlock() {
     [rows],
   );
 
-  const maxAbs = useMemo(
-    () => sorted.reduce((m, r) => Math.max(m, Math.abs(r.diff)), 0),
+  const maxVal = useMemo(
+    () => sorted.reduce((m, r) => Math.max(m, r.uk, r.cityVal), 0),
     [sorted],
   );
+
+  const UK_COLOR = "#3B82F6";
+  const CITY_COLOR = "#F59E0B";
 
   const totals = useMemo(() => {
     const uk = rows.reduce((s, r) => s + r.uk, 0);
@@ -88,6 +91,14 @@ export default function RaskhozhdenieDiffBlock() {
             Разница расхождений
           </h3>
           <p className="text-white/40 text-xs">Расхождение УК минус Расхождение города</p>
+          <div className="flex items-center gap-4 mt-2">
+            <span className="flex items-center gap-1.5 text-[11px] text-white/60">
+              <span className="w-3 h-3 rounded-sm" style={{ background: UK_COLOR }} />УК
+            </span>
+            <span className="flex items-center gap-1.5 text-[11px] text-white/60">
+              <span className="w-3 h-3 rounded-sm" style={{ background: CITY_COLOR }} />Город
+            </span>
+          </div>
         </div>
         <div className="text-right">
           <p
@@ -103,31 +114,37 @@ export default function RaskhozhdenieDiffBlock() {
       <div className="space-y-2.5">
         {sorted.map(r => {
           const pos = r.diff >= 0;
-          const color = pos ? "#00CC44" : "#E50000";
-          const widthPct = maxAbs > 0 ? (Math.abs(r.diff) / maxAbs) * 100 : 0;
+          const diffColor = pos ? "#00CC44" : "#E50000";
+          const ukPct = maxVal > 0 ? (r.uk / maxVal) * 100 : 0;
+          const cityPct = maxVal > 0 ? (r.cityVal / maxVal) * 100 : 0;
           return (
             <div key={r.city} className="flex items-center gap-3">
               <div className="w-24 sm:w-32 shrink-0 text-white/80 text-sm font-medium truncate" title={r.city}>
                 {r.city}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="h-3.5 rounded-md bg-white/[0.04] overflow-hidden relative">
                   <div
-                    className="h-full rounded-lg transition-all duration-500 flex items-center"
-                    style={{
-                      width: `${Math.max(widthPct, 4)}%`,
-                      background: `linear-gradient(90deg, ${color}66, ${color}cc)`,
-                    }}
+                    className="h-full rounded-md transition-all duration-500"
+                    style={{ width: `${Math.max(ukPct, r.uk > 0 ? 2 : 0)}%`, background: UK_COLOR }}
                   />
-                  <div className="absolute inset-0 flex items-center px-3 gap-3 text-[10px] text-white/50 pointer-events-none">
-                    <span>УК: {fmtMoney(r.uk)}</span>
-                    <span>Город: {fmtMoney(r.cityVal)}</span>
-                  </div>
+                  <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-medium text-white/70 pointer-events-none">
+                    УК: {fmtMoney(r.uk)}
+                  </span>
+                </div>
+                <div className="h-3.5 rounded-md bg-white/[0.04] overflow-hidden relative">
+                  <div
+                    className="h-full rounded-md transition-all duration-500"
+                    style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 2 : 0)}%`, background: CITY_COLOR }}
+                  />
+                  <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-medium text-white/70 pointer-events-none">
+                    Город: {fmtMoney(r.cityVal)}
+                  </span>
                 </div>
               </div>
               <div
                 className="w-28 shrink-0 text-right font-bold tabular-nums text-sm"
-                style={{ color }}
+                style={{ color: diffColor }}
               >
                 {(pos ? "+" : "") + fmtMoney(r.diff)}
               </div>
