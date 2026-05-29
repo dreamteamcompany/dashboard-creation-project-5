@@ -122,22 +122,22 @@ export default function RaskhozhdenieDiffBlock() {
               <div className="w-24 sm:w-32 shrink-0 text-white/80 text-sm font-medium truncate" title={r.city}>
                 {r.city}
               </div>
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="h-3.5 rounded-md bg-white/[0.04] overflow-hidden relative">
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
                   <div
-                    className="h-full rounded-md transition-all duration-500"
-                    style={{ width: `${Math.max(ukPct, r.uk > 0 ? 2 : 0)}%`, background: UK_COLOR }}
+                    className="h-full rounded-lg transition-all duration-500"
+                    style={{ width: `${Math.max(ukPct, r.uk > 0 ? 3 : 0)}%`, background: UK_COLOR }}
                   />
-                  <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-medium text-white/70 pointer-events-none">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
                     УК: {fmtMoney(r.uk)}
                   </span>
                 </div>
-                <div className="h-3.5 rounded-md bg-white/[0.04] overflow-hidden relative">
+                <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
                   <div
-                    className="h-full rounded-md transition-all duration-500"
-                    style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 2 : 0)}%`, background: CITY_COLOR }}
+                    className="h-full rounded-lg transition-all duration-500"
+                    style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 3 : 0)}%`, background: CITY_COLOR }}
                   />
-                  <span className="absolute inset-y-0 left-2 flex items-center text-[10px] font-medium text-white/70 pointer-events-none">
+                  <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
                     Город: {fmtMoney(r.cityVal)}
                   </span>
                 </div>
