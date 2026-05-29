@@ -1,7 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
+import {
+  BarChart, Bar, AreaChart, Area, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 import Icon from "@/components/ui/icon";
+import { useTheme } from "@/context/ThemeContext";
 import funcUrls from "../../../backend/func2url.json";
-import { DASHBOARD_ID, fmtMoney, MONTHS } from "./VyrabotkaUtils";
+import { DASHBOARD_ID, fmtMoney, fmtShort, MONTHS } from "./VyrabotkaUtils";
 
 interface DashRow {
   id: number;
@@ -19,7 +24,23 @@ interface Props {
   mode: "city" | "month";
 }
 
+interface TipPayload { value: number; }
+interface TipProps { active?: boolean; payload?: TipPayload[]; label?: string; }
+
+const Tip = ({ active, payload, label }: TipProps) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="chart-tooltip p-3 rounded-xl" style={{ minWidth: 160 }}>
+      <p className="text-xs text-white/50 mb-1">{label}</p>
+      <p className="text-white font-semibold">{fmtMoney(payload[0].value)}</p>
+    </div>
+  );
+};
+
 export default function VyrabotkaCompareBlock({ mode }: Props) {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+  const axisColor = isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
   const [items, setItems] = useState<CompareItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,7 +63,9 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
 
         let result = Object.entries(map).map(([name, value]) => ({ name, value }));
         if (mode === "month") {
-          result = result.sort((a, b) => MONTHS.indexOf(a.name) - MONTHS.indexOf(b.name));
+          result = result
+            .filter(i => MONTHS.includes(i.name))
+            .sort((a, b) => MONTHS.indexOf(a.name) - MONTHS.indexOf(b.name));
         } else {
           result = result.sort((a, b) => b.value - a.value);
         }
@@ -56,11 +79,7 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
     load();
   }, [mode]);
 
-  const maxVal = useMemo(() => items.reduce((m, i) => Math.max(m, i.value), 0), [items]);
   const total = useMemo(() => items.reduce((s, i) => s + i.value, 0), [items]);
-
-  const GRADIENT = "linear-gradient(90deg, #6D3ACD, #A855F7)";
-  const GLOW = "0 0 20px #8B5CF666, 0 0 40px #8B5CF626";
 
   if (loading) {
     return (
@@ -74,8 +93,9 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
   }
 
   const title = mode === "city" ? "Выработка на 20-е по городам" : "Выработка на 20-е по месяцам";
-  const subtitle = mode === "city" ? "Сравнение по городам" : "Сравнение по месяцам";
+  const subtitle = mode === "city" ? "Сравнение по городам" : "Динамика по месяцам";
   const countLabel = mode === "city" ? `${items.length} городов` : `${items.length} месяцев`;
+  const gradId = mode === "city" ? "gradVyrCity" : "gradVyrMonth";
 
   return (
     <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
@@ -92,33 +112,45 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        {items.map(i => {
-          const pct = maxVal > 0 ? (i.value / maxVal) * 100 : 0;
-          return (
-            <div key={i.name} className="flex items-center gap-3">
-              <div className="w-24 sm:w-32 shrink-0 text-white/80 text-sm font-medium truncate" title={i.name}>
-                {i.name}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
-                  <div
-                    className="h-full rounded-lg transition-all duration-700"
-                    style={{ width: `${Math.max(pct, i.value > 0 ? 3 : 0)}%`, background: GRADIENT, boxShadow: i.value > 0 ? GLOW : "none" }}
-                  />
-                  <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
-                    {fmtMoney(i.value)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <ResponsiveContainer width="100%" height={360}>
+        {mode === "city" ? (
+          <BarChart data={items} margin={{ top: 20, right: 20, left: 10, bottom: 0 }} barCategoryGap="20%">
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A855F7" stopOpacity={1} />
+                <stop offset="100%" stopColor="#6D3ACD" stopOpacity={0.8} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} vertical={false} />
+            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={70} />
+            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => fmtShort(v)} width={70} />
+            <Tooltip content={<Tip />} cursor={{ fill: isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)", radius: 8 }} />
+            <Bar dataKey="value" name="Выработка на 20-е" radius={[6, 6, 0, 0]}>
+              {items.map((d) => (
+                <Cell key={d.name} fill={`url(#${gradId})`} />
+              ))}
+            </Bar>
+          </BarChart>
+        ) : (
+          <AreaChart data={items} margin={{ top: 20, right: 20, left: 10, bottom: 0 }}>
+            <defs>
+              <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A855F7" stopOpacity={0.6} />
+                <stop offset="100%" stopColor="#6D3ACD" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} vertical={false} />
+            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={70} />
+            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v: number) => fmtShort(v)} width={70} />
+            <Tooltip content={<Tip />} cursor={{ stroke: "#A855F7", strokeWidth: 1, strokeDasharray: "4 4" }} />
+            <Area type="monotone" dataKey="value" name="Выработка на 20-е" stroke="#A855F7" strokeWidth={2.5} fill={`url(#${gradId})`} dot={{ fill: "#A855F7", r: 3 }} activeDot={{ r: 5 }} />
+          </AreaChart>
+        )}
+      </ResponsiveContainer>
 
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5 text-xs text-white/50">
         <div className="flex items-center gap-2">
-          <Icon name="BarChart3" size={14} />
+          <Icon name={mode === "city" ? "BarChart3" : "TrendingUp"} size={14} />
           <span>{countLabel}</span>
         </div>
         <span>Итого: {fmtMoney(total)}</span>
