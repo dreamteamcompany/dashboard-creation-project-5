@@ -361,9 +361,13 @@ export default function VyrabotkaView() {
         />
       )}
 
-      <RaskhozhdenieDiffBlock />
-      <VyrabotkaCompareBlock mode="city" />
-      <VyrabotkaCompareBlock mode="month" />
+      {!selectedCity && (
+        <>
+          <RaskhozhdenieDiffBlock />
+          <VyrabotkaCompareBlock mode="city" />
+          <VyrabotkaCompareBlock mode="month" />
+        </>
+      )}
     </div>
   );
 }
