@@ -63,6 +63,10 @@ export default function RaskhozhdenieDiffBlock() {
 
   const UK_COLOR = "#3B82F6";
   const CITY_COLOR = "#F59E0B";
+  const UK_GRADIENT = "linear-gradient(90deg, #2563EB, #60A5FA)";
+  const CITY_GRADIENT = "linear-gradient(90deg, #D97706, #FBBF24)";
+  const UK_GLOW = "0 0 20px #3B82F666, 0 0 40px #3B82F626";
+  const CITY_GLOW = "0 0 20px #F59E0B66, 0 0 40px #F59E0B26";
 
   const totals = useMemo(() => {
     const uk = rows.reduce((s, r) => s + r.uk, 0);
@@ -125,8 +129,8 @@ export default function RaskhozhdenieDiffBlock() {
               <div className="flex-1 min-w-0 space-y-1.5">
                 <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
                   <div
-                    className="h-full rounded-lg transition-all duration-500"
-                    style={{ width: `${Math.max(ukPct, r.uk > 0 ? 3 : 0)}%`, background: UK_COLOR }}
+                    className="h-full rounded-lg transition-all duration-700"
+                    style={{ width: `${Math.max(ukPct, r.uk > 0 ? 3 : 0)}%`, background: UK_GRADIENT, boxShadow: r.uk > 0 ? UK_GLOW : "none" }}
                   />
                   <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
                     УК: {fmtMoney(r.uk)}
@@ -134,8 +138,8 @@ export default function RaskhozhdenieDiffBlock() {
                 </div>
                 <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
                   <div
-                    className="h-full rounded-lg transition-all duration-500"
-                    style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 3 : 0)}%`, background: CITY_COLOR }}
+                    className="h-full rounded-lg transition-all duration-700"
+                    style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 3 : 0)}%`, background: CITY_GRADIENT, boxShadow: r.cityVal > 0 ? CITY_GLOW : "none" }}
                   />
                   <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
                     Город: {fmtMoney(r.cityVal)}
