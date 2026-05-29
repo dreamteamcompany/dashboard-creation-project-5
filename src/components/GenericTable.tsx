@@ -178,11 +178,6 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
     return rows.reduce((sum, r) => sum + (Number(r[key]) || 0), 0);
   };
 
-  const rowTotal = (row: Row) =>
-    columns.reduce((sum, c) => sum + (Number(row[c.key]) || 0), 0);
-
-  const grandTotal = rows.reduce((sum, r) => sum + rowTotal(r), 0);
-
   if (loading) {
     return (
       <div className="glass rounded-2xl p-8 flex items-center justify-center gap-3 text-white/40">
@@ -269,9 +264,6 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
                   )}
                 </th>
               ))}
-              <th className="px-4 py-3 text-white/70 font-bold text-xs text-center whitespace-nowrap" style={{ background: "var(--sticky-cell-bg)" }}>
-                ИТОГО
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -288,7 +280,7 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
                   {showGroupHeader && (
                     <tr key={`group-${groupName}`} className="border-b border-white/8 bg-white/5">
                       <td
-                        colSpan={columns.length + 2}
+                        colSpan={columns.length + 1}
                         className="px-4 py-2 text-white/70 font-bold text-xs uppercase tracking-wide"
                       >
                         <div className="flex items-center justify-between">
@@ -344,11 +336,6 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
                         />
                       </td>
                     ))}
-                    <td className="px-4 py-2.5 text-center">
-                      <span className={`text-xs font-bold px-2 py-1 rounded-lg ${rowTotal(row) > 0 ? "text-gradient-violet" : "text-white/30"}`}>
-                        {rowTotal(row).toLocaleString("ru-RU")}
-                      </span>
-                    </td>
                   </tr>
                 </>
               );
@@ -369,9 +356,6 @@ export default function GenericTable({ title, subtitle, apiUrl, columns: initial
                   </span>
                 </td>
               ))}
-              <td className="px-4 py-3 text-center">
-                <span className="text-sm font-black text-gradient-pink">{grandTotal.toLocaleString("ru-RU")}</span>
-              </td>
             </tr>
           </tfoot>
         </table>
