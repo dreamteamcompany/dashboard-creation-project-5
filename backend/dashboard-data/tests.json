@@ -5,7 +5,7 @@
       "method": "GET",
       "path": "/?dashboard_id=1",
       "expectedStatus": 200,
-      "expectedBody": {},
+      "expectedBody": [],
       "bodyMatcher": "partial"
     },
     {
