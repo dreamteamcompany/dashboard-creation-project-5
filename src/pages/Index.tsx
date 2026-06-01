@@ -48,7 +48,7 @@ export default function Dashboard() {
               {first?.title ?? "Дашборды"}
             </h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
-              {dashboards.map(d => (
+              {dashboards.filter(d => !d.hidden).map(d => (
                 <button key={d.id}
                   onClick={() => navigate(`/dashboard/${d.slug}`)}
                   className="text-xs px-3 py-1.5 rounded-full glass glass-hover text-white/60 hover:text-white transition-all duration-200">

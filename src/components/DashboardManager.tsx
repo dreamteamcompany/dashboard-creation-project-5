@@ -318,12 +318,23 @@ export default function DashboardManager({ onClose }: Props) {
                 <div className="text-center py-12 text-white/30 text-sm">Нет дашбордов</div>
               ) : (
                 dashboards.map(d => (
-                  <div key={d.id} className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/8 transition-colors">
+                  <div key={d.id} className={`flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/8 transition-colors ${d.hidden ? "opacity-50" : ""}`}>
                     <div>
-                      <p className="text-white font-semibold text-sm">{d.title}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-white font-semibold text-sm">{d.title}</p>
+                        {d.hidden && (
+                          <span className="text-[10px] uppercase tracking-wide text-white/40 bg-white/10 rounded px-1.5 py-0.5">скрыт</span>
+                        )}
+                      </div>
                       <p className="text-white/40 text-xs mt-0.5">{d.columns.length} колонок · /{d.slug}</p>
                     </div>
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => update(d.id, { hidden: !d.hidden })}
+                        title={d.hidden ? "Показать в навигации" : "Скрыть из навигации"}
+                        className="glass glass-hover rounded-lg px-3 py-1.5 text-white/60 text-xs flex items-center gap-1.5">
+                        <Icon name={d.hidden ? "EyeOff" : "Eye"} size={13} /> {d.hidden ? "Скрыт" : "Виден"}
+                      </button>
                       <button onClick={() => openEdit(d)} className="glass glass-hover rounded-lg px-3 py-1.5 text-white/60 text-xs flex items-center gap-1.5">
                         <Icon name="Pencil" size={13} /> Изменить
                       </button>

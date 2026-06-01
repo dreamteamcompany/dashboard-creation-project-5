@@ -69,7 +69,7 @@ export default function DashboardPage() {
                 {dashboard.title}
               </h1>
               <div className="flex flex-wrap items-center gap-2">
-                {dashboards.map(d => (
+                {dashboards.filter(d => !d.hidden || d.slug === id).map(d => (
                   <button key={d.id}
                     onClick={() => navigate(`/dashboard/${d.slug}`)}
                     className={`text-xs px-3 py-1 rounded-full transition-all duration-200 ${

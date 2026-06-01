@@ -54,7 +54,7 @@ def handler(event: dict, context) -> dict:
         if method == "GET":
             if dash_id:
                 cur.execute(
-                    f"SELECT id, title, slug, api_url, columns, created_at FROM {SCHEMA}.dashboards WHERE id = %s",
+                    f"SELECT id, title, slug, api_url, columns, created_at, hidden FROM {SCHEMA}.dashboards WHERE id = %s",
                     (dash_id,),
                 )
                 row = cur.fetchone()
@@ -67,7 +67,7 @@ def handler(event: dict, context) -> dict:
                 }
             else:
                 cur.execute(
-                    f"SELECT id, title, slug, api_url, columns, created_at FROM {SCHEMA}.dashboards ORDER BY id"
+                    f"SELECT id, title, slug, api_url, columns, created_at, hidden FROM {SCHEMA}.dashboards ORDER BY id"
                 )
                 rows = cur.fetchall()
                 return {
@@ -86,7 +86,7 @@ def handler(event: dict, context) -> dict:
             initial_rows = body.get("rows", [])
 
             cur.execute(
-                f"INSERT INTO {SCHEMA}.dashboards (title, slug, api_url, columns) VALUES (%s, %s, %s, %s) RETURNING id, title, slug, api_url, columns, created_at",
+                f"INSERT INTO {SCHEMA}.dashboards (title, slug, api_url, columns) VALUES (%s, %s, %s, %s) RETURNING id, title, slug, api_url, columns, created_at, hidden",
                 (title, slug, api_url, json.dumps(columns)),
             )
             row = cur.fetchone()
@@ -114,16 +114,18 @@ def handler(event: dict, context) -> dict:
             title = body.get("title")
             slug = body.get("slug")
             api_url = body.get("api_url")
+            hidden = body.get("hidden")
             columns = sanitize_columns(body.get("columns")) if body.get("columns") is not None else None
             cur.execute(
                 f"""UPDATE {SCHEMA}.dashboards
                     SET title = COALESCE(%s, title),
                         slug = COALESCE(%s, slug),
                         api_url = COALESCE(%s, api_url),
-                        columns = COALESCE(%s, columns)
+                        columns = COALESCE(%s, columns),
+                        hidden = COALESCE(%s, hidden)
                     WHERE id = %s
-                    RETURNING id, title, slug, api_url, columns, created_at""",
-                (title, slug, api_url, json.dumps(columns) if columns is not None else None, dash_id),
+                    RETURNING id, title, slug, api_url, columns, created_at, hidden""",
+                (title, slug, api_url, json.dumps(columns) if columns is not None else None, hidden, dash_id),
             )
             row = cur.fetchone()
             conn.commit()
@@ -159,4 +161,5 @@ def _row_to_dict(row):
         "api_url": row[3],
         "columns": row[4] if isinstance(row[4], list) else json.loads(row[4]),
         "created_at": str(row[5]),
+        "hidden": bool(row[6]) if len(row) > 6 else False,
     }

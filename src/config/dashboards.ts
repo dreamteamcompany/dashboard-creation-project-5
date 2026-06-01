@@ -13,6 +13,7 @@ export interface DashboardConfig {
   slug: string;
   api_url: string;
   columns: ColumnDef[];
+  hidden?: boolean;
 }
 
 export interface ExtraTableConfig {
