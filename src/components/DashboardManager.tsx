@@ -208,15 +208,7 @@ export default function DashboardManager({ onClose }: Props) {
 
   const commitColumn = (i: number, val: string) => {
     const label = val.trim();
-    const oldKey = columns[i]?.key;
-    const newKey = slugify(label) || oldKey;
-    setColumns(prev => prev.map((c, ci) => ci === i ? { key: newKey, label } : c));
-    if (oldKey !== newKey) {
-      setRows(r => r.map(row => {
-        const { [oldKey]: v, ...rest } = row as Record<string, string | number>;
-        return { ...rest, [newKey]: v ?? 0 } as TableRow;
-      }));
-    }
+    setColumns(prev => prev.map((c, ci) => ci === i ? { ...c, label } : c));
     setEditingColIdx(null);
   };
 
