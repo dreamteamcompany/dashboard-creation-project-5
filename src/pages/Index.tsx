@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [showManager, setShowManager] = useState(false);
   const { dashboards, loading } = useDashboards();
 
-  const first = dashboards[0];
+  const first = dashboards.find(d => !d.hidden) ?? dashboards[0];
 
   return (
     <>
