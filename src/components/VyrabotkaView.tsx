@@ -363,7 +363,7 @@ export default function VyrabotkaView() {
 
       {!selectedCity && (
         <>
-          <RaskhozhdenieDiffBlock />
+          <RaskhozhdenieDiffBlock selectedMonth={selectedMonth} />
           <VyrabotkaCompareBlock mode="city" />
           <VyrabotkaCompareBlock mode="month" />
         </>

@@ -18,30 +18,21 @@ interface CityDiff {
   diff: number;
 }
 
-export default function RaskhozhdenieDiffBlock() {
-  const [rows, setRows] = useState<CityDiff[]>([]);
+interface Props {
+  selectedMonth?: string | null;
+}
+
+export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) {
+  const [rawRows, setRawRows] = useState<DashRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const rawRows: DashRow[] = await fetch(
+        const data: DashRow[] = await fetch(
           `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`,
         ).then(r => r.json());
-
-        const cityMap: Record<string, CityDiff> = {};
-        rawRows.forEach(r => {
-          const sep = r.city.lastIndexOf(" — ");
-          const cityName = sep !== -1 ? r.city.substring(0, sep) : r.city;
-          if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
-          cityMap[cityName].uk += Number(r.raskhod_uk) || 0;
-          cityMap[cityName].cityVal += Number(r.raskhod_city) || 0;
-        });
-        const mapped = Object.values(cityMap).map(c => ({
-          ...c,
-          diff: c.uk - c.cityVal,
-        }));
-        setRows(mapped);
+        setRawRows(data);
       } catch (e) {
         console.error("Failed to load raskhozhdenie diff", e);
       } finally {
@@ -50,6 +41,20 @@ export default function RaskhozhdenieDiffBlock() {
     }
     load();
   }, []);
+
+  const rows = useMemo<CityDiff[]>(() => {
+    const cityMap: Record<string, CityDiff> = {};
+    rawRows.forEach(r => {
+      const sep = r.city.lastIndexOf(" — ");
+      const cityName = sep !== -1 ? r.city.substring(0, sep) : r.city;
+      const month = sep !== -1 ? r.city.substring(sep + 3) : null;
+      if (selectedMonth && month !== selectedMonth) return;
+      if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
+      cityMap[cityName].uk += Number(r.raskhod_uk) || 0;
+      cityMap[cityName].cityVal += Number(r.raskhod_city) || 0;
+    });
+    return Object.values(cityMap).map(c => ({ ...c, diff: c.uk - c.cityVal }));
+  }, [rawRows, selectedMonth]);
 
   const sorted = useMemo(
     () => [...rows].sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)),
