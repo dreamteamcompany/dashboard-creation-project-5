@@ -41,6 +41,7 @@ export type Period = "all" | "month" | "quarter" | "year";
 export interface Filters {
   period: Period;
   types: ClinicErrorType[];
+  month?: string;
 }
 
 export const ALL_TYPES: ClinicErrorType[] = ["Бухгалтерия", "Фин", "Сервис"];

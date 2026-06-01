@@ -5,6 +5,7 @@ import { ALL_TYPES, TYPE_COLORS } from "./types";
 interface Props {
   filters: Filters;
   onChange: (f: Filters) => void;
+  availableMonths?: string[];
 }
 
 const PERIODS: { value: Filters["period"]; label: string }[] = [
@@ -14,13 +15,28 @@ const PERIODS: { value: Filters["period"]; label: string }[] = [
   { value: "all", label: "Всё время" },
 ];
 
-export default function ClinicFilters({ filters, onChange }: Props) {
+export default function ClinicFilters({ filters, onChange, availableMonths = [] }: Props) {
   const toggleType = (t: ClinicErrorType) => {
     const has = filters.types.includes(t);
     const next = has ? filters.types.filter(x => x !== t) : [...filters.types, t];
     if (next.length === 0) return;
     onChange({ ...filters, types: next });
   };
+
+  const selectPeriod = (value: Filters["period"]) => {
+    if (value === "month") {
+      const defaultMonth = filters.month && availableMonths.includes(filters.month)
+        ? filters.month
+        : availableMonths[availableMonths.length - 1];
+      onChange({ ...filters, period: value, month: defaultMonth });
+    } else {
+      onChange({ ...filters, period: value, month: undefined });
+    }
+  };
+
+  const selectedMonth = filters.month && availableMonths.includes(filters.month)
+    ? filters.month
+    : availableMonths[availableMonths.length - 1];
 
   return (
     <div className="glass rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -32,7 +48,7 @@ export default function ClinicFilters({ filters, onChange }: Props) {
         {PERIODS.map(p => (
           <button
             key={p.value}
-            onClick={() => onChange({ ...filters, period: p.value })}
+            onClick={() => selectPeriod(p.value)}
             className={`text-xs px-3 py-1.5 rounded-full transition-all duration-200 ${
               filters.period === p.value
                 ? "gradient-violet text-white font-semibold"
@@ -42,6 +58,20 @@ export default function ClinicFilters({ filters, onChange }: Props) {
             {p.label}
           </button>
         ))}
+        {filters.period === "month" && availableMonths.length > 0 && (
+          <div className="relative">
+            <select
+              value={selectedMonth}
+              onChange={e => onChange({ ...filters, period: "month", month: e.target.value })}
+              className="appearance-none text-xs pl-3 pr-8 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/40 text-white font-medium outline-none cursor-pointer hover:bg-violet-500/25 transition-colors focus:border-violet-500"
+            >
+              {availableMonths.map(m => (
+                <option key={m} value={m} className="bg-[#1e1432] text-white">{m}</option>
+              ))}
+            </select>
+            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
+        )}
       </div>
 
       <div className="hidden sm:block w-px h-6 bg-white/10" />

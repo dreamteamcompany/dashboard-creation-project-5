@@ -85,8 +85,11 @@ export function useClinicStats({ rows, columns, filters }: Params) {
     let currentMonths: string[] = sortedMonths.slice();
     let prevMonths: string[] = [];
     if (filters.period === "month" && sortedMonths.length > 0) {
-      currentMonths = [sortedMonths[sortedMonths.length - 1]];
-      prevMonths = sortedMonths.length > 1 ? [sortedMonths[sortedMonths.length - 2]] : [];
+      const idx = filters.month && sortedMonths.includes(filters.month)
+        ? sortedMonths.indexOf(filters.month)
+        : sortedMonths.length - 1;
+      currentMonths = [sortedMonths[idx]];
+      prevMonths = idx > 0 ? [sortedMonths[idx - 1]] : [];
     } else if (filters.period === "quarter" && sortedMonths.length > 0) {
       currentMonths = sortedMonths.slice(-3);
       prevMonths = sortedMonths.slice(-6, -3);

@@ -56,6 +56,8 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
 
   const stats = useClinicStats({ rows, columns, filters });
 
+  const availableMonths = stats.sortedMonths;
+
   if (loading) {
     return (
       <div className="glass rounded-2xl p-8 flex items-center justify-center gap-3 text-white/40">
@@ -71,7 +73,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <ClinicFilters filters={filters} onChange={setFilters} />
+      <ClinicFilters filters={filters} onChange={setFilters} availableMonths={availableMonths} />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
