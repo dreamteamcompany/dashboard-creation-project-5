@@ -22,6 +22,8 @@ interface CompareItem {
 
 interface Props {
   mode: "city" | "month";
+  selectedMonth?: string | null;
+  selectedCity?: string | null;
 }
 
 interface TipPayload { value: number; }
@@ -37,39 +39,20 @@ const Tip = ({ active, payload, label }: TipProps) => {
   );
 };
 
-export default function VyrabotkaCompareBlock({ mode }: Props) {
+export default function VyrabotkaCompareBlock({ mode, selectedMonth = null, selectedCity = null }: Props) {
   const { theme } = useTheme();
   const isLight = theme === "light";
   const axisColor = isLight ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
-  const [items, setItems] = useState<CompareItem[]>([]);
+  const [rawRows, setRawRows] = useState<DashRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const rawRows: DashRow[] = await fetch(
+        const data: DashRow[] = await fetch(
           `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`,
         ).then(r => r.json());
-
-        const map: Record<string, number> = {};
-        rawRows.forEach(r => {
-          const sep = r.city.lastIndexOf(" — ");
-          const cityName = sep !== -1 ? r.city.substring(0, sep) : r.city;
-          const monthName = sep !== -1 ? r.city.substring(sep + 3) : "";
-          const key = mode === "city" ? cityName : monthName;
-          if (!key) return;
-          map[key] = (map[key] || 0) + (Number(r.vyrabotka_na_20e) || 0);
-        });
-
-        let result = Object.entries(map).map(([name, value]) => ({ name, value }));
-        if (mode === "month") {
-          result = result
-            .filter(i => MONTHS.includes(i.name))
-            .sort((a, b) => MONTHS.indexOf(a.name) - MONTHS.indexOf(b.name));
-        } else {
-          result = result.sort((a, b) => b.value - a.value);
-        }
-        setItems(result);
+        setRawRows(data);
       } catch (e) {
         console.error("Failed to load vyrabotka compare", e);
       } finally {
@@ -77,7 +60,32 @@ export default function VyrabotkaCompareBlock({ mode }: Props) {
       }
     }
     load();
-  }, [mode]);
+  }, []);
+
+  const items = useMemo<CompareItem[]>(() => {
+    const map: Record<string, number> = {};
+    rawRows.forEach(r => {
+      const sep = r.city.lastIndexOf(" — ");
+      const cityName = sep !== -1 ? r.city.substring(0, sep) : r.city;
+      const monthName = sep !== -1 ? r.city.substring(sep + 3) : "";
+      // В режиме "по городам" применяем фильтр месяца; в режиме "по месяцам" — фильтр города
+      if (mode === "city" && selectedMonth && monthName !== selectedMonth) return;
+      if (mode === "month" && selectedCity && cityName !== selectedCity) return;
+      const key = mode === "city" ? cityName : monthName;
+      if (!key) return;
+      map[key] = (map[key] || 0) + (Number(r.vyrabotka_na_20e) || 0);
+    });
+
+    let result = Object.entries(map).map(([name, value]) => ({ name, value }));
+    if (mode === "month") {
+      result = result
+        .filter(i => MONTHS.includes(i.name))
+        .sort((a, b) => MONTHS.indexOf(a.name) - MONTHS.indexOf(b.name));
+    } else {
+      result = result.sort((a, b) => b.value - a.value);
+    }
+    return result;
+  }, [rawRows, mode, selectedMonth, selectedCity]);
 
   const total = useMemo(() => items.reduce((s, i) => s + i.value, 0), [items]);
 
