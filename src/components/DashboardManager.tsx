@@ -187,7 +187,18 @@ export default function DashboardManager({ onClose }: Props) {
   const openEdit = (d: DashboardConfig) => {
     setTitle(d.title);
     setSlug(d.slug);
-    setColumns(d.columns.length ? d.columns : [{ key: "col1", label: "Причина 1" }]);
+    const seen = new Set<string>();
+    const uniqueCols = (d.columns.length ? d.columns : [{ key: "col1", label: "Причина 1" }]).map((c, i) => {
+      let key = c.key && c.key.trim() ? c.key : `col${i}`;
+      if (seen.has(key)) {
+        let suffix = i;
+        while (seen.has(`${key}-${suffix}`)) suffix++;
+        key = `${key}-${suffix}`;
+      }
+      seen.add(key);
+      return { ...c, key };
+    });
+    setColumns(uniqueCols);
     setRows([{ city: "" }]);
     setEditing(d);
     setMode("edit");
