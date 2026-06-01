@@ -139,7 +139,7 @@ export default function DashboardManager({ onClose }: Props) {
   };
 
   const addExtraColumn = () => {
-    const key = `col${Date.now()}`;
+    const key = `col${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
     setExtraColumns(c => [...c, { key, label: "" }]);
     setExtraRows(r => r.map(row => ({ ...row, [key]: "" })));
   };
@@ -210,7 +210,7 @@ export default function DashboardManager({ onClose }: Props) {
   };
 
   const addColumn = () => {
-    const key = `col${Date.now()}`;
+    const key = `col${Date.now()}${Math.random().toString(36).slice(2, 7)}`;
     setColumns(c => [...c, { key, label: "" }]);
     setRows(r => r.map(row => ({ ...row, [key]: 0 })));
     const idx = columns.length;
