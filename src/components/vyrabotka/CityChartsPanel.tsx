@@ -102,37 +102,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
         </ResponsiveContainer>
       </div>}
 
-      {filtered.length > 0 && <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
-        <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
-          <div className="mb-6">
-            <h3 className="font-display font-bold text-white text-lg">Нарастающий итог</h3>
-            <p className="text-white/40 text-xs mt-0.5">Накопительный план vs факт</p>
-          </div>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={cumulativeData} margin={{ top: 5, right: 20, left: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradCumPlan" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.plan} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={COLORS.plan} stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="gradCumFact" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.fact} stopOpacity={0.3} />
-                  <stop offset="95%" stopColor={COLORS.fact} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"} />
-              <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
-              <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
-                tickFormatter={(v: number) => fmtShort(v)} width={70} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="natural" dataKey="cumPlan" name="План (нараст.)" stroke={COLORS.plan} strokeWidth={2}
-                fill="url(#gradCumPlan)" dot={{ fill: COLORS.plan, r: 3, strokeWidth: 0 }} />
-              <Area type="natural" dataKey="cumFact" name="Факт (нараст.)" stroke={COLORS.fact} strokeWidth={2}
-                fill="url(#gradCumFact)" dot={{ fill: COLORS.fact, r: 3, strokeWidth: 0 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
+      {filtered.length > 0 && <div className="grid grid-cols-1 gap-2 sm:gap-4">
         <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">% выполнения плана</h3>
