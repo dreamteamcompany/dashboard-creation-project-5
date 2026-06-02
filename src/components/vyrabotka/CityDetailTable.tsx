@@ -22,6 +22,7 @@ export default function CityDetailTable({
 }: Props) {
   const totalPlanUk = activeMonths.reduce((s, m) => s + (cd.months[m]?.planUk || 0), 0);
   const totalDiffUk = totalFact - totalPlanUk;
+  const totalNa20e = activeMonths.reduce((s, m) => s + (cd.months[m]?.vyrabotkaNa20e || 0), 0);
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in-up">
       <div className="mb-6">
@@ -35,6 +36,7 @@ export default function CityDetailTable({
               <th className="text-right text-white/50 font-medium py-3 px-3">План</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">План УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Факт</th>
+              <th className="text-right text-white/50 font-medium py-3 px-3">Выработка на 20-е</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение от УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">%</th>
@@ -53,6 +55,7 @@ export default function CityDetailTable({
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.plan)}</td>
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.planUk || 0)}</td>
                   <td className="py-3 px-3 text-right text-white">{md.fact > 0 ? fmtFull(md.fact) : "—"}</td>
+                  <td className="py-3 px-3 text-right text-white/70">{md.vyrabotkaNa20e > 0 ? fmtFull(md.vyrabotkaNa20e) : "—"}</td>
                   <td className="py-3 px-3 text-right font-semibold" style={{ color: diff >= 0 ? COLORS.good : COLORS.bad }}>
                     {md.fact > 0 ? ((diff >= 0 ? "+" : "") + fmtFull(diff)) : "—"}
                   </td>
@@ -76,6 +79,7 @@ export default function CityDetailTable({
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlan)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlanUk)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalFact)}</td>
+              <td className="py-3 px-3 text-right text-white font-bold">{totalNa20e > 0 ? fmtFull(totalNa20e) : "—"}</td>
               <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiff >= 0 ? COLORS.good : COLORS.bad }}>
                 {(totalDiff >= 0 ? "+" : "") + fmtFull(totalDiff)}
               </td>

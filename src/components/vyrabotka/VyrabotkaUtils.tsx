@@ -4,6 +4,7 @@ export interface CityMonthData {
   plan: number;
   fact: number;
   planUk: number;
+  vyrabotkaNa20e: number;
 }
 
 export interface CityData {
