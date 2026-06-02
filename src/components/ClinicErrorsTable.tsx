@@ -89,12 +89,7 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
           });
         }
         setRows(arr);
-        const expanded: Record<string, boolean> = {};
-        arr.forEach(r => {
-          const cs = String(r.city);
-          if (cs.includes(" — ")) expanded[cs.split(" — ")[0]] = true;
-        });
-        setExpandedCities(expanded);
+        setExpandedCities({});
         setLoading(false);
       })
       .catch(() => setLoading(false));
