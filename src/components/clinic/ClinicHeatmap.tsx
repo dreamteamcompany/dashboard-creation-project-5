@@ -187,23 +187,26 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                   const rowsForCity = reasonLabels.length > 0 ? reasonLabels : [""];
                   return (
                     <>
+                      {ci > 0 && (
+                        <tr key={`${city}-sep`} aria-hidden>
+                          <td colSpan={months.length + 3} style={{ height: 6, padding: 0 }}>
+                            <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }} />
+                          </td>
+                        </tr>
+                      )}
                       {rowsForCity.map((label, li) => {
                         const rowTotal = months.reduce(
                           (s, m) => s + (map[city]?.[m]?.reasons?.[label] || 0),
                           0,
                         );
                         return (
-                          <tr
-                            key={`${city}-${label}`}
-                            className={li === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
-                          >
+                          <tr key={`${city}-${label}`}>
                             {li === 0 ? (
                               <td
                                 rowSpan={rowsForCity.length}
                                 className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
                                 style={{
-                                  background: "var(--page-bg, #0a0812)",
-                                  borderTop: ci > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined,
+                                  background: ci % 2 === 1 ? "rgba(255,255,255,0.02)" : "var(--page-bg, #0a0812)",
                                 }}
                                 onClick={onCityClick ? () => onCityClick(city) : undefined}
                               >
