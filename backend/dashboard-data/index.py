@@ -46,6 +46,25 @@ def handler(event: dict, context) -> dict:
         columns = dash[1] if isinstance(dash[1], list) else json.loads(dash[1])
         col_keys = [c["key"] for c in columns]
 
+        if method == "GET" and params.get("cleanup") == "1":
+            cur.execute(
+                f"""DELETE FROM {SCHEMA}.dashboard_rows
+                    WHERE dashboard_id = %s
+                      AND id NOT IN (
+                          SELECT MIN(id) FROM {SCHEMA}.dashboard_rows
+                          WHERE dashboard_id = %s
+                          GROUP BY city
+                      )""",
+                (int(dashboard_id), int(dashboard_id)),
+            )
+            removed = cur.rowcount
+            conn.commit()
+            return {
+                "statusCode": 200,
+                "headers": {**CORS, "Content-Type": "application/json"},
+                "body": json.dumps({"ok": True, "removed": removed}),
+            }
+
         if method == "GET":
             raw_mode = params.get("raw") == "1"
             cur.execute(
@@ -74,20 +93,47 @@ def handler(event: dict, context) -> dict:
             rows = body.get("rows", [])
             for row in rows:
                 row_id = row.get("id")
+                city = row.get("city", "")
                 incoming = {k: int(row.get(k)) for k in col_keys if row.get(k) is not None}
                 if row_id:
                     cur.execute(
                         f"""UPDATE {SCHEMA}.dashboard_rows
                             SET data = data || %s::jsonb, city = %s, updated_at = NOW()
                             WHERE id = %s AND dashboard_id = %s""",
-                        (json.dumps(incoming), row.get("city", ""), int(row_id), int(dashboard_id)),
+                        (json.dumps(incoming), city, int(row_id), int(dashboard_id)),
                     )
                 else:
                     data = {k: int(row.get(k, 0)) for k in col_keys}
                     cur.execute(
-                        f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES (%s, %s, %s)",
-                        (int(dashboard_id), row.get("city", ""), json.dumps(data)),
+                        f"""SELECT id FROM {SCHEMA}.dashboard_rows
+                            WHERE dashboard_id = %s AND city = %s
+                            ORDER BY id LIMIT 1""",
+                        (int(dashboard_id), city),
                     )
+                    existing = cur.fetchone()
+                    if existing:
+                        cur.execute(
+                            f"""UPDATE {SCHEMA}.dashboard_rows
+                                SET data = data || %s::jsonb, updated_at = NOW()
+                                WHERE id = %s""",
+                            (json.dumps(data), existing[0]),
+                        )
+                    else:
+                        cur.execute(
+                            f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES (%s, %s, %s)",
+                            (int(dashboard_id), city, json.dumps(data)),
+                        )
+
+            cur.execute(
+                f"""DELETE FROM {SCHEMA}.dashboard_rows
+                    WHERE dashboard_id = %s
+                      AND id NOT IN (
+                          SELECT MIN(id) FROM {SCHEMA}.dashboard_rows
+                          WHERE dashboard_id = %s
+                          GROUP BY city
+                      )""",
+                (int(dashboard_id), int(dashboard_id)),
+            )
             conn.commit()
             return {
                 "statusCode": 200,
