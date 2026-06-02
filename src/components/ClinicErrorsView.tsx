@@ -157,7 +157,11 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
             </div>
             {stats.topReason ? (
               <>
-                <p className="font-display text-xl sm:text-2xl font-bold text-amber-300 truncate" title={stats.topReason.label}>
+                <p
+                  className="font-display text-lg sm:text-xl font-bold text-amber-300 leading-tight"
+                  title={stats.topReason.label}
+                  style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                >
                   {stats.topReason.label}
                 </p>
                 <p className="text-white/40 text-xs mt-1">
