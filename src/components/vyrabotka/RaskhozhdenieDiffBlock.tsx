@@ -6,8 +6,8 @@ import { DASHBOARD_ID, fmtMoney } from "./VyrabotkaUtils";
 interface DashRow {
   id: number;
   city: string;
-  raskhod_uk: number;
-  raskhod_city: number;
+  plan: number;
+  fact: number;
   [key: string]: unknown;
 }
 
@@ -50,8 +50,8 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
       const month = sep !== -1 ? r.city.substring(sep + 3) : null;
       if (selectedMonth && month !== selectedMonth) return;
       if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
-      cityMap[cityName].uk += Number(r.raskhod_uk) || 0;
-      cityMap[cityName].cityVal += Number(r.raskhod_city) || 0;
+      cityMap[cityName].uk += Number(r.fact) || 0;
+      cityMap[cityName].cityVal += Number(r.plan) || 0;
     });
     return Object.values(cityMap).map(c => ({ ...c, diff: c.uk - c.cityVal }));
   }, [rawRows, selectedMonth]);
@@ -97,15 +97,15 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
       <div className="flex items-start justify-between mb-5 gap-3 flex-wrap">
         <div>
           <h3 className="font-display font-bold text-white text-base sm:text-lg">
-            Разница расхождений
+            Отклонение от плана
           </h3>
-          <p className="text-white/40 text-xs">Расхождение УК минус Расхождение города</p>
+          <p className="text-white/40 text-xs">Факт минус План УК</p>
           <div className="flex items-center gap-4 mt-2">
             <span className="flex items-center gap-1.5 text-[11px] text-white/60">
-              <span className="w-3 h-3 rounded-sm" style={{ background: UK_COLOR }} />УК
+              <span className="w-3 h-3 rounded-sm" style={{ background: UK_COLOR }} />Факт
             </span>
             <span className="flex items-center gap-1.5 text-[11px] text-white/60">
-              <span className="w-3 h-3 rounded-sm" style={{ background: CITY_COLOR }} />Город
+              <span className="w-3 h-3 rounded-sm" style={{ background: CITY_COLOR }} />План УК
             </span>
           </div>
         </div>
@@ -138,7 +138,7 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
                     style={{ width: `${Math.max(ukPct, r.uk > 0 ? 3 : 0)}%`, background: UK_GRADIENT, boxShadow: r.uk > 0 ? UK_GLOW : "none" }}
                   />
                   <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
-                    УК: {fmtMoney(r.uk)}
+                    Факт: {fmtMoney(r.uk)}
                   </span>
                 </div>
                 <div className="h-7 rounded-lg bg-white/[0.04] overflow-hidden relative">
@@ -147,7 +147,7 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
                     style={{ width: `${Math.max(cityPct, r.cityVal > 0 ? 3 : 0)}%`, background: CITY_GRADIENT, boxShadow: r.cityVal > 0 ? CITY_GLOW : "none" }}
                   />
                   <span className="absolute inset-y-0 left-3 flex items-center text-xs font-semibold text-white pointer-events-none drop-shadow">
-                    Город: {fmtMoney(r.cityVal)}
+                    План УК: {fmtMoney(r.cityVal)}
                   </span>
                 </div>
               </div>
@@ -168,8 +168,8 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
           <span>{rows.length} городов</span>
         </div>
         <div className="flex items-center gap-4">
-          <span>УК: {fmtMoney(totals.uk)}</span>
-          <span>Город: {fmtMoney(totals.cityVal)}</span>
+          <span>Факт: {fmtMoney(totals.uk)}</span>
+          <span>План УК: {fmtMoney(totals.cityVal)}</span>
         </div>
       </div>
     </div>
