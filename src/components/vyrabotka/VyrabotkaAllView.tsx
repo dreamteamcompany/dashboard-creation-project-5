@@ -199,7 +199,7 @@ export default function VyrabotkaAllView({
           </div>
         </div>}
 
-      {(pieDataFact.length > 0 || deviationData.length > 0) && <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {pieDataFact.length > 0 && <div className="grid grid-cols-1 gap-4">
         {pieDataFact.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
           <div className="mb-6">
             <h3 className="font-display font-bold text-white text-lg">Доля городов в выработке</h3>
@@ -260,39 +260,6 @@ export default function VyrabotkaAllView({
           </div>
         </div>}
 
-        {deviationData.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
-          <div className="mb-6">
-            <h3 className="font-display font-bold text-white text-lg">Отклонение от плана</h3>
-            <p className="text-white/40 text-xs mt-0.5">% выполнения по городам</p>
-          </div>
-          <div className="space-y-2">
-            {deviationData.map((entry) => {
-              const isPositive = entry.value >= 0;
-              const pct = entry.pct;
-              const barWidth = Math.min(pct, 130);
-              return (
-                <div key={entry.name} className="flex items-center gap-3">
-                  <span className="text-xs text-white/60 w-[110px] shrink-0 truncate text-right">{entry.name}</span>
-                  <div className="flex-1 h-6 rounded-md bg-white/5 relative overflow-hidden">
-                    <div
-                      className="h-full rounded-md transition-all duration-700"
-                      style={{
-                        width: `${(barWidth / 130) * 100}%`,
-                        background: statusGradient(isPositive ? 100 : pct),
-                      }}
-                    />
-                    {pct >= 100 && (
-                      <div className="absolute left-0 top-0 h-full border-r-2 border-white/30" style={{ width: `${(100 / 130) * 100}%` }} />
-                    )}
-                  </div>
-                  <span className={`text-xs font-bold w-[52px] shrink-0 text-right ${pctColor(pct)}`}>
-                    {pct.toFixed(1)}%
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>}
       </div>}
 
       {filteredMonthly.length > 0 && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
