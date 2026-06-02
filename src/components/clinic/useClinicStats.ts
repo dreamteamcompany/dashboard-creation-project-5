@@ -36,6 +36,7 @@ export interface CityMonthCell {
   month: string;
   value: number;
   types: Record<ClinicErrorType, number>;
+  reasons: Record<string, number>;
 }
 
 export interface CityProfile {
@@ -113,7 +114,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
     const byType: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
     const byTypePrev: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
 
-    const cityMap: Record<string, { total: number; prev: number; byType: Record<ClinicErrorType, number>; byReason: Record<string, { value: number; type?: ClinicErrorType }>; byMonth: Record<string, { total: number; types: Record<ClinicErrorType, number> }> }> = {};
+    const cityMap: Record<string, { total: number; prev: number; byType: Record<ClinicErrorType, number>; byReason: Record<string, { value: number; type?: ClinicErrorType }>; byMonth: Record<string, { total: number; types: Record<ClinicErrorType, number>; reasons: Record<string, number> }> }> = {};
     const reasonMap: Record<string, ReasonTotal> = {};
     const monthMap: Record<string, { total: number; types: Record<ClinicErrorType, number> }> = {};
     const monthMapPrev: Record<string, { total: number; types: Record<ClinicErrorType, number> }> = {};
@@ -163,9 +164,10 @@ export function useClinicStats({ rows, columns, filters }: Params) {
             if (col.type) monthMap[month].types[col.type] += v;
 
             if (city) {
-              cityMap[city].byMonth[month] = cityMap[city].byMonth[month] || { total: 0, types: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 } };
+              cityMap[city].byMonth[month] = cityMap[city].byMonth[month] || { total: 0, types: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 }, reasons: {} };
               cityMap[city].byMonth[month].total += v;
               if (col.type) cityMap[city].byMonth[month].types[col.type] += v;
+              cityMap[city].byMonth[month].reasons[label] = (cityMap[city].byMonth[month].reasons[label] || 0) + v;
             }
           }
 
@@ -213,6 +215,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
               "Фин": mb.types["Фин"] || 0,
               "Сервис": mb.types["Сервис"] || 0,
             },
+            reasons: mb.reasons || {},
           });
         }
       }

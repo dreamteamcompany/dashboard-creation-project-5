@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import Icon from "@/components/ui/icon";
 import type { CityMonthCell } from "./useClinicStats";
-import type { ClinicErrorType } from "./types";
+import type { ClinicErrorType, ColumnDef } from "./types";
 import { ALL_TYPES, TYPE_COLORS } from "./types";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   months: string[];
   cells: CityMonthCell[];
   max: number;
+  columns?: ColumnDef[];
   onCityClick?: (city: string) => void;
 }
 
@@ -26,16 +27,38 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-function colorForType(value: number, max: number, type: ClinicErrorType): string {
+function colorForValue(value: number, max: number, color: string): string {
   if (value === 0) return "rgba(255,255,255,0.04)";
   const ratio = max > 0 ? value / max : 0;
   const alpha = 0.2 + ratio * 0.7;
-  return hexToRgba(TYPE_COLORS[type], Math.min(alpha, 0.9));
+  return hexToRgba(color, Math.min(alpha, 0.9));
 }
 
-export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Props) {
+function colorForType(value: number, max: number, type: ClinicErrorType): string {
+  return colorForValue(value, max, TYPE_COLORS[type]);
+}
+
+export default function ClinicHeatmap({ cities, months, cells, columns = [], onCityClick }: Props) {
   const [activeType, setActiveType] = useState<ClinicErrorType | "all">("all");
   const visibleTypes = activeType === "all" ? ALL_TYPES : [activeType];
+  const showReasons = activeType !== "all";
+
+  // Причины выбранного отдела (label), у которых есть хотя бы одна ошибка
+  const reasonLabels: string[] = useMemo(() => {
+    if (activeType === "all") return [];
+    const labels = columns
+      .filter(c => c.type === activeType)
+      .map(c => c.label || c.key);
+    const present = new Set<string>();
+    cells.forEach(c => {
+      Object.entries(c.reasons || {}).forEach(([label, v]) => {
+        if (v > 0 && labels.includes(label)) present.add(label);
+      });
+    });
+    return labels.filter(l => present.has(l));
+  }, [activeType, columns, cells]);
+
+  const reasonColor = activeType === "all" ? "#8b5cf6" : TYPE_COLORS[activeType];
 
   const map: Record<string, Record<string, CityMonthCell>> = useMemo(() => {
     const m: Record<string, Record<string, CityMonthCell>> = {};
@@ -70,6 +93,20 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
     });
     return res;
   }, [cities, months, map]);
+
+  const reasonMax = useMemo(() => {
+    let res = 0;
+    if (!showReasons) return 0;
+    cities.forEach(city => {
+      months.forEach(m => {
+        reasonLabels.forEach(label => {
+          const v = map[city]?.[m]?.reasons?.[label] || 0;
+          if (v > res) res = v;
+        });
+      });
+    });
+    return res;
+  }, [cities, months, map, reasonLabels, showReasons]);
 
   if (cities.length === 0 || months.length === 0) return null;
 
@@ -131,7 +168,7 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
                 className="text-left text-white/40 font-medium px-1 sticky z-10"
                 style={{ background: "var(--page-bg, #0a0812)", left: 0 }}
               >
-                Отдел
+                {showReasons ? "Причина" : "Отдел"}
               </th>
               {months.map(m => (
                 <th
@@ -145,69 +182,135 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
             </tr>
           </thead>
           <tbody>
-            {cities.map((city, ci) => (
-              <>
-                {visibleTypes.map((t, ti) => {
-                  const color = TYPE_COLORS[t];
-                  const rowTotal = months.reduce(
-                    (s, m) => s + (map[city]?.[m]?.types[t] || 0),
-                    0,
-                  );
+            {showReasons
+              ? cities.map((city, ci) => {
+                  const rowsForCity = reasonLabels.length > 0 ? reasonLabels : [""];
                   return (
-                    <tr
-                      key={`${city}-${t}`}
-                      className={ti === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
-                    >
-                      {ti === 0 ? (
-                        <td
-                          rowSpan={visibleTypes.length}
-                          className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
-                          style={{
-                            background: "var(--page-bg, #0a0812)",
-                            borderTop: ci > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined,
-                          }}
-                          onClick={onCityClick ? () => onCityClick(city) : undefined}
-                        >
-                          {city}
-                        </td>
-                      ) : null}
-                      <td
-                        className="px-1.5 text-[9px] font-bold tracking-wider"
-                        style={{ color }}
-                        title={t}
-                      >
-                        {TYPE_SHORT[t]}
-                      </td>
-                      {months.map(m => {
-                        const v = map[city]?.[m]?.types[t] || 0;
+                    <>
+                      {rowsForCity.map((label, li) => {
+                        const rowTotal = months.reduce(
+                          (s, m) => s + (map[city]?.[m]?.reasons?.[label] || 0),
+                          0,
+                        );
                         return (
-                          <td
-                            key={m}
-                            className="text-center rounded transition-all duration-150 hover:scale-110"
-                            style={{
-                              background: colorForType(v, typeMax[t], t),
-                              minWidth: 38,
-                              height: 20,
-                            }}
-                            title={`${city} · ${m} · ${t}: ${v}`}
+                          <tr
+                            key={`${city}-${label}`}
+                            className={li === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
                           >
-                            <span className="text-[10px] font-semibold text-white/95">
-                              {v || ""}
-                            </span>
-                          </td>
+                            {li === 0 ? (
+                              <td
+                                rowSpan={rowsForCity.length}
+                                className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
+                                style={{
+                                  background: "var(--page-bg, #0a0812)",
+                                  borderTop: ci > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined,
+                                }}
+                                onClick={onCityClick ? () => onCityClick(city) : undefined}
+                              >
+                                {city}
+                              </td>
+                            ) : null}
+                            <td
+                              className="px-1.5 text-[10px] font-medium whitespace-nowrap max-w-[200px] truncate"
+                              style={{ color: reasonColor }}
+                              title={label}
+                            >
+                              {label || "—"}
+                            </td>
+                            {months.map(m => {
+                              const v = map[city]?.[m]?.reasons?.[label] || 0;
+                              return (
+                                <td
+                                  key={m}
+                                  className="text-center rounded transition-all duration-150 hover:scale-110"
+                                  style={{
+                                    background: colorForValue(v, reasonMax, reasonColor),
+                                    minWidth: 38,
+                                    height: 20,
+                                  }}
+                                  title={`${city} · ${m} · ${label}: ${v}`}
+                                >
+                                  <span className="text-[10px] font-semibold text-white/95">
+                                    {v || ""}
+                                  </span>
+                                </td>
+                              );
+                            })}
+                            <td
+                              className="px-2 text-right text-[11px] font-bold tabular-nums"
+                              style={{ color: rowTotal > 0 ? reasonColor : "rgba(255,255,255,0.25)" }}
+                            >
+                              {rowTotal.toLocaleString("ru-RU")}
+                            </td>
+                          </tr>
                         );
                       })}
-                      <td
-                        className="px-2 text-right text-[11px] font-bold tabular-nums"
-                        style={{ color: rowTotal > 0 ? color : "rgba(255,255,255,0.25)" }}
-                      >
-                        {rowTotal.toLocaleString("ru-RU")}
-                      </td>
-                    </tr>
+                    </>
                   );
-                })}
-              </>
-            ))}
+                })
+              : cities.map((city, ci) => (
+                  <>
+                    {visibleTypes.map((t, ti) => {
+                      const color = TYPE_COLORS[t];
+                      const rowTotal = months.reduce(
+                        (s, m) => s + (map[city]?.[m]?.types[t] || 0),
+                        0,
+                      );
+                      return (
+                        <tr
+                          key={`${city}-${t}`}
+                          className={ti === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
+                        >
+                          {ti === 0 ? (
+                            <td
+                              rowSpan={visibleTypes.length}
+                              className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
+                              style={{
+                                background: "var(--page-bg, #0a0812)",
+                                borderTop: ci > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined,
+                              }}
+                              onClick={onCityClick ? () => onCityClick(city) : undefined}
+                            >
+                              {city}
+                            </td>
+                          ) : null}
+                          <td
+                            className="px-1.5 text-[9px] font-bold tracking-wider"
+                            style={{ color }}
+                            title={t}
+                          >
+                            {TYPE_SHORT[t]}
+                          </td>
+                          {months.map(m => {
+                            const v = map[city]?.[m]?.types[t] || 0;
+                            return (
+                              <td
+                                key={m}
+                                className="text-center rounded transition-all duration-150 hover:scale-110"
+                                style={{
+                                  background: colorForType(v, typeMax[t], t),
+                                  minWidth: 38,
+                                  height: 20,
+                                }}
+                                title={`${city} · ${m} · ${t}: ${v}`}
+                              >
+                                <span className="text-[10px] font-semibold text-white/95">
+                                  {v || ""}
+                                </span>
+                              </td>
+                            );
+                          })}
+                          <td
+                            className="px-2 text-right text-[11px] font-bold tabular-nums"
+                            style={{ color: rowTotal > 0 ? color : "rgba(255,255,255,0.25)" }}
+                          >
+                            {rowTotal.toLocaleString("ru-RU")}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </>
+                ))}
           </tbody>
         </table>
       </div>

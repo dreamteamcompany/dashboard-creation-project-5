@@ -298,6 +298,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
         months={stats.currentMonths}
         cells={stats.cityMonthCells}
         max={stats.heatmapMaxValue}
+        columns={columns}
         onCityClick={setSelectedCity}
       />
 
