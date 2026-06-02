@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Icon from "@/components/ui/icon";
 import type { CityMonthCell } from "./useClinicStats";
 import type { ClinicErrorType } from "./types";
@@ -34,6 +34,9 @@ function colorForType(value: number, max: number, type: ClinicErrorType): string
 }
 
 export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Props) {
+  const [activeType, setActiveType] = useState<ClinicErrorType | "all">("all");
+  const visibleTypes = activeType === "all" ? ALL_TYPES : [activeType];
+
   const map: Record<string, Record<string, CityMonthCell>> = useMemo(() => {
     const m: Record<string, Record<string, CityMonthCell>> = {};
     cells.forEach(c => {
@@ -77,16 +80,40 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
           <h3 className="font-display font-bold text-white text-base sm:text-lg">
             Тепловая карта Город × Месяц
           </h3>
-          <p className="text-white/40 text-xs">Три отдела в одной таблице</p>
+          <p className="text-white/40 text-xs">
+            {activeType === "all" ? "Три отдела в одной таблице" : `Только: ${activeType}`}
+          </p>
         </div>
-        <div className="flex items-center gap-3 text-[10px]">
-          {ALL_TYPES.map(t => (
-            <div key={t} className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ background: TYPE_COLORS[t] }} />
-              <span className="text-white/60 font-medium">{t}</span>
-              <span className="text-white/40 tabular-nums">{typeTotals[t].toLocaleString("ru-RU")}</span>
-            </div>
-          ))}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            onClick={() => setActiveType("all")}
+            className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+              activeType === "all"
+                ? "bg-white/15 text-white"
+                : "bg-white/5 text-white/50 hover:text-white/80"
+            }`}
+          >
+            Все
+          </button>
+          {ALL_TYPES.map(t => {
+            const active = activeType === t;
+            return (
+              <button
+                key={t}
+                onClick={() => setActiveType(t)}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all flex items-center gap-1.5"
+                style={{
+                  background: active ? hexToRgba(TYPE_COLORS[t], 0.25) : "rgba(255,255,255,0.05)",
+                  color: active ? TYPE_COLORS[t] : "rgba(255,255,255,0.5)",
+                  boxShadow: active ? `inset 0 0 0 1px ${hexToRgba(TYPE_COLORS[t], 0.5)}` : undefined,
+                }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ background: TYPE_COLORS[t] }} />
+                {TYPE_SHORT[t]}
+                <span className="tabular-nums opacity-70">{typeTotals[t].toLocaleString("ru-RU")}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -120,7 +147,7 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
           <tbody>
             {cities.map((city, ci) => (
               <>
-                {ALL_TYPES.map((t, ti) => {
+                {visibleTypes.map((t, ti) => {
                   const color = TYPE_COLORS[t];
                   const rowTotal = months.reduce(
                     (s, m) => s + (map[city]?.[m]?.types[t] || 0),
@@ -133,7 +160,7 @@ export default function ClinicHeatmap({ cities, months, cells, onCityClick }: Pr
                     >
                       {ti === 0 ? (
                         <td
-                          rowSpan={3}
+                          rowSpan={visibleTypes.length}
                           className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
                           style={{
                             background: "var(--page-bg, #0a0812)",
