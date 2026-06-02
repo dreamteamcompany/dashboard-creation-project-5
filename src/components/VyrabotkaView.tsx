@@ -106,7 +106,7 @@ export default function VyrabotkaView() {
   const barData = DATA.map(d => {
     const t = getCityTotals(d, activeMonths, selectedMonth);
     return { name: d.city, plan: t.plan, fact: t.fact, pct: t.pct };
-  }).sort((a, b) => b.pct - a.pct);
+  }).sort((a, b) => a.name.localeCompare(b.name, "ru"));
 
   const pieDataFact = DATA.map((d, i) => {
     const t = getCityTotals(d, activeMonths, selectedMonth);
@@ -116,7 +116,7 @@ export default function VyrabotkaView() {
   const deviationData = DATA.map(d => {
     const t = getCityTotals(d, activeMonths, selectedMonth);
     return { name: d.city, value: t.diff, pct: t.pct };
-  }).filter(d => d.value !== 0).sort((a, b) => b.pct - a.pct);
+  }).filter(d => d.value !== 0).sort((a, b) => a.name.localeCompare(b.name, "ru"));
 
   const kpiKey = `${selectedCity || "all"}-${selectedMonth || "all"}`;
 
