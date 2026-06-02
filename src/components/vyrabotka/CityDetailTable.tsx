@@ -36,10 +36,10 @@ export default function CityDetailTable({
               <th className="text-right text-white/50 font-medium py-3 px-3">План</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">План УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Факт</th>
-              <th className="text-right text-white/50 font-medium py-3 px-3">Выработка на 20-е</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение от УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">%</th>
+              <th className="text-right text-white/50 font-medium py-3 px-3">Выработка на 20-е</th>
             </tr>
           </thead>
           <tbody>
@@ -55,7 +55,6 @@ export default function CityDetailTable({
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.plan)}</td>
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.planUk || 0)}</td>
                   <td className="py-3 px-3 text-right text-white">{md.fact > 0 ? fmtFull(md.fact) : "—"}</td>
-                  <td className="py-3 px-3 text-right text-white/70">{md.vyrabotkaNa20e > 0 ? fmtFull(md.vyrabotkaNa20e) : "—"}</td>
                   <td className="py-3 px-3 text-right font-semibold" style={{ color: diff >= 0 ? COLORS.good : COLORS.bad }}>
                     {md.fact > 0 ? ((diff >= 0 ? "+" : "") + fmtFull(diff)) : "—"}
                   </td>
@@ -69,6 +68,7 @@ export default function CityDetailTable({
                       </span>
                     ) : "—"}
                   </td>
+                  <td className="py-3 px-3 text-right text-white/70">{md.vyrabotkaNa20e > 0 ? fmtFull(md.vyrabotkaNa20e) : "—"}</td>
                 </tr>
               );
             })}
@@ -79,7 +79,6 @@ export default function CityDetailTable({
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlan)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlanUk)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalFact)}</td>
-              <td className="py-3 px-3 text-right text-white font-bold">{totalNa20e > 0 ? fmtFull(totalNa20e) : "—"}</td>
               <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiff >= 0 ? COLORS.good : COLORS.bad }}>
                 {(totalDiff >= 0 ? "+" : "") + fmtFull(totalDiff)}
               </td>
@@ -91,6 +90,7 @@ export default function CityDetailTable({
                   {totalPct.toFixed(1)}%
                 </span>
               </td>
+              <td className="py-3 px-3 text-right text-white font-bold">{totalNa20e > 0 ? fmtFull(totalNa20e) : "—"}</td>
             </tr>
           </tfoot>
         </table>
