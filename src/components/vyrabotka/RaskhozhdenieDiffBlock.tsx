@@ -57,7 +57,7 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
   }, [rawRows, selectedMonth]);
 
   const sorted = useMemo(
-    () => [...rows].sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff)),
+    () => [...rows].sort((a, b) => a.city.localeCompare(b.city, "ru")),
     [rows],
   );
 

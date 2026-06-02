@@ -318,11 +318,7 @@ export default function VyrabotkaAllView({
               <div key={d.name} className="group cursor-pointer" onClick={() => setSelectedCity(d.name)}>
                 <div className="flex flex-wrap items-center justify-between gap-y-0.5 mb-1.5">
                   <div className="flex items-center gap-2 min-w-0">
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
-                      idx === 0 ? "bg-[#00CC44]/20 text-[#00CC44]" :
-                      idx === barData.length - 1 ? "bg-[#E50000]/20 text-[#E50000]" :
-                      "bg-white/10 text-white/40"
-                    }`}>{idx + 1}</span>
+                    <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 bg-white/10 text-white/40">{idx + 1}</span>
                     <span className="text-sm text-white/80 font-medium group-hover:text-white transition-colors truncate">{d.name}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
