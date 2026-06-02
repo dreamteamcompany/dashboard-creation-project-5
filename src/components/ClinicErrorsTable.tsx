@@ -71,7 +71,8 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
             const cityA = String(a.city);
             const cityB = String(b.city);
             if (cityA !== cityB) return cityA.localeCompare(cityB, "ru");
-            return (MONTH_ORDER[String(a.month)] || 99) - (MONTH_ORDER[String(b.month)] || 99);
+            // строка-заголовок города (без месяца) идёт первой, затем месяцы по порядку
+            return (MONTH_ORDER[String(a.month)] || 0) - (MONTH_ORDER[String(b.month)] || 0);
           });
           arr.forEach(r => {
             if (r.month && String(r.month).length > 0) {
@@ -83,7 +84,8 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
             const [cityA, monthA] = String(a.city).split(" — ");
             const [cityB, monthB] = String(b.city).split(" — ");
             if (cityA !== cityB) return cityA.localeCompare(cityB, "ru");
-            return (MONTH_ORDER[monthA] || 99) - (MONTH_ORDER[monthB] || 99);
+            // строка-заголовок города (без месяца) идёт первой, затем месяцы по порядку
+            return (MONTH_ORDER[monthA] || 0) - (MONTH_ORDER[monthB] || 0);
           });
         }
         setRows(arr);
