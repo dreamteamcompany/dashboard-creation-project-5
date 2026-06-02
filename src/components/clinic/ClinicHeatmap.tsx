@@ -38,8 +38,20 @@ function colorForType(value: number, max: number, type: ClinicErrorType): string
   return colorForValue(value, max, TYPE_COLORS[type]);
 }
 
+interface HoverInfo {
+  rowKey: string;
+  month: string;
+  city: string;
+  label: string;
+  value: number;
+  color: string;
+  x: number;
+  y: number;
+}
+
 export default function ClinicHeatmap({ cities, months, cells, columns = [], onCityClick }: Props) {
   const [activeType, setActiveType] = useState<ClinicErrorType | "all">("all");
+  const [hover, setHover] = useState<HoverInfo | null>(null);
   const visibleTypes = activeType === "all" ? ALL_TYPES : [activeType];
   const showReasons = activeType !== "all";
 
@@ -154,31 +166,43 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
         </div>
       </div>
 
-      <div className="overflow-x-auto -mx-2 px-2">
+      <div className="overflow-auto -mx-2 px-2 max-h-[70vh]" onMouseLeave={() => setHover(null)}>
         <table className="w-full text-xs border-separate" style={{ borderSpacing: "2px" }}>
-          <thead>
+          <thead className="sticky top-0 z-20">
             <tr>
               <th
-                className="text-left text-white/40 font-medium px-2 sticky left-0 z-10"
+                className="text-left text-white/50 font-semibold px-2 py-2 sticky left-0 z-30"
                 style={{ background: "var(--page-bg, #0a0812)" }}
               >
                 Город
               </th>
               <th
-                className="text-left text-white/40 font-medium px-1 sticky z-10"
+                className="text-left text-white/50 font-semibold px-1 py-2 sticky z-30"
                 style={{ background: "var(--page-bg, #0a0812)", left: 0 }}
               >
                 {showReasons ? "Причина" : "Отдел"}
               </th>
-              {months.map(m => (
-                <th
-                  key={m}
-                  className="text-white/40 font-medium px-1 text-center min-w-[38px]"
-                >
-                  {m.slice(0, 3)}
-                </th>
-              ))}
-              <th className="text-white/40 font-medium px-2 text-right">Σ</th>
+              {months.map(m => {
+                const isHot = hover?.month === m;
+                return (
+                  <th
+                    key={m}
+                    className="font-semibold px-1 py-2 text-center min-w-[38px] transition-colors"
+                    style={{
+                      background: isHot ? "rgba(255,255,255,0.08)" : "var(--page-bg, #0a0812)",
+                      color: isHot ? "#fff" : "rgba(255,255,255,0.45)",
+                    }}
+                  >
+                    {m.slice(0, 3)}
+                  </th>
+                );
+              })}
+              <th
+                className="text-white/50 font-semibold px-2 py-2 text-right"
+                style={{ background: "var(--page-bg, #0a0812)" }}
+              >
+                Σ
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -195,12 +219,14 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                         </tr>
                       )}
                       {rowsForCity.map((label, li) => {
+                        const rowKey = `${city}-${label}`;
+                        const rowHot = hover?.rowKey === rowKey;
                         const rowTotal = months.reduce(
                           (s, m) => s + (map[city]?.[m]?.reasons?.[label] || 0),
                           0,
                         );
                         return (
-                          <tr key={`${city}-${label}`}>
+                          <tr key={rowKey}>
                             {li === 0 ? (
                               <td
                                 rowSpan={rowsForCity.length}
@@ -214,24 +240,37 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                               </td>
                             ) : null}
                             <td
-                              className="px-1.5 text-[10px] font-medium whitespace-nowrap max-w-[200px] truncate"
-                              style={{ color: reasonColor }}
+                              className="px-1.5 text-[10px] font-medium whitespace-nowrap max-w-[200px] truncate transition-colors"
+                              style={{ color: rowHot ? "#fff" : reasonColor }}
                               title={label}
                             >
                               {label || "—"}
                             </td>
                             {months.map(m => {
                               const v = map[city]?.[m]?.reasons?.[label] || 0;
+                              const colHot = hover?.month === m;
+                              const cellHot = rowHot && colHot;
                               return (
                                 <td
                                   key={m}
-                                  className="text-center rounded transition-all duration-150 hover:scale-110"
+                                  className="text-center rounded transition-all duration-100 cursor-default"
                                   style={{
                                     background: colorForValue(v, reasonMax, reasonColor),
                                     minWidth: 38,
                                     height: 20,
+                                    boxShadow: cellHot
+                                      ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
+                                      : (rowHot || colHot)
+                                      ? "inset 0 0 0 1px rgba(255,255,255,0.25)"
+                                      : undefined,
                                   }}
-                                  title={`${city} · ${m} · ${label}: ${v}`}
+                                  onMouseEnter={e =>
+                                    setHover({
+                                      rowKey, month: m, city, label, value: v, color: reasonColor,
+                                      x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.offsetWidth / 2,
+                                      y: e.currentTarget.getBoundingClientRect().top,
+                                    })
+                                  }
                                 >
                                   <span className="text-[10px] font-semibold text-white/95">
                                     {v || ""}
@@ -240,8 +279,11 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                               );
                             })}
                             <td
-                              className="px-2 text-right text-[11px] font-bold tabular-nums"
-                              style={{ color: rowTotal > 0 ? reasonColor : "rgba(255,255,255,0.25)" }}
+                              className="px-2 text-right text-[11px] font-bold tabular-nums transition-colors"
+                              style={{
+                                color: rowTotal > 0 ? reasonColor : "rgba(255,255,255,0.25)",
+                                background: rowHot ? "rgba(255,255,255,0.06)" : undefined,
+                              }}
                             >
                               {rowTotal.toLocaleString("ru-RU")}
                             </td>
@@ -255,13 +297,15 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                   <>
                     {visibleTypes.map((t, ti) => {
                       const color = TYPE_COLORS[t];
+                      const rowKey = `${city}-${t}`;
+                      const rowHot = hover?.rowKey === rowKey;
                       const rowTotal = months.reduce(
                         (s, m) => s + (map[city]?.[m]?.types[t] || 0),
                         0,
                       );
                       return (
                         <tr
-                          key={`${city}-${t}`}
+                          key={rowKey}
                           className={ti === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
                         >
                           {ti === 0 ? (
@@ -278,24 +322,37 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             </td>
                           ) : null}
                           <td
-                            className="px-1.5 text-[9px] font-bold tracking-wider"
-                            style={{ color }}
+                            className="px-1.5 text-[9px] font-bold tracking-wider transition-colors"
+                            style={{ color: rowHot ? "#fff" : color }}
                             title={t}
                           >
                             {TYPE_SHORT[t]}
                           </td>
                           {months.map(m => {
                             const v = map[city]?.[m]?.types[t] || 0;
+                            const colHot = hover?.month === m;
+                            const cellHot = rowHot && colHot;
                             return (
                               <td
                                 key={m}
-                                className="text-center rounded transition-all duration-150 hover:scale-110"
+                                className="text-center rounded transition-all duration-100 cursor-default"
                                 style={{
                                   background: colorForType(v, typeMax[t], t),
                                   minWidth: 38,
                                   height: 20,
+                                  boxShadow: cellHot
+                                    ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
+                                    : (rowHot || colHot)
+                                    ? "inset 0 0 0 1px rgba(255,255,255,0.25)"
+                                    : undefined,
                                 }}
-                                title={`${city} · ${m} · ${t}: ${v}`}
+                                onMouseEnter={e =>
+                                  setHover({
+                                    rowKey, month: m, city, label: t, value: v, color,
+                                    x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.offsetWidth / 2,
+                                    y: e.currentTarget.getBoundingClientRect().top,
+                                  })
+                                }
                               >
                                 <span className="text-[10px] font-semibold text-white/95">
                                   {v || ""}
@@ -304,8 +361,11 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             );
                           })}
                           <td
-                            className="px-2 text-right text-[11px] font-bold tabular-nums"
-                            style={{ color: rowTotal > 0 ? color : "rgba(255,255,255,0.25)" }}
+                            className="px-2 text-right text-[11px] font-bold tabular-nums transition-colors"
+                            style={{
+                              color: rowTotal > 0 ? color : "rgba(255,255,255,0.25)",
+                              background: rowHot ? "rgba(255,255,255,0.06)" : undefined,
+                            }}
                           >
                             {rowTotal.toLocaleString("ru-RU")}
                           </td>
@@ -317,6 +377,29 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
           </tbody>
         </table>
       </div>
+
+      {hover && hover.value > 0 && (
+        <div
+          className="fixed z-50 pointer-events-none px-3 py-2 rounded-lg text-xs shadow-xl"
+          style={{
+            left: hover.x,
+            top: hover.y - 8,
+            transform: "translate(-50%, -100%)",
+            background: "rgba(15,12,25,0.97)",
+            border: `1px solid ${hexToRgba(hover.color, 0.5)}`,
+          }}
+        >
+          <div className="font-semibold text-white">{hover.city}</div>
+          <div className="text-white/60 mt-0.5">{hover.month}</div>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="w-2 h-2 rounded-full" style={{ background: hover.color }} />
+            <span className="text-white/80">{hover.label}</span>
+            <span className="font-bold tabular-nums ml-1" style={{ color: hover.color }}>
+              {hover.value.toLocaleString("ru-RU")}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-end gap-3 mt-3 text-[10px] text-white/40 flex-wrap">
         {ALL_TYPES.map(t => (
