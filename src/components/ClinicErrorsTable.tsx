@@ -365,10 +365,22 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
               if (hasGroup && !isOpen) return null;
 
               return (
-                <tr key={(row.id || 0) + "-" + ri} className="border-b border-white/5 transition-colors hover:bg-white/3">
+                <tr
+                  key={(row.id || 0) + "-" + ri}
+                  className={`border-b transition-colors ${
+                    isCityRow
+                      ? "border-white/10 bg-violet-500/[0.07] hover:bg-violet-500/[0.12]"
+                      : "border-white/5 hover:bg-white/3"
+                  }`}
+                >
                   <td
-                    className="px-4 py-2.5 text-white/80 font-medium text-xs whitespace-nowrap sticky left-0 z-10"
-                    style={{ background: "var(--sticky-cell-bg)", paddingLeft: hasGroup ? 36 : undefined }}
+                    className={`px-4 py-2.5 text-xs whitespace-nowrap sticky left-0 z-10 ${
+                      isCityRow ? "text-white font-bold" : "text-white/80 font-medium"
+                    }`}
+                    style={{
+                      background: isCityRow ? "var(--clinic-city-bg, rgba(124,92,255,0.12))" : "var(--sticky-cell-bg)",
+                      paddingLeft: hasGroup ? 36 : undefined,
+                    }}
                   >
                     {editable && editingRowIdx === ri ? (
                       <input
