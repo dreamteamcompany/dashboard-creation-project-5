@@ -16,6 +16,7 @@ import VyrabotkaKPI from "./vyrabotka/VyrabotkaKPI";
 import VyrabotkaCityView from "./vyrabotka/VyrabotkaCityView";
 import VyrabotkaAllView from "./vyrabotka/VyrabotkaAllView";
 import VyrabotkaCompareBlock from "./vyrabotka/VyrabotkaCompareBlock";
+import RaskhozhdenieDiffBlock from "./vyrabotka/RaskhozhdenieDiffBlock";
 
 export default function VyrabotkaView() {
   const { theme } = useTheme();
@@ -362,6 +363,7 @@ export default function VyrabotkaView() {
 
       {!selectedCity && (
         <>
+          <RaskhozhdenieDiffBlock selectedMonth={selectedMonth} />
           <VyrabotkaCompareBlock mode="city" selectedMonth={selectedMonth} />
           <VyrabotkaCompareBlock mode="month" selectedCity={selectedCity} />
         </>
