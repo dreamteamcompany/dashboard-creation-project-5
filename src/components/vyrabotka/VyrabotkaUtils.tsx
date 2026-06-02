@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 export interface CityMonthData {
   plan: number;
   fact: number;
+  planUk: number;
 }
 
 export interface CityData {
@@ -13,6 +14,8 @@ export interface CityData {
 export interface CityTotals {
   plan: number;
   fact: number;
+  planUk: number;
+  diffUk: number;
   diff: number;
   pct: number;
 }
@@ -154,13 +157,13 @@ export const PieTooltip = ({ active, payload }: TTooltip) => {
 };
 
 export function getCityTotals(city: CityData, activeMonths: string[], month?: string | null): CityTotals {
-  let plan = 0, fact = 0;
+  let plan = 0, fact = 0, planUk = 0;
   const ms = month ? [month] : activeMonths;
   ms.forEach(m => {
     const md = city.months[m];
-    if (md) { plan += md.plan; fact += md.fact; }
+    if (md) { plan += md.plan; fact += md.fact; planUk += md.planUk || 0; }
   });
-  return { plan, fact, diff: fact - plan, pct: plan > 0 ? (fact / plan) * 100 : 0 };
+  return { plan, fact, planUk, diff: fact - plan, diffUk: fact - planUk, pct: plan > 0 ? (fact / plan) * 100 : 0 };
 }
 
 export default {};

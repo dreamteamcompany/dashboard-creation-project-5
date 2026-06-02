@@ -20,6 +20,8 @@ export default function CityDetailTable({
   selectedCity, cd, activeMonths,
   totalPlan, totalFact, totalDiff, totalPct,
 }: Props) {
+  const totalPlanUk = activeMonths.reduce((s, m) => s + (cd.months[m]?.planUk || 0), 0);
+  const totalDiffUk = totalFact - totalPlanUk;
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in-up">
       <div className="mb-6">
@@ -31,8 +33,10 @@ export default function CityDetailTable({
             <tr className="border-b border-white/10">
               <th className="text-left text-white/50 font-medium py-3 px-3">Месяц</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">План</th>
+              <th className="text-right text-white/50 font-medium py-3 px-3">План УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Факт</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение</th>
+              <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение от УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">%</th>
             </tr>
           </thead>
@@ -41,14 +45,19 @@ export default function CityDetailTable({
               const md = cd.months[m];
               if (!md) return null;
               const diff = md.fact - md.plan;
+              const diffUk = md.fact - (md.planUk || 0);
               const pct = md.plan > 0 ? (md.fact / md.plan) * 100 : 0;
               return (
                 <tr key={m} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="py-3 px-3 text-white font-medium">{MONTH_LABELS[m]}</td>
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.plan)}</td>
+                  <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.planUk || 0)}</td>
                   <td className="py-3 px-3 text-right text-white">{md.fact > 0 ? fmtFull(md.fact) : "—"}</td>
                   <td className="py-3 px-3 text-right font-semibold" style={{ color: diff >= 0 ? COLORS.good : COLORS.bad }}>
                     {md.fact > 0 ? ((diff >= 0 ? "+" : "") + fmtFull(diff)) : "—"}
+                  </td>
+                  <td className="py-3 px-3 text-right font-semibold" style={{ color: diffUk >= 0 ? COLORS.good : COLORS.bad }}>
+                    {md.fact > 0 ? ((diffUk >= 0 ? "+" : "") + fmtFull(diffUk)) : "—"}
                   </td>
                   <td className="py-3 px-3 text-right">
                     {md.fact > 0 ? (
@@ -65,9 +74,13 @@ export default function CityDetailTable({
             <tr className="border-t-2 border-white/20">
               <td className="py-3 px-3 text-white font-bold">Итого</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlan)}</td>
+              <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlanUk)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalFact)}</td>
               <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiff >= 0 ? COLORS.good : COLORS.bad }}>
                 {(totalDiff >= 0 ? "+" : "") + fmtFull(totalDiff)}
+              </td>
+              <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiffUk >= 0 ? COLORS.good : COLORS.bad }}>
+                {(totalDiffUk >= 0 ? "+" : "") + fmtFull(totalDiffUk)}
               </td>
               <td className="py-3 px-3 text-right">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${pctBg(totalPct)}`}>

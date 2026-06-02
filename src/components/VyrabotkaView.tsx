@@ -45,7 +45,7 @@ export default function VyrabotkaView() {
     const url = `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`;
     fetch(url)
       .then(r => r.json())
-      .then((rows: Array<{ id: number; city: string; plan: number; fact: number }>) => {
+      .then((rows: Array<{ id: number; city: string; plan: number; fact: number; plan_uk: number }>) => {
         const cityMap: Record<string, Record<string, CityMonthData>> = {};
         rows.forEach(r => {
           const sep = r.city.lastIndexOf(" — ");
@@ -53,7 +53,7 @@ export default function VyrabotkaView() {
           const cityName = r.city.substring(0, sep);
           const month = r.city.substring(sep + 3);
           if (!cityMap[cityName]) cityMap[cityName] = {};
-          cityMap[cityName][month] = { plan: r.plan, fact: r.fact };
+          cityMap[cityName][month] = { plan: r.plan, fact: r.fact, planUk: Number(r.plan_uk) || 0 };
         });
         const mapped: CityData[] = Object.entries(cityMap).map(([city, months]) => ({ city, months }));
         setDATA(mapped);
