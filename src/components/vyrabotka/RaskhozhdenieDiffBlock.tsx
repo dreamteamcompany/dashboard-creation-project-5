@@ -6,7 +6,7 @@ import { DASHBOARD_ID, fmtMoney } from "./VyrabotkaUtils";
 interface DashRow {
   id: number;
   city: string;
-  plan: number;
+  plan_uk: number;
   fact: number;
   [key: string]: unknown;
 }
@@ -51,7 +51,7 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
       if (selectedMonth && month !== selectedMonth) return;
       if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
       cityMap[cityName].uk += Number(r.fact) || 0;
-      cityMap[cityName].cityVal += Number(r.plan) || 0;
+      cityMap[cityName].cityVal += Number(r.plan_uk) || 0;
     });
     return Object.values(cityMap).map(c => ({ ...c, diff: c.uk - c.cityVal }));
   }, [rawRows, selectedMonth]);
