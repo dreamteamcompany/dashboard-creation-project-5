@@ -360,13 +360,16 @@ export default function VyrabotkaAllView({
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] sm:text-xs text-white/30 whitespace-nowrap">{fmtMoney(d.fact)}&nbsp;/&nbsp;{fmtMoney(d.plan)}</span>
-                    <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap ${
-                      pct >= 100 ? "bg-[#00CC44]/15 text-[#00CC44]" :
-                      pct >= 80 ? "bg-[#FFB800]/15 text-[#FFB800]" :
-                      "bg-[#E50000]/15 text-[#E50000]"
-                    }`}>
-                      {pct.toFixed(1)}%
-                    </span>
+                    {(() => {
+                      const diff = d.fact - d.plan;
+                      return (
+                        <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap ${
+                          diff >= 0 ? "bg-[#00CC44]/15 text-[#00CC44]" : "bg-[#E50000]/15 text-[#E50000]"
+                        }`}>
+                          {(diff >= 0 ? "+" : "") + fmtMoney(diff)}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="relative h-7 rounded-lg bg-white/[0.03] overflow-hidden group-hover:bg-white/[0.06] transition-colors">
