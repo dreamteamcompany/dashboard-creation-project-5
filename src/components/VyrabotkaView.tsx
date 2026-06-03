@@ -261,7 +261,7 @@ export default function VyrabotkaView() {
             >
               {stuck ? "Все" : "Все города"}
             </button>
-            {DATA.map(d => (
+            {[...DATA].sort((a, b) => a.city.localeCompare(b.city, "ru")).map(d => (
               <button key={d.city}
                 onClick={() => setSelectedCity(selectedCity === d.city ? null : d.city)}
                 className={`rounded-full transition-all duration-300 ${selectedCity === d.city ? "gradient-violet text-white font-semibold" : "glass glass-hover text-white/50"}`}
