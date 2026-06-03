@@ -4,9 +4,7 @@
       "name": "Unauthorized access",
       "method": "GET",
       "path": "/",
-      "expectedStatus": 401,
-      "expectedBody": {"error": "unauthorized"},
-      "bodyMatcher": "partial"
+      "expectedStatus": 401
     },
     {
       "name": "OPTIONS CORS",

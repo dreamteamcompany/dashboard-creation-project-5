@@ -60,12 +60,17 @@ def handler(event: dict, context) -> dict:
     if not user:
         return {"statusCode": 401, "headers": CORS, "body": json.dumps({"error": "unauthorized"})}
 
-    if user.get("role") != "admin":
-        return {"statusCode": 403, "headers": CORS, "body": json.dumps({"error": "admin_required"})}
-
     method = event.get("httpMethod", "GET")
     conn = get_conn()
     cur = conn.cursor()
+
+    cur.execute(f"SELECT role FROM {SCHEMA}.allowed_users WHERE bitrix_id = {int(user.get('bitrix_id', 0))}")
+    role_row = cur.fetchone()
+    current_role = role_row[0] if role_row else None
+    if current_role != "admin":
+        cur.close()
+        conn.close()
+        return {"statusCode": 403, "headers": CORS, "body": json.dumps({"error": "admin_required", "role": current_role})}
 
     if method == "GET":
         cur.execute(f"SELECT id, bitrix_id, name, role, created_at FROM {SCHEMA}.allowed_users ORDER BY created_at ASC")
