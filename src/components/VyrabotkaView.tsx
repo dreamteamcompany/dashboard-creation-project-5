@@ -92,8 +92,12 @@ export default function VyrabotkaView() {
     return { ...d, ...t };
   }).filter(c => c.plan > 0).sort((a, b) => b.pct - a.pct);
 
-  const bestCity = cityRanking[0];
   const worstCity = cityRanking[cityRanking.length - 1];
+
+  const bestCity = DATA.map(d => {
+    const t = getCityTotals(d, activeMonths, selectedMonth);
+    return { city: d.city, pct: t.planUk > 0 ? (t.fact / t.planUk) * 100 : 0, planUk: t.planUk };
+  }).filter(c => c.planUk > 0).sort((a, b) => b.pct - a.pct)[0];
 
   const monthlyData = activeMonths.map(m => {
     let plan = 0, fact = 0;
