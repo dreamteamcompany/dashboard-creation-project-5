@@ -53,7 +53,7 @@ export default function VyrabotkaView() {
           const cityName = r.city.substring(0, sep);
           const month = r.city.substring(sep + 3);
           if (!cityMap[cityName]) cityMap[cityName] = {};
-          const factVal = Number(r.fact ?? r.fakt) || 0;
+          const factVal = Number(r.fakt ?? r.fact) || 0;
           cityMap[cityName][month] = { plan: Number(r.plan) || 0, fact: factVal, planUk: Number(r.plan_uk) || 0, vyrabotkaNa20e: Number(r.vyrabotka_na_20e) || 0 };
         });
         const mapped: CityData[] = Object.entries(cityMap).map(([city, months]) => ({ city, months }));
