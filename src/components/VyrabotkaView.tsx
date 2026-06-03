@@ -103,7 +103,7 @@ export default function VyrabotkaView() {
     let plan = 0, fact = 0;
     filteredData.forEach(d => {
       const md = d.months[m];
-      if (md) { plan += md.plan; fact += md.fact; }
+      if (md) { plan += (md.planUk || 0); fact += md.fact; }
     });
     return { name: MONTH_LABELS[m] || m, shortName: m, plan, fact, pct: plan > 0 ? ((fact / plan) * 100) : 0 };
   });
