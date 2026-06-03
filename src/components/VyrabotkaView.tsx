@@ -84,7 +84,7 @@ export default function VyrabotkaView() {
     totalFact += t.fact;
     totalPlanUk += t.planUk;
   });
-  const totalDiff = totalFact - totalPlan;
+  const totalDiff = totalFact - totalPlanUk;
   const totalPct = totalPlan > 0 ? (totalFact / totalPlan) * 100 : 0;
 
   const cityRanking = DATA.map(d => {
