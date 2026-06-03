@@ -81,6 +81,8 @@ def handler(event: dict, context) -> dict:
                     item = {"id": r[0], "city": r[1]}
                     for k in col_keys:
                         item[k] = row_data.get(k, 0)
+                    if "fact" not in item:
+                        item["fact"] = row_data.get("fact", 0)
                 result.append(item)
             return {
                 "statusCode": 200,
