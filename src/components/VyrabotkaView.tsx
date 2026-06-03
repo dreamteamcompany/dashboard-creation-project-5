@@ -77,11 +77,12 @@ export default function VyrabotkaView() {
 
   const filteredData = selectedCity ? DATA.filter(d => d.city === selectedCity) : DATA;
 
-  let totalPlan = 0, totalFact = 0;
+  let totalPlan = 0, totalFact = 0, totalPlanUk = 0;
   filteredData.forEach(d => {
     const t = getCityTotals(d, activeMonths, selectedMonth);
     totalPlan += t.plan;
     totalFact += t.fact;
+    totalPlanUk += t.planUk;
   });
   const totalDiff = totalFact - totalPlan;
   const totalPct = totalPlan > 0 ? (totalFact / totalPlan) * 100 : 0;
@@ -166,7 +167,7 @@ export default function VyrabotkaView() {
     : [
         {
           label: "Общий план",
-          value: fmtMoney(totalPlan),
+          value: fmtMoney(totalPlanUk),
           icon: "Target",
           gradient: "gradient-violet",
           textGradient: "text-gradient-violet",
