@@ -67,11 +67,11 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
   );
 
   const UK_COLOR = "#3B82F6";
-  const CITY_COLOR = "#F59E0B";
+  const CITY_COLOR = "#7F00FF";
   const UK_GRADIENT = "linear-gradient(90deg, #2563EB, #60A5FA)";
-  const CITY_GRADIENT = "linear-gradient(90deg, #D97706, #FBBF24)";
+  const CITY_GRADIENT = "linear-gradient(90deg, #5B00B5, #7F00FF)";
   const UK_GLOW = "0 0 20px #3B82F666, 0 0 40px #3B82F626";
-  const CITY_GLOW = "0 0 20px #F59E0B66, 0 0 40px #F59E0B26";
+  const CITY_GLOW = "0 0 20px #7F00FF66, 0 0 40px #7F00FF26";
 
   const totals = useMemo(() => {
     const uk = rows.reduce((s, r) => s + r.uk, 0);
