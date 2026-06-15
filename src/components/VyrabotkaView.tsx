@@ -132,8 +132,8 @@ export default function VyrabotkaView() {
         const rank = cityRanking.findIndex(c => c.city === selectedCity) + 1;
         return [
           {
-            label: `План · ${selectedCity}`,
-            value: fmtMoney(ct.plan),
+            label: `План УК · ${selectedCity}`,
+            value: fmtMoney(ct.planUk),
             icon: "Target",
             gradient: "gradient-violet",
             textGradient: "text-gradient-violet",
