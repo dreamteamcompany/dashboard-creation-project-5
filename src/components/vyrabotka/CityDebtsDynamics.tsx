@@ -30,6 +30,8 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
     return { name: MONTH_LABELS[m] || m, debt, cum };
   });
 
+  const maxCum = data.length ? Math.max(...data.map(d => d.cum)) : 0;
+  const yMin = maxCum > 0 ? -maxCum * 0.04 : 0;
   const totalDebt = data.length ? data[data.length - 1].cum : 0;
   const lastDebt = data.length ? data[data.length - 1].debt : 0;
   const prevDebt = data.length > 1 ? data[data.length - 2].debt : 0;
@@ -66,7 +68,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
           <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"} vertical={false} />
           <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={50} />
           <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
-            tickFormatter={(v: number) => fmtShort(v)} width={70} />
+            tickFormatter={(v: number) => fmtShort(v)} width={70} domain={[yMin, 'auto']} />
           <Tooltip
             cursor={{ stroke: COLORS.bad, strokeWidth: 1, strokeDasharray: "4 4" }}
             content={({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: { debt?: number; cum?: number } }>; label?: string }) => {
