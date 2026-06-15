@@ -8,6 +8,7 @@ import {
 import CityKpiCards from "./CityKpiCards";
 import CityEfficiencyPanel from "./CityEfficiencyPanel";
 import CityChartsPanel from "./CityChartsPanel";
+import CityDebtsDynamics from "./CityDebtsDynamics";
 import CityDetailTable from "./CityDetailTable";
 
 interface MonthlyDataItem {
@@ -165,6 +166,16 @@ export default function VyrabotkaCityView({
         isLight={isLight}
         axisColor={axisColor}
       />
+
+      {selectedMonth && (
+        <CityDebtsDynamics
+          cd={cd}
+          activeMonths={activeMonths}
+          selectedMonth={selectedMonth}
+          isLight={isLight}
+          axisColor={axisColor}
+        />
+      )}
 
       <CityDetailTable
         selectedCity={selectedCity}
