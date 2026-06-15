@@ -22,6 +22,7 @@ interface Props {
   selectedCity: string;
   DATA: CityData[];
   activeMonths: string[];
+  selectedMonth?: string | null;
   monthlyData: MonthlyDataItem[];
   totalPlan: number;
   totalFact: number;
@@ -34,7 +35,7 @@ interface Props {
 }
 
 export default function VyrabotkaCityView({
-  selectedCity, DATA, activeMonths, monthlyData,
+  selectedCity, DATA, activeMonths, selectedMonth, monthlyData,
   totalPlan, totalFact, totalDiff, totalPct,
   kpiKey, isLight, axisColor, cityRanking,
 }: Props) {
@@ -72,7 +73,7 @@ export default function VyrabotkaCityView({
   const cityFactTotal = monthsData.reduce((s, d) => s + d.fact, 0);
   const shareOfTotal = allCitiesFactTotal > 0 ? (cityFactTotal / allCitiesFactTotal) * 100 : 0;
 
-  const cityTotals = getCityTotals(cd, activeMonths);
+  const cityTotals = getCityTotals(cd, activeMonths, selectedMonth);
   const planExecution = cityTotals.planUk > 0 ? (cityTotals.fact / cityTotals.planUk) * 100 : 0;
   const stability = monthsData.length > 1
     ? (() => {

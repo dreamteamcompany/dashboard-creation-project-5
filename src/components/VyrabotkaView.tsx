@@ -341,6 +341,7 @@ export default function VyrabotkaView() {
           selectedCity={selectedCity}
           DATA={DATA}
           activeMonths={activeMonths}
+          selectedMonth={selectedMonth}
           monthlyData={monthlyData}
           totalPlan={totalPlan}
           totalFact={totalFact}
