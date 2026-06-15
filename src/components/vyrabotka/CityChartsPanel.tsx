@@ -6,7 +6,6 @@ import {
 import {
   COLORS,
   fmtShort,
-  fmtFull,
   CustomTooltip,
 } from "./VyrabotkaUtils";
 
@@ -146,77 +145,6 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
         </div>
       </div>}
 
-      {filtered.some(d => d.fact > 0) && <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
-        <div className="mb-6">
-          <h3 className="font-display font-bold text-white text-lg">Отклонение по месяцам</h3>
-          <p className="text-white/40 text-xs mt-0.5">Перевыполнение / недовыполнение</p>
-        </div>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={monthlyData.filter(d => d.fact > 0).map(d => ({ ...d, deviation: d.fact - d.plan, absDeviation: Math.abs(d.fact - d.plan) }))} margin={{ top: 20, right: 5, left: 10, bottom: 0 }} barCategoryGap="8%">
-            <defs>
-              <linearGradient id="gradDevPos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={COLORS.good} stopOpacity={1} />
-                <stop offset="100%" stopColor="#009933" stopOpacity={0.9} />
-              </linearGradient>
-              <linearGradient id="gradDevNeg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={COLORS.bad} stopOpacity={1} />
-                <stop offset="100%" stopColor="#B30000" stopOpacity={0.9} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.04)"} vertical={false} />
-            <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
-              tickFormatter={(v: number) => fmtShort(v)} width={70} />
-            <Tooltip cursor={{ fill: isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)", radius: 8 }}
-              content={({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: { plan?: number; fact?: number; deviation?: number } }>; label?: string }) => {
-                if (!active || !payload?.length) return null;
-                const d = payload[0]?.payload;
-                if (!d) return null;
-                return (
-                  <div className="chart-tooltip p-3 rounded-xl" style={{ minWidth: 180 }}>
-                    <p className="text-xs text-white/50 mb-2">{label}</p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-2 h-2 rounded-full" style={{ background: COLORS.plan }} />
-                      <span className="text-white/70">План:</span>
-                      <span className="font-semibold text-white ml-auto">{fmtFull(d.plan || 0)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="w-2 h-2 rounded-full" style={{ background: COLORS.fact }} />
-                      <span className="text-white/70">Факт:</span>
-                      <span className="font-semibold text-white ml-auto">{fmtFull(d.fact || 0)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm mt-1 pt-1 border-t border-white/10">
-                      <span className="w-2 h-2 rounded-full" style={{ background: (d.deviation || 0) >= 0 ? COLORS.good : COLORS.bad }} />
-                      <span className="text-white/70">{(d.deviation || 0) >= 0 ? "Перевыполнение:" : "Недовыполнение:"}</span>
-                      <span className="font-semibold ml-auto" style={{ color: (d.deviation || 0) >= 0 ? COLORS.good : COLORS.bad }}>
-                        {(d.deviation || 0) >= 0 ? "+" : ""}{fmtFull(d.deviation || 0)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              }}
-            />
-            <Bar dataKey="absDeviation" name="Отклонение" radius={[6, 6, 0, 0]}
-              label={({ x, y, width: w, value, index }: { x: number; y: number; width: number; value: number; index: number }) => {
-                const factFiltered = monthlyData.filter(d => d.fact > 0);
-                const d = factFiltered[index];
-                if (!d || value === 0) return null;
-                const isPositive = d.fact - d.plan >= 0;
-                return (
-                  <text x={x + w / 2} y={y - 6} textAnchor="middle"
-                    fill={isPositive ? COLORS.good : COLORS.bad} fontSize={10} fontWeight={600}>
-                    {isPositive ? "+" : "−"}{fmtShort(value)}
-                  </text>
-                );
-              }}
-            >
-              {monthlyData.filter(d => d.fact > 0).map((d, i) => (
-                <Cell key={i} fill={d.fact - d.plan >= 0 ? "url(#gradDevPos)" : "url(#gradDevNeg)"} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>}
     </>
   );
 }
