@@ -134,7 +134,7 @@ export default function VyrabotkaAllView({
               </div>
             )}
           </div>
-          <div className="space-y-1 max-h-[280px] overflow-y-auto pr-1">
+          <div className="space-y-1 pr-1">
             {cityRanking.map((c, i) => {
               const isLeader = i === 0;
               const isTop3 = i < 3;
