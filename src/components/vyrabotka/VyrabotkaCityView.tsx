@@ -167,15 +167,13 @@ export default function VyrabotkaCityView({
         axisColor={axisColor}
       />
 
-      {selectedMonth && (
-        <CityDebtsDynamics
-          cd={cd}
-          activeMonths={activeMonths}
-          selectedMonth={selectedMonth}
-          isLight={isLight}
-          axisColor={axisColor}
-        />
-      )}
+      <CityDebtsDynamics
+        cd={cd}
+        activeMonths={activeMonths}
+        selectedMonth={selectedMonth}
+        isLight={isLight}
+        axisColor={axisColor}
+      />
 
       <CityDetailTable
         selectedCity={selectedCity}

@@ -14,13 +14,13 @@ import {
 interface Props {
   cd: CityData;
   activeMonths: string[];
-  selectedMonth: string;
+  selectedMonth?: string | null;
   isLight: boolean;
   axisColor: string;
 }
 
 export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isLight, axisColor }: Props) {
-  const endIdx = activeMonths.indexOf(selectedMonth);
+  const endIdx = selectedMonth ? activeMonths.indexOf(selectedMonth) : -1;
   const months = endIdx >= 0 ? activeMonths.slice(0, endIdx + 1) : activeMonths;
 
   let cum = 0;
@@ -40,7 +40,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-display font-bold text-white text-lg">Динамика роста долгов</h3>
-          <p className="text-white/40 text-xs mt-0.5">Накопленные долги клиники по {MONTH_LABELS[selectedMonth]}</p>
+          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Накопленные долги клиники по ${MONTH_LABELS[selectedMonth]}` : "Накопленные долги клиники за весь период"}</p>
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${growth > 0 ? "bg-[#E50000]/10 border border-[#E50000]/20" : "bg-[#00CC44]/10 border border-[#00CC44]/20"}`}>
           <Icon name={growth > 0 ? "TrendingUp" : "TrendingDown"} size={13} className={growth > 0 ? "text-[#E50000]" : "text-[#00CC44]"} />
