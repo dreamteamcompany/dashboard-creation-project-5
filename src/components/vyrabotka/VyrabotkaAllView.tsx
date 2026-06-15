@@ -326,7 +326,7 @@ export default function VyrabotkaAllView({
                     {(() => {
                       const diff = d.fact - d.plan;
                       return (
-                        <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap ${
+                        <span className={`text-xs sm:text-sm font-bold px-1.5 sm:px-2 py-0.5 rounded-full whitespace-nowrap ${
                           diff >= 0 ? "bg-[#00CC44]/15 text-[#00CC44]" : "bg-[#E50000]/15 text-[#E50000]"
                         }`}>
                           {(diff >= 0 ? "+" : "") + fmtMoney(diff)}
