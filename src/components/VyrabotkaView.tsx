@@ -151,12 +151,12 @@ export default function VyrabotkaView() {
           },
           {
             label: "Отклонение",
-            value: (ct.diff >= 0 ? "+" : "") + fmtMoney(ct.diff),
-            icon: ct.diff >= 0 ? "ArrowUpRight" : "ArrowDownRight",
-            gradient: ct.diff >= 0 ? "gradient-green" : "gradient-pink",
-            textGradient: ct.diff >= 0 ? "text-gradient-green" : "text-gradient-pink",
-            glow: ct.diff >= 0 ? "rgba(0,212,106,0.35)" : "rgba(255,60,172,0.35)",
-            sub: fmtMoney(Math.abs(ct.diff)) + " ₽",
+            value: (ct.diffUk >= 0 ? "+" : "") + fmtMoney(ct.diffUk),
+            icon: ct.diffUk >= 0 ? "ArrowUpRight" : "ArrowDownRight",
+            gradient: ct.diffUk >= 0 ? "gradient-green" : "gradient-pink",
+            textGradient: ct.diffUk >= 0 ? "text-gradient-green" : "text-gradient-pink",
+            glow: ct.diffUk >= 0 ? "rgba(0,212,106,0.35)" : "rgba(255,60,172,0.35)",
+            sub: fmtMoney(Math.abs(ct.diffUk)) + " ₽",
           },
           {
             label: "Место в рейтинге",
