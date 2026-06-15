@@ -30,16 +30,16 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
     return { name: MONTH_LABELS[m] || m, debt, cum };
   });
 
-  const maxCum = raw.length ? Math.max(...raw.map(d => d.cum)) : 0;
+  const maxDebt = raw.length ? Math.max(...raw.map(d => d.debt)) : 0;
   // Минимальная видимая высота для ненулевых сумм, чтобы маленькие значения
   // не сливались с нулём на крупном масштабе
-  const minVisible = maxCum * 0.05;
+  const minVisible = maxDebt * 0.05;
   const data = raw.map(d => ({
     ...d,
-    cumPlot: d.cum > 0 ? Math.max(d.cum, minVisible) : 0,
+    debtPlot: d.debt > 0 ? Math.max(d.debt, minVisible) : 0,
   }));
 
-  const yMin = maxCum > 0 ? -maxCum * 0.04 : 0;
+  const yMin = maxDebt > 0 ? -maxDebt * 0.04 : 0;
   const totalDebt = data.length ? data[data.length - 1].cum : 0;
   const lastDebt = data.length ? data[data.length - 1].debt : 0;
   const prevDebt = data.length > 1 ? data[data.length - 2].debt : 0;
@@ -50,7 +50,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-display font-bold text-white text-lg">Динамика роста долгов</h3>
-          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Накопленные долги клиники по ${MONTH_LABELS[selectedMonth]}` : "Накопленные долги клиники за весь период"}</p>
+          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Долги клиники по месяцам до ${MONTH_LABELS[selectedMonth]}` : "Долги клиники по месяцам за весь период"}</p>
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${growth > 0 ? "bg-[#E50000]/10 border border-[#E50000]/20" : "bg-[#00CC44]/10 border border-[#00CC44]/20"}`}>
           <Icon name={growth > 0 ? "TrendingUp" : "TrendingDown"} size={13} className={growth > 0 ? "text-[#E50000]" : "text-[#00CC44]"} />
@@ -100,7 +100,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
               );
             }}
           />
-          <Area type="monotone" dataKey="cumPlot" name="Накоплено" stroke={COLORS.bad} strokeWidth={3}
+          <Area type="monotone" dataKey="debtPlot" name="За месяц" stroke={COLORS.bad} strokeWidth={3}
             fill="url(#gradDebt)" dot={{ fill: COLORS.bad, r: 4 }} activeDot={{ r: 6 }} />
         </AreaChart>
       </ResponsiveContainer>
