@@ -24,13 +24,21 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
   const months = endIdx >= 0 ? activeMonths.slice(0, endIdx + 1) : activeMonths;
 
   let cum = 0;
-  const data = months.map(m => {
+  const raw = months.map(m => {
     const debt = cd.months[m]?.dolgiKlinik || 0;
     cum += debt;
     return { name: MONTH_LABELS[m] || m, debt, cum };
   });
 
-  const maxCum = data.length ? Math.max(...data.map(d => d.cum)) : 0;
+  const maxCum = raw.length ? Math.max(...raw.map(d => d.cum)) : 0;
+  // Минимальная видимая высота для ненулевых сумм, чтобы маленькие значения
+  // не сливались с нулём на крупном масштабе
+  const minVisible = maxCum * 0.05;
+  const data = raw.map(d => ({
+    ...d,
+    cumPlot: d.cum > 0 ? Math.max(d.cum, minVisible) : 0,
+  }));
+
   const yMin = maxCum > 0 ? -maxCum * 0.04 : 0;
   const totalDebt = data.length ? data[data.length - 1].cum : 0;
   const lastDebt = data.length ? data[data.length - 1].debt : 0;
@@ -92,7 +100,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
               );
             }}
           />
-          <Area type="monotone" dataKey="cum" name="Накоплено" stroke={COLORS.bad} strokeWidth={3}
+          <Area type="monotone" dataKey="cumPlot" name="Накоплено" stroke={COLORS.bad} strokeWidth={3}
             fill="url(#gradDebt)" dot={{ fill: COLORS.bad, r: 4 }} activeDot={{ r: 6 }} />
         </AreaChart>
       </ResponsiveContainer>
