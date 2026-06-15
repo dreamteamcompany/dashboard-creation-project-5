@@ -45,7 +45,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS.plan }} />
-              <span className="text-xs text-white/50">План</span>
+              <span className="text-xs text-white/50">План УК</span>
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS.fact }} />
@@ -74,7 +74,7 @@ export default function CityChartsPanel({ monthlyData, cumulativeData, isLight, 
             <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
               tickFormatter={(v: number) => fmtShort(v)} width={70} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: isLight ? "rgba(0,0,0,0.04)" : "rgba(255,255,255,0.03)", radius: 8 }} />
-            <Bar dataKey="plan" name="План" fill="url(#gradBarPlan)" radius={[6, 6, 0, 0]}
+            <Bar dataKey="plan" name="План УК" fill="url(#gradBarPlan)" radius={[6, 6, 0, 0]}
               label={({ x, y, width: w, value }: { x: number; y: number; width: number; value: number }) =>
                 value > 0 ? (
                   <text x={x + w / 2} y={y - 6} textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize={10}>
