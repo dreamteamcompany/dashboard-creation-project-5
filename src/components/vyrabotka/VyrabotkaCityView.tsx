@@ -73,7 +73,7 @@ export default function VyrabotkaCityView({
   const shareOfTotal = allCitiesFactTotal > 0 ? (cityFactTotal / allCitiesFactTotal) * 100 : 0;
 
   const cityTotals = getCityTotals(cd, activeMonths);
-  const planExecution = cityTotals.pct;
+  const planExecution = cityTotals.planUk > 0 ? (cityTotals.fact / cityTotals.planUk) * 100 : 0;
   const stability = monthsData.length > 1
     ? (() => {
         const pcts = monthsData.map(d => d.plan > 0 ? (d.fact / d.plan) * 100 : 0);
