@@ -23,6 +23,7 @@ export default function CityDetailTable({
   const totalPlanUk = activeMonths.reduce((s, m) => s + (cd.months[m]?.planUk || 0), 0);
   const totalDiffUk = totalFact - totalPlanUk;
   const totalNa20e = activeMonths.reduce((s, m) => s + (cd.months[m]?.vyrabotkaNa20e || 0), 0);
+  const totalDolgi = activeMonths.reduce((s, m) => s + (cd.months[m]?.dolgiKlinik || 0), 0);
   return (
     <div className="glass rounded-2xl p-6 animate-fade-in-up">
       <div className="mb-6">
@@ -40,6 +41,7 @@ export default function CityDetailTable({
               <th className="text-right text-white/50 font-medium py-3 px-3">Отклонение от УК</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">%</th>
               <th className="text-right text-white/50 font-medium py-3 px-3">Выработка на 20-е</th>
+              <th className="text-right text-white/50 font-medium py-3 px-3">Долги клиник</th>
             </tr>
           </thead>
           <tbody>
@@ -69,6 +71,7 @@ export default function CityDetailTable({
                     ) : "—"}
                   </td>
                   <td className="py-3 px-3 text-right text-white/70">{md.vyrabotkaNa20e > 0 ? fmtFull(md.vyrabotkaNa20e) : "—"}</td>
+                  <td className="py-3 px-3 text-right text-white/70">{md.dolgiKlinik > 0 ? fmtFull(md.dolgiKlinik) : "—"}</td>
                 </tr>
               );
             })}
@@ -91,6 +94,7 @@ export default function CityDetailTable({
                 </span>
               </td>
               <td className="py-3 px-3 text-right text-white font-bold">{totalNa20e > 0 ? fmtFull(totalNa20e) : "—"}</td>
+              <td className="py-3 px-3 text-right text-white font-bold">{totalDolgi > 0 ? fmtFull(totalDolgi) : "—"}</td>
             </tr>
           </tfoot>
         </table>

@@ -45,7 +45,7 @@ export default function VyrabotkaView() {
     const url = `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`;
     fetch(url)
       .then(r => r.json())
-      .then((rows: Array<{ id: number; city: string; plan: number; fact?: number; fakt?: number; plan_uk: number; vyrabotka_na_20e: number }>) => {
+      .then((rows: Array<{ id: number; city: string; plan: number; fact?: number; fakt?: number; plan_uk: number; vyrabotka_na_20e: number; dolgi_klinik?: number }>) => {
         const cityMap: Record<string, Record<string, CityMonthData>> = {};
         rows.forEach(r => {
           const sep = r.city.lastIndexOf(" — ");
@@ -54,7 +54,7 @@ export default function VyrabotkaView() {
           const month = r.city.substring(sep + 3);
           if (!cityMap[cityName]) cityMap[cityName] = {};
           const factVal = Number(r.fakt ?? r.fact) || 0;
-          cityMap[cityName][month] = { plan: Number(r.plan) || 0, fact: factVal, planUk: Number(r.plan_uk) || 0, vyrabotkaNa20e: Number(r.vyrabotka_na_20e) || 0 };
+          cityMap[cityName][month] = { plan: Number(r.plan) || 0, fact: factVal, planUk: Number(r.plan_uk) || 0, vyrabotkaNa20e: Number(r.vyrabotka_na_20e) || 0, dolgiKlinik: Number(r.dolgi_klinik) || 0 };
         });
         const mapped: CityData[] = Object.entries(cityMap).map(([city, months]) => ({ city, months }));
         setDATA(mapped);
