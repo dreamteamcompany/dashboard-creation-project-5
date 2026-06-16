@@ -346,7 +346,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-display font-bold text-white text-base sm:text-lg">Месяцы по отделам</h3>
-              <p className="text-white/40 text-xs">Сравнение Бухгалтерии, Фина и Сервиса</p>
+              <p className="text-white/40 text-xs">Сравнение Дженериков, Фина и Сервиса</p>
             </div>
             <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
               <Icon name="BarChart3" size={18} />
@@ -360,7 +360,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
                 <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
-                <Bar dataKey="Бухгалтерия" stackId="a" fill={TYPE_COLORS["Бухгалтерия"]} />
+                <Bar dataKey="Дженерики" stackId="a" fill={TYPE_COLORS["Дженерики"]} />
                 <Bar dataKey="Фин" stackId="a" fill={TYPE_COLORS["Фин"]} />
                 <Bar dataKey="Сервис" stackId="a" fill={TYPE_COLORS["Сервис"]} radius={[4, 4, 0, 0]} />
               </BarChart>

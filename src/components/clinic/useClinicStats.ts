@@ -256,7 +256,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
             month: m,
             short: m.slice(0, 3),
             total: c.byMonth[m]?.total || 0,
-            "Бухгалтерия": c.byMonth[m]?.types["Бухгалтерия"] || 0,
+            "Дженерики": c.byMonth[m]?.types["Дженерики"] || 0,
             "Фин": c.byMonth[m]?.types["Фин"] || 0,
             "Сервис": c.byMonth[m]?.types["Сервис"] || 0,
           })),
