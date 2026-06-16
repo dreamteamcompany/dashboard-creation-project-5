@@ -167,7 +167,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
       </div>
 
       <div className="overflow-auto -mx-2 px-2 max-h-[70vh]" onMouseLeave={() => setHover(null)}>
-        <table className="w-full text-xs border-separate" style={{ borderSpacing: "2px" }}>
+        <table className="w-full text-xs border-separate" style={{ borderSpacing: "5px" }}>
           <thead className="sticky top-0 z-20">
             <tr>
               <th
@@ -187,7 +187,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                 return (
                   <th
                     key={m}
-                    className="font-semibold px-1 py-2 text-center min-w-[38px] transition-colors"
+                    className="font-semibold px-2 py-2.5 text-center min-w-[56px] text-[11px] rounded-md transition-colors"
                     style={{
                       background: isHot ? "rgba(255,255,255,0.08)" : "var(--page-bg, #0a0812)",
                       color: isHot ? "#fff" : "rgba(255,255,255,0.45)",
@@ -230,7 +230,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             {li === 0 ? (
                               <td
                                 rowSpan={rowsForCity.length}
-                                className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
+                                className={`px-3 py-2 text-white/85 text-[13px] font-semibold whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
                                 style={{
                                   background: ci % 2 === 1 ? "rgba(255,255,255,0.02)" : "var(--page-bg, #0a0812)",
                                 }}
@@ -240,7 +240,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                               </td>
                             ) : null}
                             <td
-                              className="px-1.5 text-[10px] font-medium whitespace-nowrap max-w-[200px] truncate transition-colors"
+                              className="px-2 text-[11px] font-medium whitespace-nowrap max-w-[220px] truncate transition-colors"
                               style={{ color: rowHot ? "#fff" : reasonColor }}
                               title={label}
                             >
@@ -253,11 +253,11 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                               return (
                                 <td
                                   key={m}
-                                  className="text-center rounded transition-all duration-100 cursor-default"
+                                  className="text-center rounded-lg transition-all duration-100 cursor-default"
                                   style={{
                                     background: colorForValue(v, reasonMax, reasonColor),
-                                    minWidth: 38,
-                                    height: 20,
+                                    minWidth: 56,
+                                    height: 34,
                                     boxShadow: cellHot
                                       ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
                                       : (rowHot || colHot)
@@ -272,14 +272,14 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                                     })
                                   }
                                 >
-                                  <span className="text-[10px] font-semibold text-white/95">
+                                  <span className="text-[13px] font-bold text-white/95 tabular-nums">
                                     {v || ""}
                                   </span>
                                 </td>
                               );
                             })}
                             <td
-                              className="px-2 text-right text-[11px] font-bold tabular-nums transition-colors"
+                              className="px-3 text-right text-[13px] font-bold tabular-nums transition-colors"
                               style={{
                                 color: rowTotal > 0 ? reasonColor : "rgba(255,255,255,0.25)",
                                 background: rowHot ? "rgba(255,255,255,0.06)" : undefined,
@@ -295,6 +295,13 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                 })
               : cities.map((city, ci) => (
                   <>
+                    {ci > 0 && (
+                      <tr key={`${city}-sep`} aria-hidden>
+                        <td colSpan={months.length + 3} style={{ height: 6, padding: 0 }}>
+                          <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }} />
+                        </td>
+                      </tr>
+                    )}
                     {visibleTypes.map((t, ti) => {
                       const color = TYPE_COLORS[t];
                       const rowKey = `${city}-${t}`;
@@ -304,17 +311,13 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                         0,
                       );
                       return (
-                        <tr
-                          key={rowKey}
-                          className={ti === 0 && ci > 0 ? "border-t border-white/[0.04]" : ""}
-                        >
+                        <tr key={rowKey}>
                           {ti === 0 ? (
                             <td
                               rowSpan={visibleTypes.length}
-                              className={`px-2 py-1 text-white/85 font-medium whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
+                              className={`px-3 py-2 text-white/85 text-[13px] font-semibold whitespace-nowrap sticky left-0 z-10 align-middle ${onCityClick ? "cursor-pointer hover:text-white" : ""}`}
                               style={{
                                 background: "var(--page-bg, #0a0812)",
-                                borderTop: ci > 0 ? "1px solid rgba(255,255,255,0.06)" : undefined,
                               }}
                               onClick={onCityClick ? () => onCityClick(city) : undefined}
                             >
@@ -322,7 +325,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             </td>
                           ) : null}
                           <td
-                            className="px-1.5 text-[9px] font-bold tracking-wider transition-colors"
+                            className="px-2 text-[11px] font-bold tracking-wider transition-colors"
                             style={{ color: rowHot ? "#fff" : color }}
                             title={t}
                           >
@@ -335,11 +338,11 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             return (
                               <td
                                 key={m}
-                                className="text-center rounded transition-all duration-100 cursor-default"
+                                className="text-center rounded-lg transition-all duration-100 cursor-default"
                                 style={{
                                   background: colorForType(v, typeMax[t], t),
-                                  minWidth: 38,
-                                  height: 20,
+                                  minWidth: 56,
+                                  height: 34,
                                   boxShadow: cellHot
                                     ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
                                     : (rowHot || colHot)
@@ -354,14 +357,14 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                                   })
                                 }
                               >
-                                <span className="text-[10px] font-semibold text-white/95">
+                                <span className="text-[13px] font-bold text-white/95 tabular-nums">
                                   {v || ""}
                                 </span>
                               </td>
                             );
                           })}
                           <td
-                            className="px-2 text-right text-[11px] font-bold tabular-nums transition-colors"
+                            className="px-3 text-right text-[13px] font-bold tabular-nums transition-colors"
                             style={{
                               color: rowTotal > 0 ? color : "rgba(255,255,255,0.25)",
                               background: rowHot ? "rgba(255,255,255,0.06)" : undefined,
