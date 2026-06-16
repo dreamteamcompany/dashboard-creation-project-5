@@ -55,19 +55,26 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
   const visibleTypes = activeType === "all" ? ALL_TYPES : [activeType];
   const showReasons = activeType !== "all";
 
-  // Причины выбранного отдела (label), у которых есть хотя бы одна ошибка
+  // Подпись причины по ключу колонки (для отображения)
+  const keyToLabel = useMemo(() => {
+    const m: Record<string, string> = {};
+    columns.forEach(c => { m[c.key] = c.label || c.key; });
+    return m;
+  }, [columns]);
+
+  // Причины выбранного отдела (ключи колонок), у которых есть хотя бы одна ошибка
   const reasonLabels: string[] = useMemo(() => {
     if (activeType === "all") return [];
-    const labels = columns
+    const keys = columns
       .filter(c => c.type === activeType)
-      .map(c => c.label || c.key);
+      .map(c => c.key);
     const present = new Set<string>();
     cells.forEach(c => {
-      Object.entries(c.reasons || {}).forEach(([label, v]) => {
-        if (v > 0 && labels.includes(label)) present.add(label);
+      Object.entries(c.reasons || {}).forEach(([key, v]) => {
+        if (v > 0 && keys.includes(key)) present.add(key);
       });
     });
-    return labels.filter(l => present.has(l));
+    return keys.filter(k => present.has(k));
   }, [activeType, columns, cells]);
 
   const reasonColor = activeType === "all" ? "#8b5cf6" : TYPE_COLORS[activeType];
@@ -242,9 +249,9 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                             <td
                               className="px-2 text-[11px] font-medium whitespace-nowrap max-w-[220px] truncate transition-colors"
                               style={{ color: rowHot ? "#fff" : reasonColor }}
-                              title={label}
+                              title={keyToLabel[label] || label}
                             >
-                              {label || "—"}
+                              {keyToLabel[label] || "—"}
                             </td>
                             {months.map(m => {
                               const v = map[city]?.[m]?.reasons?.[label] || 0;
@@ -266,7 +273,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                                   }}
                                   onMouseEnter={e =>
                                     setHover({
-                                      rowKey, month: m, city, label, value: v, color: reasonColor,
+                                      rowKey, month: m, city, label: keyToLabel[label] || label, value: v, color: reasonColor,
                                       x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.offsetWidth / 2,
                                       y: e.currentTarget.getBoundingClientRect().top,
                                     })

@@ -167,7 +167,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
               cityMap[city].byMonth[month] = cityMap[city].byMonth[month] || { total: 0, types: { "Дженерики": 0, "Фин": 0, "Сервис": 0 }, reasons: {} };
               cityMap[city].byMonth[month].total += v;
               if (col.type) cityMap[city].byMonth[month].types[col.type] += v;
-              cityMap[city].byMonth[month].reasons[label] = (cityMap[city].byMonth[month].reasons[label] || 0) + v;
+              cityMap[city].byMonth[month].reasons[col.key] = (cityMap[city].byMonth[month].reasons[col.key] || 0) + v;
             }
           }
 
