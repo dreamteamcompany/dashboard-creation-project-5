@@ -177,8 +177,8 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                 Город
               </th>
               <th
-                className="text-left text-white/50 font-semibold px-1 py-2 sticky z-30"
-                style={{ background: "var(--page-bg, #0a0812)", left: 0 }}
+                className="text-left text-white/50 font-semibold px-2 py-2"
+                style={{ background: "var(--page-bg, #0a0812)" }}
               >
                 {showReasons ? "Причина" : "Отдел"}
               </th>
