@@ -274,7 +274,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
       )}
 
       {/* Топ-5 причин + Разбивка по отделам */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <div className={`grid grid-cols-1 gap-4 sm:gap-6 ${stats.reasons.length > 0 ? "lg:grid-cols-2" : ""}`}>
         <ClinicTopReasons reasons={stats.reasons} />
         <ClinicDepartmentsBreakdown
           byType={stats.byType}
