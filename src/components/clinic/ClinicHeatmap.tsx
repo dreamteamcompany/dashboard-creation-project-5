@@ -174,18 +174,18 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
       </div>
 
       <div className="overflow-auto -mx-2 px-2 max-h-[70vh]" onMouseLeave={() => setHover(null)}>
-        <table className="w-full text-xs border-separate" style={{ borderSpacing: "5px" }}>
+        <table className="text-xs border-separate" style={{ borderSpacing: "5px" }}>
           <thead className="sticky top-0 z-20">
             <tr>
               <th
-                className="text-left text-white/50 font-semibold px-2 py-2 sticky left-0 z-30 w-px whitespace-nowrap"
-                style={{ background: "var(--page-bg, #0a0812)" }}
+                className="text-left text-white/50 font-semibold px-2 py-2 sticky left-0 z-30 whitespace-nowrap"
+                style={{ background: "var(--page-bg, #0a0812)", minWidth: 150 }}
               >
                 Город
               </th>
               <th
-                className="text-left text-white/50 font-semibold px-2 py-2 w-px whitespace-nowrap"
-                style={{ background: "var(--page-bg, #0a0812)" }}
+                className="text-left text-white/50 font-semibold px-2 py-2 whitespace-nowrap"
+                style={{ background: "var(--page-bg, #0a0812)", minWidth: 120 }}
               >
                 {showReasons ? "Причина" : "Отдел"}
               </th>
@@ -194,8 +194,10 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                 return (
                   <th
                     key={m}
-                    className="font-semibold px-2 py-2.5 text-center min-w-[56px] text-[11px] rounded-md transition-colors"
+                    className="font-semibold px-2 py-2.5 text-center text-[11px] rounded-md transition-colors"
                     style={{
+                      width: 96,
+                      minWidth: 96,
                       background: isHot ? "rgba(255,255,255,0.08)" : "var(--page-bg, #0a0812)",
                       color: isHot ? "#fff" : "rgba(255,255,255,0.45)",
                     }}
@@ -263,7 +265,8 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                                   className="text-center rounded-lg transition-all duration-100 cursor-default"
                                   style={{
                                     background: colorForValue(v, reasonMax, reasonColor),
-                                    minWidth: 56,
+                                    width: 96,
+                                    minWidth: 96,
                                     height: 34,
                                     boxShadow: cellHot
                                       ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
@@ -348,7 +351,8 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
                                 className="text-center rounded-lg transition-all duration-100 cursor-default"
                                 style={{
                                   background: colorForType(v, typeMax[t], t),
-                                  minWidth: 56,
+                                  width: 96,
+                                  minWidth: 96,
                                   height: 34,
                                   boxShadow: cellHot
                                     ? "inset 0 0 0 1.5px rgba(255,255,255,0.9)"
