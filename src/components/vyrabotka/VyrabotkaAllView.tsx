@@ -18,6 +18,7 @@ import {
   CustomTooltip,
   PieTooltip,
 } from "./VyrabotkaUtils";
+import AllCitiesDebtsDynamics from "./AllCitiesDebtsDynamics";
 
 interface MonthlyDataItem {
   name: string;
@@ -350,6 +351,14 @@ export default function VyrabotkaAllView({
           })}
         </div>
       </div>}
+
+      <AllCitiesDebtsDynamics
+        DATA={DATA}
+        activeMonths={activeMonths}
+        selectedMonth={selectedMonth}
+        isLight={isLight}
+        axisColor={axisColor}
+      />
     </>
   );
 }
