@@ -1,6 +1,6 @@
 import Icon from "@/components/ui/icon";
 import type { Filters, ClinicErrorType } from "./types";
-import { ALL_TYPES, TYPE_COLORS } from "./types";
+import { ALL_TYPES, TYPE_COLORS, QUARTERS, quarterOfMonth } from "./types";
 
 interface Props {
   filters: Filters;
@@ -23,12 +23,26 @@ export default function ClinicFilters({ filters, onChange, availableMonths = [] 
     onChange({ ...filters, types: next });
   };
 
+  // Кварталы, в которых есть данные
+  const availableQuarters = QUARTERS.filter(q =>
+    availableMonths.some(m => quarterOfMonth(m) === q.value),
+  );
+
+  const lastQuarter = availableMonths.length > 0
+    ? quarterOfMonth(availableMonths[availableMonths.length - 1])
+    : 1;
+
   const selectPeriod = (value: Filters["period"]) => {
     if (value === "month") {
       const defaultMonth = filters.month && availableMonths.includes(filters.month)
         ? filters.month
         : availableMonths[availableMonths.length - 1];
       onChange({ ...filters, period: value, month: defaultMonth });
+    } else if (value === "quarter") {
+      const defaultQuarter = filters.quarter && availableQuarters.some(q => q.value === filters.quarter)
+        ? filters.quarter
+        : lastQuarter;
+      onChange({ ...filters, period: value, month: undefined, quarter: defaultQuarter });
     } else {
       onChange({ ...filters, period: value, month: undefined });
     }
@@ -37,6 +51,10 @@ export default function ClinicFilters({ filters, onChange, availableMonths = [] 
   const selectedMonth = filters.month && availableMonths.includes(filters.month)
     ? filters.month
     : availableMonths[availableMonths.length - 1];
+
+  const selectedQuarter = filters.quarter && availableQuarters.some(q => q.value === filters.quarter)
+    ? filters.quarter
+    : lastQuarter;
 
   return (
     <div className="glass rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -67,6 +85,20 @@ export default function ClinicFilters({ filters, onChange, availableMonths = [] 
             >
               {availableMonths.map(m => (
                 <option key={m} value={m} className="bg-[#1e1432] text-white">{m}</option>
+              ))}
+            </select>
+            <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />
+          </div>
+        )}
+        {filters.period === "quarter" && availableQuarters.length > 0 && (
+          <div className="relative">
+            <select
+              value={selectedQuarter}
+              onChange={e => onChange({ ...filters, period: "quarter", month: undefined, quarter: Number(e.target.value) })}
+              className="appearance-none text-xs pl-3 pr-8 py-1.5 rounded-full bg-violet-500/15 border border-violet-500/40 text-white font-medium outline-none cursor-pointer hover:bg-violet-500/25 transition-colors focus:border-violet-500"
+            >
+              {availableQuarters.map(q => (
+                <option key={q.value} value={q.value} className="bg-[#1e1432] text-white">{q.label}</option>
               ))}
             </select>
             <Icon name="ChevronDown" size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none" />

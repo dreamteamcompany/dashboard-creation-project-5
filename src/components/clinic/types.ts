@@ -12,6 +12,18 @@ export const MONTHS = [
   "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
 ] as const;
 
+export const QUARTERS: { value: number; label: string; months: string[] }[] = [
+  { value: 1, label: "I квартал", months: ["Январь", "Февраль", "Март"] },
+  { value: 2, label: "II квартал", months: ["Апрель", "Май", "Июнь"] },
+  { value: 3, label: "III квартал", months: ["Июль", "Август", "Сентябрь"] },
+  { value: 4, label: "IV квартал", months: ["Октябрь", "Ноябрь", "Декабрь"] },
+];
+
+export function quarterOfMonth(month: string): number {
+  const idx = MONTHS.indexOf(month as typeof MONTHS[number]);
+  return idx < 0 ? 0 : Math.floor(idx / 3) + 1;
+}
+
 export const MONTH_SHORT: Record<string, string> = {
   "Январь": "Янв", "Февраль": "Фев", "Март": "Мар", "Апрель": "Апр",
   "Май": "Май", "Июнь": "Июн", "Июль": "Июл", "Август": "Авг",
@@ -42,6 +54,7 @@ export interface Filters {
   period: Period;
   types: ClinicErrorType[];
   month?: string;
+  quarter?: number;
 }
 
 export const ALL_TYPES: ClinicErrorType[] = ["Дженерики", "Фин", "Сервис"];

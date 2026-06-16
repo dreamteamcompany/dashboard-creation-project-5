@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { ColumnDef, ClinicErrorType, Row, Filters } from "./types";
-import { MONTHS } from "./types";
+import { MONTHS, quarterOfMonth } from "./types";
 
 interface Params {
   rows: Row[];
@@ -92,8 +92,12 @@ export function useClinicStats({ rows, columns, filters }: Params) {
       currentMonths = [sortedMonths[idx]];
       prevMonths = idx > 0 ? [sortedMonths[idx - 1]] : [];
     } else if (filters.period === "quarter" && sortedMonths.length > 0) {
-      currentMonths = sortedMonths.slice(-3);
-      prevMonths = sortedMonths.slice(-6, -3);
+      const q = filters.quarter && filters.quarter >= 1 && filters.quarter <= 4
+        ? filters.quarter
+        : quarterOfMonth(sortedMonths[sortedMonths.length - 1]);
+      currentMonths = sortedMonths.filter(m => quarterOfMonth(m) === q);
+      const prevQ = q > 1 ? q - 1 : 0;
+      prevMonths = prevQ ? sortedMonths.filter(m => quarterOfMonth(m) === prevQ) : [];
     } else if (filters.period === "year") {
       currentMonths = sortedMonths.slice();
       prevMonths = [];
