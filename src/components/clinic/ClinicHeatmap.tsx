@@ -174,12 +174,12 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
       </div>
 
       <div className="overflow-auto -mx-2 px-2 max-h-[70vh]" onMouseLeave={() => setHover(null)}>
-        <table className="text-xs border-separate" style={{ borderSpacing: "5px" }}>
+        <table className="w-full text-xs border-separate" style={{ borderSpacing: "5px" }}>
           <thead className="sticky top-0 z-20">
             <tr>
               <th
                 className="text-left text-white/50 font-semibold px-2 py-2 sticky left-0 z-30 whitespace-nowrap"
-                style={{ background: "var(--page-bg, #0a0812)", minWidth: 150 }}
+                style={{ background: "var(--page-bg, #0a0812)", width: "100%", minWidth: 150 }}
               >
                 Город
               </th>
