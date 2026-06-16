@@ -90,8 +90,8 @@ export default function VyrabotkaView() {
 
   const cityRanking = DATA.map(d => {
     const t = getCityTotals(d, activeMonths, selectedMonth);
-    return { ...d, ...t };
-  }).filter(c => c.plan > 0).sort((a, b) => b.pct - a.pct);
+    return { ...d, ...t, pct: t.planUk > 0 ? (t.fact / t.planUk) * 100 : 0 };
+  }).filter(c => c.planUk > 0).sort((a, b) => b.pct - a.pct);
 
   const worstCity = cityRanking[cityRanking.length - 1];
 
