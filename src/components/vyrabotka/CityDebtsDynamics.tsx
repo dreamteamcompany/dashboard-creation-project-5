@@ -1,6 +1,6 @@
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer,
+  Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 import Icon from "@/components/ui/icon";
 import {
@@ -20,14 +20,16 @@ interface Props {
 }
 
 export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isLight, axisColor }: Props) {
-  const endIdx = selectedMonth ? activeMonths.indexOf(selectedMonth) : -1;
-  const months = endIdx >= 0 ? activeMonths.slice(0, endIdx + 1) : activeMonths;
+  // График всегда показывает весь период, выбранный месяц подсвечивается
+  const months = activeMonths;
+  const selIdx = selectedMonth ? activeMonths.indexOf(selectedMonth) : -1;
+  const selLabel = selectedMonth ? (MONTH_LABELS[selectedMonth] || selectedMonth) : null;
 
   let cum = 0;
-  const raw = months.map(m => {
+  const raw = months.map((m, i) => {
     const debt = cd.months[m]?.dolgiKlinik || 0;
     cum += debt;
-    return { name: MONTH_LABELS[m] || m, debt, cum };
+    return { name: MONTH_LABELS[m] || m, debt, cum, isSel: i === selIdx };
   });
 
   const maxDebt = raw.length ? Math.max(...raw.map(d => d.debt)) : 0;
@@ -40,9 +42,11 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
   }));
 
   const yMin = maxDebt > 0 ? -maxDebt * 0.04 : 0;
-  const totalDebt = data.length ? data[data.length - 1].cum : 0;
-  const lastDebt = data.length ? data[data.length - 1].debt : 0;
-  const prevDebt = data.length > 1 ? data[data.length - 2].debt : 0;
+  // Итоговая сумма: за выбранный месяц или накоплено за весь период
+  const selData = selIdx >= 0 ? data[selIdx] : null;
+  const totalDebt = selData ? selData.debt : (data.length ? data[data.length - 1].cum : 0);
+  const lastDebt = selData ? selData.debt : (data.length ? data[data.length - 1].debt : 0);
+  const prevDebt = selIdx > 0 ? data[selIdx - 1].debt : (data.length > 1 ? data[data.length - 2].debt : 0);
   const growth = prevDebt > 0 ? ((lastDebt - prevDebt) / prevDebt) * 100 : (lastDebt > 0 ? 100 : 0);
 
   return (
@@ -50,7 +54,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-display font-bold text-white text-lg">Динамика роста долгов</h3>
-          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Долги клиники по месяцам до ${MONTH_LABELS[selectedMonth]}` : "Долги клиники по месяцам за весь период"}</p>
+          <p className="text-white/40 text-xs mt-0.5">{selLabel ? `Долги клиники по месяцам · ${selLabel} выделен` : "Долги клиники по месяцам за весь период"}</p>
         </div>
         <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${growth > 0 ? "bg-[#E50000]/10 border border-[#E50000]/20" : "bg-[#00CC44]/10 border border-[#00CC44]/20"}`}>
           <Icon name={growth > 0 ? "TrendingUp" : "TrendingDown"} size={13} className={growth > 0 ? "text-[#E50000]" : "text-[#00CC44]"} />
@@ -61,7 +65,7 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
       </div>
 
       <div className="mb-4">
-        <p className="text-white/40 text-xs">Всего долгов накоплено</p>
+        <p className="text-white/40 text-xs">{selLabel ? `Долг за ${selLabel}` : "Всего долгов накоплено"}</p>
         <p className="text-2xl font-bold text-[#E50000]">{fmtFull(totalDebt)}</p>
       </div>
 
@@ -95,8 +99,22 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
               );
             }}
           />
+          {selLabel && (
+            <ReferenceLine x={selLabel} stroke={COLORS.bad} strokeDasharray="4 4" strokeOpacity={0.6} />
+          )}
           <Area type="monotone" dataKey="debtPlot" name="За месяц" stroke={COLORS.bad} strokeWidth={3}
-            fill="url(#gradDebt)" dot={{ fill: COLORS.bad, r: 4 }} activeDot={{ r: 6 }} />
+            fill="url(#gradDebt)"
+            dot={(props: { cx?: number; cy?: number; payload?: { isSel?: boolean } }) => {
+              const { cx, cy, payload } = props;
+              if (cx == null || cy == null) return <g />;
+              const sel = payload?.isSel;
+              return (
+                <circle cx={cx} cy={cy} r={sel ? 7 : 4}
+                  fill={sel ? "#fff" : COLORS.bad}
+                  stroke={COLORS.bad} strokeWidth={sel ? 3 : 0} />
+              );
+            }}
+            activeDot={{ r: 6 }} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
