@@ -119,6 +119,17 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
       </ResponsiveContainer>
 
       <div className="flex flex-wrap gap-2 mt-4">
+        {(() => {
+          const allHidden = cities.every(c => hidden[c.city]);
+          return (
+            <button
+              onClick={() => setHidden(allHidden ? {} : Object.fromEntries(cities.map(c => [c.city, true])))}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-all ${allHidden ? "bg-white/[0.03] text-white/30" : "bg-white/[0.06] text-white/70 hover:bg-white/10"}`}>
+              <Icon name={allHidden ? "EyeOff" : "Eye"} size={12} />
+              <span>Все</span>
+            </button>
+          );
+        })()}
         {cities.map(c => {
           const color = PIE_COLORS[cities.indexOf(c) % PIE_COLORS.length];
           const isHidden = hidden[c.city];
