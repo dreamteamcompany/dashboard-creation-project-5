@@ -42,10 +42,12 @@ export default function ClinicAnomalies({ anomalies, concentrationPct, topCities
             ))}
           </div>
         ) : (
-          <div className="p-6 text-center text-white/30 text-sm flex flex-col items-center gap-2">
-            <Icon name="ShieldCheck" size={32} className="text-emerald-400/40" />
-            Резких всплесков нет
-            <span className="text-[11px]">(сравнение работает для периодов «Месяц» и «Квартал»)</span>
+          <div className="flex flex-col items-center justify-center text-center min-h-[260px] py-8 gap-4">
+            <div className="w-20 h-20 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <Icon name="ShieldCheck" size={44} className="text-emerald-400/70" />
+            </div>
+            <p className="font-display text-2xl sm:text-3xl font-bold text-white/80">Резких всплесков нет</p>
+            <span className="text-xs text-white/35 max-w-[280px]">Сравнение работает для периодов «Месяц» и «Квартал»</span>
           </div>
         )}
       </div>
