@@ -292,15 +292,45 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
         onCityClick={setSelectedCity}
       />
 
-      {/* Тепловая карта */}
-      <ClinicHeatmap
-        cities={stats.heatmapCities}
-        months={stats.currentMonths}
-        cells={stats.cityMonthCells}
-        max={stats.heatmapMaxValue}
-        columns={columns}
-        onCityClick={setSelectedCity}
-      />
+      {/* Тепловая карта + Месяцы по отделам рядом, когда карта компактная */}
+      <div className={`flex flex-col ${stats.currentMonths.length <= 3 ? "lg:flex-row" : ""} gap-4 sm:gap-6 items-stretch`}>
+        <ClinicHeatmap
+          cities={stats.heatmapCities}
+          months={stats.currentMonths}
+          cells={stats.cityMonthCells}
+          max={stats.heatmapMaxValue}
+          columns={columns}
+          onCityClick={setSelectedCity}
+        />
+
+        {stats.currentMonths.length <= 3 && stats.monthsData.length > 0 && (
+          <div className="glass rounded-2xl p-4 sm:p-6 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-display font-bold text-white text-base sm:text-lg">Месяцы по отделам</h3>
+                <p className="text-white/40 text-xs">Сравнение Дженериков, Фина и Сервиса</p>
+              </div>
+              <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center">
+                <Icon name="BarChart3" size={18} />
+              </div>
+            </div>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.monthsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                  <XAxis dataKey="short" stroke="rgba(255,255,255,0.4)" fontSize={11} />
+                  <YAxis stroke="rgba(255,255,255,0.4)" fontSize={11} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: 12, color: "rgba(255,255,255,0.6)" }} />
+                  <Bar dataKey="Дженерики" stackId="a" fill={TYPE_COLORS["Дженерики"]} />
+                  <Bar dataKey="Фин" stackId="a" fill={TYPE_COLORS["Фин"]} />
+                  <Bar dataKey="Сервис" stackId="a" fill={TYPE_COLORS["Сервис"]} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Динамика по месяцам + Динамика по отделам */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -340,8 +370,8 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
         <ClinicDepartmentsTrend monthsData={stats.monthsData} />
       </div>
 
-      {/* Месяцы по отделам (stacked) */}
-      {stats.monthsData.length > 0 && (
+      {/* Месяцы по отделам (stacked) — на всю ширину, когда тепловая карта широкая */}
+      {stats.currentMonths.length > 3 && stats.monthsData.length > 0 && (
         <div className="glass rounded-2xl p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
