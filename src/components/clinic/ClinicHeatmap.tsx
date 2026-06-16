@@ -130,7 +130,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
   if (cities.length === 0 || months.length === 0) return null;
 
   return (
-    <div className={`glass rounded-2xl p-4 sm:p-6 overflow-hidden w-full ${months.length <= 2 ? "max-w-[680px]" : ""}`}>
+    <div className={`glass rounded-2xl p-4 sm:p-6 overflow-hidden w-full ${months.length <= 3 ? "max-w-[680px]" : ""}`}>
       <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <div>
           <h3 className="font-display font-bold text-white text-base sm:text-lg">
