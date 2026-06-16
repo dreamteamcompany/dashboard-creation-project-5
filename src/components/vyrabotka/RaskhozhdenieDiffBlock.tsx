@@ -7,7 +7,8 @@ interface DashRow {
   id: number;
   city: string;
   plan_uk: number;
-  fact: number;
+  fact?: number;
+  fakt?: number;
   [key: string]: unknown;
 }
 
@@ -50,7 +51,7 @@ export default function RaskhozhdenieDiffBlock({ selectedMonth = null }: Props) 
       const month = sep !== -1 ? r.city.substring(sep + 3) : null;
       if (selectedMonth && month !== selectedMonth) return;
       if (!cityMap[cityName]) cityMap[cityName] = { city: cityName, uk: 0, cityVal: 0, diff: 0 };
-      cityMap[cityName].uk += Number(r.fact) || 0;
+      cityMap[cityName].uk += Number(r.fakt ?? r.fact) || 0;
       cityMap[cityName].cityVal += Number(r.plan_uk) || 0;
     });
     return Object.values(cityMap).map(c => ({ ...c, diff: c.uk - c.cityVal }));
