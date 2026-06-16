@@ -304,7 +304,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
         />
 
         {stats.currentMonths.length <= 3 && stats.monthsData.length > 0 && (
-          <div className="glass rounded-2xl p-4 sm:p-6 flex-1 min-w-0">
+          <div className="glass rounded-2xl p-4 sm:p-6 flex-1 min-w-0 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="font-display font-bold text-white text-base sm:text-lg">Месяцы по отделам</h3>
@@ -314,7 +314,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
                 <Icon name="BarChart3" size={18} />
               </div>
             </div>
-            <div className="h-[280px]">
+            <div className="flex-1 min-h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.monthsData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
