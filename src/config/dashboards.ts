@@ -1,4 +1,4 @@
-export type ClinicErrorType = "Бухгалтерия" | "Фин" | "Сервис";
+export type ClinicErrorType = "Дженерики" | "Фин" | "Сервис";
 
 export interface ColumnDef {
   key: string;

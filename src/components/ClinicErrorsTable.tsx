@@ -17,7 +17,7 @@ interface Props {
   onColumnsChange?: (cols: ColumnDef[]) => Promise<void>;
 }
 
-const TYPE_OPTIONS: ClinicErrorType[] = ["Бухгалтерия", "Фин", "Сервис"];
+const TYPE_OPTIONS: ClinicErrorType[] = ["Дженерики", "Фин", "Сервис"];
 
 const MONTHS = [
   "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
@@ -25,7 +25,7 @@ const MONTHS = [
 ];
 
 const TYPE_STYLES: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  "Дженерики": "bg-amber-500/15 text-amber-300 border-amber-500/30",
   "Фин": "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
   "Сервис": "bg-violet-500/15 text-violet-300 border-violet-500/30",
 };

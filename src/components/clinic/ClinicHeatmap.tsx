@@ -14,7 +14,7 @@ interface Props {
 }
 
 const TYPE_SHORT: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "БУХ",
+  "Дженерики": "ДЖЕН",
   "Фин": "ФИН",
   "Сервис": "СРВ",
 };
@@ -82,7 +82,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
   }, [cells]);
 
   const typeMax: Record<ClinicErrorType, number> = useMemo(() => {
-    const res: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
+    const res: Record<ClinicErrorType, number> = { "Дженерики": 0, "Фин": 0, "Сервис": 0 };
     cities.forEach(city => {
       months.forEach(m => {
         ALL_TYPES.forEach(t => {
@@ -95,7 +95,7 @@ export default function ClinicHeatmap({ cities, months, cells, columns = [], onC
   }, [cities, months, map]);
 
   const typeTotals: Record<ClinicErrorType, number> = useMemo(() => {
-    const res: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
+    const res: Record<ClinicErrorType, number> = { "Дженерики": 0, "Фин": 0, "Сервис": 0 };
     cities.forEach(city => {
       months.forEach(m => {
         ALL_TYPES.forEach(t => {

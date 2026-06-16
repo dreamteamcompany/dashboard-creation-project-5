@@ -26,7 +26,7 @@ export interface MonthBucket {
   month: string;
   short: string;
   total: number;
-  "Бухгалтерия": number;
+  "Дженерики": number;
   "Фин": number;
   "Сервис": number;
 }
@@ -111,8 +111,8 @@ export function useClinicStats({ rows, columns, filters }: Params) {
       return prevMonths.includes(m);
     };
 
-    const byType: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
-    const byTypePrev: Record<ClinicErrorType, number> = { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 };
+    const byType: Record<ClinicErrorType, number> = { "Дженерики": 0, "Фин": 0, "Сервис": 0 };
+    const byTypePrev: Record<ClinicErrorType, number> = { "Дженерики": 0, "Фин": 0, "Сервис": 0 };
 
     const cityMap: Record<string, { total: number; prev: number; byType: Record<ClinicErrorType, number>; byReason: Record<string, { value: number; type?: ClinicErrorType }>; byMonth: Record<string, { total: number; types: Record<ClinicErrorType, number>; reasons: Record<string, number> }> }> = {};
     const reasonMap: Record<string, ReasonTotal> = {};
@@ -133,7 +133,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
       if (!cityMap[city]) {
         cityMap[city] = {
           total: 0, prev: 0,
-          byType: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 },
+          byType: { "Дженерики": 0, "Фин": 0, "Сервис": 0 },
           byReason: {},
           byMonth: {},
         };
@@ -159,12 +159,12 @@ export function useClinicStats({ rows, columns, filters }: Params) {
           }
 
           if (month) {
-            if (!monthMap[month]) monthMap[month] = { total: 0, types: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 } };
+            if (!monthMap[month]) monthMap[month] = { total: 0, types: { "Дженерики": 0, "Фин": 0, "Сервис": 0 } };
             monthMap[month].total += v;
             if (col.type) monthMap[month].types[col.type] += v;
 
             if (city) {
-              cityMap[city].byMonth[month] = cityMap[city].byMonth[month] || { total: 0, types: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 }, reasons: {} };
+              cityMap[city].byMonth[month] = cityMap[city].byMonth[month] || { total: 0, types: { "Дженерики": 0, "Фин": 0, "Сервис": 0 }, reasons: {} };
               cityMap[city].byMonth[month].total += v;
               if (col.type) cityMap[city].byMonth[month].types[col.type] += v;
               cityMap[city].byMonth[month].reasons[label] = (cityMap[city].byMonth[month].reasons[label] || 0) + v;
@@ -182,7 +182,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
           if (!reasonMap[label]) reasonMap[label] = { label, key: col.key, type: col.type, total: 0, prev: 0 };
           reasonMap[label].prev += v;
           if (month) {
-            if (!monthMapPrev[month]) monthMapPrev[month] = { total: 0, types: { "Бухгалтерия": 0, "Фин": 0, "Сервис": 0 } };
+            if (!monthMapPrev[month]) monthMapPrev[month] = { total: 0, types: { "Дженерики": 0, "Фин": 0, "Сервис": 0 } };
             monthMapPrev[month].total += v;
             if (col.type) monthMapPrev[month].types[col.type] += v;
           }
@@ -211,7 +211,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
             month,
             value: mb.total,
             types: {
-              "Бухгалтерия": mb.types["Бухгалтерия"] || 0,
+              "Дженерики": mb.types["Дженерики"] || 0,
               "Фин": mb.types["Фин"] || 0,
               "Сервис": mb.types["Сервис"] || 0,
             },
@@ -229,7 +229,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
         month: m,
         short: m.slice(0, 3),
         total: monthMap[m]?.total || 0,
-        "Бухгалтерия": monthMap[m]?.types["Бухгалтерия"] || 0,
+        "Дженерики": monthMap[m]?.types["Дженерики"] || 0,
         "Фин": monthMap[m]?.types["Фин"] || 0,
         "Сервис": monthMap[m]?.types["Сервис"] || 0,
       }));

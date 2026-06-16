@@ -16,7 +16,7 @@ interface Props {
 }
 
 const TYPE_ICONS: Record<ClinicErrorType, string> = {
-  "Бухгалтерия": "Calculator",
+  "Дженерики": "Pill",
   "Фин": "Banknote",
   "Сервис": "Headphones",
 };
