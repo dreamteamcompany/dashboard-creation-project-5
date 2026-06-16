@@ -91,11 +91,6 @@ export default function CityDebtsDynamics({ cd, activeMonths, selectedMonth, isL
                     <span className="text-white/70">За месяц:</span>
                     <span className="font-semibold text-white ml-auto">{fmtFull(d.debt || 0)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm mt-1 pt-1 border-t border-white/10">
-                    <span className="w-2 h-2 rounded-full" style={{ background: COLORS.warn }} />
-                    <span className="text-white/70">Накоплено:</span>
-                    <span className="font-semibold text-white ml-auto">{fmtFull(d.cum || 0)}</span>
-                  </div>
                 </div>
               );
             }}
