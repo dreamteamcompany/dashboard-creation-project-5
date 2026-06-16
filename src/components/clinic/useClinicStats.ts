@@ -309,7 +309,7 @@ export function useClinicStats({ rows, columns, filters }: Params) {
 
     // Department change vs prev
     const typeChange: Record<ClinicErrorType, { value: number; prev: number; deltaPct: number }> = {
-      "Бухгалтерия": { value: byType["Бухгалтерия"], prev: byTypePrev["Бухгалтерия"], deltaPct: byTypePrev["Бухгалтерия"] > 0 ? ((byType["Бухгалтерия"] - byTypePrev["Бухгалтерия"]) / byTypePrev["Бухгалтерия"]) * 100 : 0 },
+      "Дженерики": { value: byType["Дженерики"], prev: byTypePrev["Дженерики"], deltaPct: byTypePrev["Дженерики"] > 0 ? ((byType["Дженерики"] - byTypePrev["Дженерики"]) / byTypePrev["Дженерики"]) * 100 : 0 },
       "Фин": { value: byType["Фин"], prev: byTypePrev["Фин"], deltaPct: byTypePrev["Фин"] > 0 ? ((byType["Фин"] - byTypePrev["Фин"]) / byTypePrev["Фин"]) * 100 : 0 },
       "Сервис": { value: byType["Сервис"], prev: byTypePrev["Сервис"], deltaPct: byTypePrev["Сервис"] > 0 ? ((byType["Сервис"] - byTypePrev["Сервис"]) / byTypePrev["Сервис"]) * 100 : 0 },
     };

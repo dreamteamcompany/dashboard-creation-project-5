@@ -97,7 +97,7 @@ export default function ClinicDepartmentsBreakdown({ byType, typeChange, total }
                 const color = TYPE_COLORS[d.name];
                 const pct = total > 0 ? (d.value / total) * 100 : 0;
                 const barPct = max > 0 ? (d.value / max) * 100 : 0;
-                const ch = typeChange[d.name];
+                const ch = typeChange[d.name] || { value: 0, prev: 0, deltaPct: 0 };
                 const hasDelta = ch.prev > 0;
                 const medals = ["🥇", "🥈", "🥉"];
 

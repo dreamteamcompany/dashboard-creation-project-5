@@ -26,7 +26,7 @@ export default function ClinicDepartmentLights({ typeChange, total }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {ALL_TYPES.map(t => {
-        const data = typeChange[t];
+        const data = typeChange[t] || { value: 0, prev: 0, deltaPct: 0 };
         const pct = total > 0 ? (data.value / total) * 100 : 0;
         const status = lightFor(data.deltaPct, data.prev > 0, data.value);
         return (
