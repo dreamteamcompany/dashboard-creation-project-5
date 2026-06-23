@@ -27,8 +27,11 @@ def handler(event: dict, context) -> dict:
             "body": json.dumps({"error": "dashboard_id required"}),
         }
 
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+    conn = psycopg2.connect(os.environ["DATABASE_URL"], connect_timeout=5)
     cur = conn.cursor()
+    cur.execute("SET lock_timeout = '3s'")
+    cur.execute("SET statement_timeout = '8s'")
+    cur.execute("SET idle_in_transaction_session_timeout = '8s'")
 
     try:
         cur.execute(
@@ -136,6 +139,13 @@ def handler(event: dict, context) -> dict:
                 "body": json.dumps({"ok": True}),
             }
 
+    except Exception as e:
+        conn.rollback()
+        return {
+            "statusCode": 500,
+            "headers": {**CORS, "Content-Type": "application/json"},
+            "body": json.dumps({"error": str(e)}),
+        }
     finally:
         cur.close()
         conn.close()
