@@ -126,16 +126,6 @@ def handler(event: dict, context) -> dict:
                             (int(dashboard_id), city, json.dumps(data)),
                         )
 
-            cur.execute(
-                f"""DELETE FROM {SCHEMA}.dashboard_rows
-                    WHERE dashboard_id = %s
-                      AND id NOT IN (
-                          SELECT MIN(id) FROM {SCHEMA}.dashboard_rows
-                          WHERE dashboard_id = %s
-                          GROUP BY city
-                      )""",
-                (int(dashboard_id), int(dashboard_id)),
-            )
             conn.commit()
             return {
                 "statusCode": 200,
