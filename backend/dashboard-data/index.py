@@ -93,10 +93,27 @@ def handler(event: dict, context) -> dict:
         if method == "POST":
             body = json.loads(event.get("body") or "{}")
             rows = body.get("rows", [])
+
+            # Существующие строки города -> id, чтобы не плодить дубли
+            cur.execute(
+                f"SELECT id, city FROM {SCHEMA}.dashboard_rows WHERE dashboard_id = %s",
+                (int(dashboard_id),),
+            )
+            city_to_id = {}
+            for rid, rcity in cur.fetchall():
+                city_to_id.setdefault(rcity, rid)
+
             for row in rows:
                 row_id = row.get("id")
                 city = row.get("city", "")
+                if not city:
+                    continue
                 incoming = {k: int(row.get(k)) for k in col_keys if row.get(k) is not None}
+                full = {k: int(row.get(k, 0)) for k in col_keys}
+
+                if not row_id:
+                    row_id = city_to_id.get(city)
+
                 if row_id:
                     cur.execute(
                         f"""UPDATE {SCHEMA}.dashboard_rows
@@ -105,26 +122,12 @@ def handler(event: dict, context) -> dict:
                         (json.dumps(incoming), city, int(row_id), int(dashboard_id)),
                     )
                 else:
-                    data = {k: int(row.get(k, 0)) for k in col_keys}
                     cur.execute(
-                        f"""SELECT id FROM {SCHEMA}.dashboard_rows
-                            WHERE dashboard_id = %s AND city = %s
-                            ORDER BY id LIMIT 1""",
-                        (int(dashboard_id), city),
+                        f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES (%s, %s, %s) RETURNING id",
+                        (int(dashboard_id), city, json.dumps(full)),
                     )
-                    existing = cur.fetchone()
-                    if existing:
-                        cur.execute(
-                            f"""UPDATE {SCHEMA}.dashboard_rows
-                                SET data = data || %s::jsonb, updated_at = NOW()
-                                WHERE id = %s""",
-                            (json.dumps(data), existing[0]),
-                        )
-                    else:
-                        cur.execute(
-                            f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES (%s, %s, %s)",
-                            (int(dashboard_id), city, json.dumps(data)),
-                        )
+                    new_id = cur.fetchone()[0]
+                    city_to_id[city] = new_id
 
             conn.commit()
             return {
