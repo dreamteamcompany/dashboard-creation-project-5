@@ -52,6 +52,7 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
   const [expandedCities, setExpandedCities] = useState<Record<string, boolean>>({});
   const rowInputRef = useRef<HTMLInputElement>(null);
   const colInputRef = useRef<HTMLInputElement>(null);
+  const initialSnapshot = useRef<Record<string, string>>({});
 
   useEffect(() => {
     setColumns(initialColumns);
@@ -88,6 +89,11 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
             return (MONTH_ORDER[monthA] || 0) - (MONTH_ORDER[monthB] || 0);
           });
         }
+        const snap: Record<string, string> = {};
+        arr.forEach(r => {
+          snap[String(r.city)] = columns.map(c => r[c.key] ?? 0).join(",");
+        });
+        initialSnapshot.current = snap;
         setRows(arr);
         setExpandedCities({});
         setLoading(false);
@@ -106,15 +112,30 @@ export default function ClinicErrorsTable({ title, subtitle, apiUrl, columns: in
   const handleSave = async () => {
     setSaving(true);
     try {
-      const saveRows = rows.map(r => {
+      const changed = rows.filter(r => {
+        const sig = columns.map(c => r[c.key] ?? 0).join(",");
+        const prev = initialSnapshot.current[String(r.city)];
+        if (prev === undefined) {
+          return String(r.city).trim() !== "" && sig !== columns.map(() => 0).join(",");
+        }
+        return sig !== prev;
+      });
+      const saveRows = changed.map(r => {
         const { month, ...rest } = r;
         return rest;
       });
-      await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rows: saveRows }),
-      });
+      if (saveRows.length > 0) {
+        await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rows: saveRows }),
+        });
+        const snap = { ...initialSnapshot.current };
+        rows.forEach(r => {
+          snap[String(r.city)] = columns.map(c => r[c.key] ?? 0).join(",");
+        });
+        initialSnapshot.current = snap;
+      }
       setSaved(true);
       setDirty(false);
     } finally {
