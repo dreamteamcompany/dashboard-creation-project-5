@@ -20,8 +20,11 @@ export function DashboardsProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     fetch(MANAGE_DASHBOARDS_URL)
       .then(r => r.json())
-      .then(data => { setDashboards(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then(data => {
+        setDashboards(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => { setDashboards([]); setLoading(false); });
   }, []);
 
   useEffect(() => { load(); }, [load]);
