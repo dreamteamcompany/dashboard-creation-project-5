@@ -57,7 +57,7 @@ export default function CityDetailTable({
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.plan)}</td>
                   <td className="py-3 px-3 text-right text-white/70">{fmtFull(md.planUk || 0)}</td>
                   <td className="py-3 px-3 text-right text-white">{md.fact > 0 ? fmtFull(md.fact) : "—"}</td>
-                  <td className="py-3 px-3 text-right font-semibold" style={{ color: diff >= 0 ? COLORS.good : COLORS.bad }}>
+                  <td className="py-3 px-3 text-right font-semibold" style={{ color: diff >= 0 ? COLORS.good : "#e97777" }}>
                     {md.fact > 0 ? ((diff >= 0 ? "+" : "") + fmtFull(diff)) : "—"}
                   </td>
                   <td className="py-3 px-3 text-right font-semibold" style={{ color: diffUk >= 0 ? COLORS.good : COLORS.bad }}>
@@ -82,7 +82,7 @@ export default function CityDetailTable({
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlan)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalPlanUk)}</td>
               <td className="py-3 px-3 text-right text-white font-bold">{fmtFull(totalFact)}</td>
-              <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiff >= 0 ? COLORS.good : COLORS.bad }}>
+              <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiff >= 0 ? COLORS.good : "#e97777" }}>
                 {(totalDiff >= 0 ? "+" : "") + fmtFull(totalDiff)}
               </td>
               <td className="py-3 px-3 text-right font-bold" style={{ color: totalDiffUk >= 0 ? COLORS.good : COLORS.bad }}>
