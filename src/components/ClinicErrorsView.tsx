@@ -134,7 +134,7 @@ export default function ClinicErrorsView({ apiUrl, dashboardId, columns }: Props
               <>
                 <button
                   onClick={() => setSelectedCity(stats.topCity!.city)}
-                  className="font-display text-2xl sm:text-3xl font-bold text-gradient-cyan truncate hover:underline text-left w-full"
+                  className="font-display text-2xl sm:text-3xl font-bold text-gradient-cyan hover:underline text-left w-full break-words leading-tight"
                 >
                   {stats.topCity.city}
                 </button>
