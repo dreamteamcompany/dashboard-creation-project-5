@@ -18,13 +18,34 @@ export function DashboardsProvider({ children }: { children: ReactNode }) {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetch(MANAGE_DASHBOARDS_URL)
-      .then(r => r.json())
-      .then(data => {
-        setDashboards(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => { setDashboards([]); setLoading(false); });
+
+    const fetchWithTimeout = async (ms: number) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        const r = await fetch(MANAGE_DASHBOARDS_URL, { signal: ctrl.signal });
+        return await r.json();
+      } finally {
+        clearTimeout(t);
+      }
+    };
+
+    (async () => {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          const data = await fetchWithTimeout(10000);
+          if (Array.isArray(data)) {
+            setDashboards(data);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to load dashboards (attempt " + (attempt + 1) + ")", e);
+        }
+      }
+      setDashboards([]);
+      setLoading(false);
+    })();
   }, []);
 
   useEffect(() => { load(); }, [load]);
