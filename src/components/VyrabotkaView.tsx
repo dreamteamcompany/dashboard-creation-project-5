@@ -43,9 +43,31 @@ export default function VyrabotkaView() {
 
   useEffect(() => {
     const url = `${funcUrls["dashboard-data"]}?dashboard_id=${DASHBOARD_ID}`;
-    fetch(url)
-      .then(r => r.json())
-      .then((rows: Array<{ id: number; city: string; plan: number; fact?: number; fakt?: number; plan_uk: number; vyrabotka_na_20e: number; dolgi_klinik?: number }>) => {
+    let cancelled = false;
+
+    const fetchWithTimeout = async (ms: number) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      try {
+        const r = await fetch(url, { signal: ctrl.signal });
+        return await r.json();
+      } finally {
+        clearTimeout(t);
+      }
+    };
+
+    const load = async () => {
+      let rows: Array<{ id: number; city: string; plan: number; fact?: number; fakt?: number; plan_uk: number; vyrabotka_na_20e: number; dolgi_klinik?: number }> | null = null;
+      for (let attempt = 0; attempt < 3 && !cancelled; attempt++) {
+        try {
+          const data = await fetchWithTimeout(10000);
+          if (Array.isArray(data)) { rows = data; break; }
+        } catch (e) {
+          console.error("Failed to load vyrabotka data (attempt " + (attempt + 1) + ")", e);
+        }
+      }
+      if (cancelled) return;
+      if (rows) {
         const cityMap: Record<string, Record<string, CityMonthData>> = {};
         rows.forEach(r => {
           const sep = r.city.lastIndexOf(" — ");
@@ -58,9 +80,12 @@ export default function VyrabotkaView() {
         });
         const mapped: CityData[] = Object.entries(cityMap).map(([city, months]) => ({ city, months }));
         setDATA(mapped);
-      })
-      .catch(e => console.error("Failed to load vyrabotka data", e))
-      .finally(() => setDataLoading(false));
+      }
+      setDataLoading(false);
+    };
+
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   const activeMonths = MONTHS;
