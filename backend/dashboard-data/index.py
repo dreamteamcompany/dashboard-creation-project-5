@@ -2,6 +2,7 @@
 import json
 import os
 import psycopg2
+from psycopg2.extras import execute_values
 
 SCHEMA = "t_p56096254_dashboard_creation_p"
 
@@ -106,31 +107,41 @@ def handler(event: dict, context) -> dict:
             for rid, rcity in cur.fetchall():
                 city_to_id.setdefault(rcity, rid)
 
+            updates = []  # (id, city, data_json)
+            inserts = []  # (city, data_json)
+            seen_insert_cities = set()
+
             for row in rows:
                 row_id = row.get("id")
                 city = row.get("city", "")
                 if not city:
                     continue
-                incoming = {k: int(row.get(k)) for k in col_keys if row.get(k) is not None}
                 full = {k: int(row.get(k, 0)) for k in col_keys}
-
                 if not row_id:
                     row_id = city_to_id.get(city)
-
                 if row_id:
-                    cur.execute(
-                        f"""UPDATE {SCHEMA}.dashboard_rows
-                            SET data = data || %s::jsonb, city = %s, updated_at = NOW()
-                            WHERE id = %s AND dashboard_id = %s""",
-                        (json.dumps(incoming), city, int(row_id), int(dashboard_id)),
-                    )
-                else:
-                    cur.execute(
-                        f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES (%s, %s, %s) RETURNING id",
-                        (int(dashboard_id), city, json.dumps(full)),
-                    )
-                    new_id = cur.fetchone()[0]
-                    city_to_id[city] = new_id
+                    updates.append((int(row_id), city, json.dumps(full)))
+                elif city not in seen_insert_cities:
+                    inserts.append((int(dashboard_id), city, json.dumps(full)))
+                    seen_insert_cities.add(city)
+
+            if updates:
+                execute_values(
+                    cur,
+                    f"""UPDATE {SCHEMA}.dashboard_rows AS t
+                        SET data = v.data::jsonb, city = v.city, updated_at = NOW()
+                        FROM (VALUES %s) AS v(id, city, data)
+                        WHERE t.id = v.id::int AND t.dashboard_id = {int(dashboard_id)}""",
+                    updates,
+                )
+
+            if inserts:
+                execute_values(
+                    cur,
+                    f"INSERT INTO {SCHEMA}.dashboard_rows (dashboard_id, city, data) VALUES %s",
+                    [(d, c, dj) for (d, c, dj) in inserts],
+                    template="(%s, %s, %s::jsonb)",
+                )
 
             conn.commit()
             return {
