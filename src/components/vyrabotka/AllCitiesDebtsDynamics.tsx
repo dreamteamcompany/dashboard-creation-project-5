@@ -73,11 +73,14 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
       </div>
 
       {!cities.length ? (
-        <div className="h-[220px] flex flex-col items-center justify-center text-center">
-          <Icon name="Inbox" size={28} className="text-white/20 mb-2" />
-          <p className="text-white/40 text-sm">
+        <div className="h-[220px] flex flex-col items-center justify-center text-center px-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#E50000]/15 border border-[#E50000]/30 flex items-center justify-center mb-3">
+            <Icon name="Inbox" size={26} className="text-[#E50000]" />
+          </div>
+          <p className="text-white text-base font-semibold">
             {selectedMonth ? `Нет данных по долгам за ${MONTH_LABELS[selectedMonth]}` : "Нет данных по долгам"}
           </p>
+          <p className="text-white/50 text-xs mt-1">Заполните долги клиник в таблице «Выработка»</p>
         </div>
       ) : singleMonth ? (
       <ResponsiveContainer width="100%" height={300}>
