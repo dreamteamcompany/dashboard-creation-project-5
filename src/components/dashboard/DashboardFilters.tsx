@@ -19,12 +19,32 @@ export default function DashboardFilters({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const observer = new IntersectionObserver(
-      ([e]) => setStuck(!e.isIntersecting),
-      { threshold: [1], rootMargin: "-5px 0px 0px 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+
+    let raf = 0;
+    let current = false;
+
+    const check = () => {
+      raf = 0;
+      const top = el.getBoundingClientRect().top;
+      const next = current ? top < 40 : top < -10;
+      if (next !== current) {
+        current = next;
+        setStuck(next);
+      }
+    };
+
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(check);
+    };
+
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   const btnCity = (active: boolean) =>
