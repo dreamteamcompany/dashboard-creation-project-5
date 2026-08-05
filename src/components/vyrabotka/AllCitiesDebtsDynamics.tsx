@@ -23,7 +23,7 @@ interface Props {
 
 export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMonth, isLight, axisColor }: Props) {
   const endIdx = selectedMonth ? activeMonths.indexOf(selectedMonth) : -1;
-  const months = endIdx >= 0 ? activeMonths.slice(0, endIdx + 1) : activeMonths;
+  const months = endIdx >= 0 ? [activeMonths[endIdx]] : activeMonths;
 
   const cities = DATA
     .map(d => ({
@@ -55,7 +55,7 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-display font-bold text-white text-lg">Динамика долгов по городам</h3>
-          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Долги клиник по месяцам до ${MONTH_LABELS[selectedMonth]}` : "Долги клиник по месяцам за весь период"}</p>
+          <p className="text-white/40 text-xs mt-0.5">{selectedMonth ? `Долги клиник за ${MONTH_LABELS[selectedMonth]}` : "Долги клиник по месяцам за весь период"}</p>
         </div>
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E50000]/10 border border-[#E50000]/20">
           <Icon name="TrendingDown" size={13} className="text-[#E50000]" />
