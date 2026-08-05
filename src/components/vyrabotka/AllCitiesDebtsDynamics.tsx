@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  LineChart, Line, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from "recharts";
 import Icon from "@/components/ui/icon";
@@ -46,9 +46,13 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
 
   const totalDebt = cities.reduce((s, c) => s + c.total, 0);
 
-  if (!cities.length) return null;
-
   const visibleCities = cities.filter(c => !hidden[c.city]);
+
+  const singleMonth = months.length === 1;
+  const barData = visibleCities.map(c => ({
+    name: c.city,
+    value: c.months[months[0]]?.dolgiKlinik || 0,
+  }));
 
   return (
     <div className="glass rounded-2xl p-4 sm:p-6 animate-fade-in-up">
@@ -68,6 +72,40 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
         <p className="text-2xl font-bold text-[#E50000]">{fmtFull(totalDebt)}</p>
       </div>
 
+      {!cities.length ? (
+        <div className="h-[220px] flex flex-col items-center justify-center text-center">
+          <Icon name="Inbox" size={28} className="text-white/20 mb-2" />
+          <p className="text-white/40 text-sm">
+            {selectedMonth ? `Нет данных по долгам за ${MONTH_LABELS[selectedMonth]}` : "Нет данных по долгам"}
+          </p>
+        </div>
+      ) : singleMonth ? (
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={barData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"} vertical={false} />
+          <XAxis dataKey="name" tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false} interval={0} angle={-35} textAnchor="end" height={80} />
+          <YAxis tick={{ fill: axisColor, fontSize: 11 }} axisLine={false} tickLine={false}
+            tickFormatter={(v: number) => fmtShort(v)} width={70} domain={[0, 'auto']} />
+          <Tooltip
+            cursor={{ fill: "rgba(255,255,255,0.04)" }}
+            content={({ active, payload, label }: { active?: boolean; payload?: Array<{ value?: number }>; label?: string }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <div className="chart-tooltip p-3 rounded-xl" style={{ minWidth: 180 }}>
+                  <p className="text-xs text-white/50 mb-1">{label}</p>
+                  <p className="text-sm font-semibold text-white">{fmtFull(payload[0].value || 0)}</p>
+                </div>
+              );
+            }}
+          />
+          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+            {barData.map((b, i) => (
+              <Cell key={i} fill={PIE_COLORS[cities.findIndex(c => c.city === b.name) % PIE_COLORS.length]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+      ) : (
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)"} vertical={false} />
@@ -117,6 +155,7 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
           })}
         </LineChart>
       </ResponsiveContainer>
+      )}
 
       <div className="flex flex-wrap gap-2 mt-4">
         {(() => {
