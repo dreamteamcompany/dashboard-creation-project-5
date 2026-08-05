@@ -44,8 +44,6 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
     return row;
   });
 
-  const totalDebt = cities.reduce((s, c) => s + c.total, 0);
-
   const visibleCities = cities.filter(c => !hidden[c.city]);
 
   const singleMonth = months.length === 1;
@@ -65,11 +63,6 @@ export default function AllCitiesDebtsDynamics({ DATA, activeMonths, selectedMon
           <Icon name="TrendingDown" size={13} className="text-[#E50000]" />
           <span className="text-[11px] font-semibold text-[#E50000]">{cities.length} городов</span>
         </div>
-      </div>
-
-      <div className="mb-4">
-        <p className="text-white/40 text-xs">Всего долгов по городам</p>
-        <p className="text-2xl font-bold text-[#E50000]">{fmtFull(totalDebt)}</p>
       </div>
 
       {!cities.length ? (
